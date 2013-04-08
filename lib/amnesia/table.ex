@@ -117,7 +117,7 @@ defmodule Amnesia.Table do
     end
   end
 
-  defmacro deffunctions(name, opts) do
+  defmacro deffunctions(opts) do
     indices = if opts[:index] do
       [opts[:index]]
     else
@@ -134,8 +134,8 @@ defmodule Amnesia.Table do
       end
 
       def create(copying // []) do
-        Amnesia.Table.create(unquote(name), [
-          record_name: unquote(name),
+        Amnesia.Table.create(__MODULE__, [
+          record_name: __MODULE__,
           attributes:  List.Dict.keys(@record_fields),
           index:       unquote(indices),
 
@@ -159,71 +159,69 @@ defmodule Amnesia.Table do
       end
 
       def info(key) do
-        Table.info(unquote(name), key)
+        Amnesia.Table.info(__MODULE__, key)
       end
 
       def mode(value) do
-        Table.mode(unquote(name), value)
+        Amnesia.Table.mode(__MODULE__, value)
       end
 
       def majority(value) do
-        Table.majority(unquote(name), value)
+        Amnesia.Table.majority(__MODULE__, value)
       end
 
       def priority(value) do
-        Table.priority(unquote(name), value)
+        Amnesia.Table.priority(__MODULE__, value)
       end
 
       def copying(node, to) do
-        Table.copying(unquote(name), node, to)
+        Amnesia.Table.copying(__MODULE__, node, to)
       end
 
       def lock(mode) do
-        Table.lock(unquote(name), mode)
+        Amnesia.Table.lock(__MODULE__, mode)
       end
 
       def destroy do
-        Table.destroy(unquote(name))
+        Amnesia.Table.destroy(__MODULE__)
       end
 
       def clear do
-        Table.clear(unquote(name))
+        Amnesia.Table.clear(__MODULE__)
       end
 
       if unquote(opts[:type]) == :bag do
         def read(key, lock // :read) do
-          Table.read(unquote(name), key, lock)
+          Amnesia.Table.read(__MODULE__, key, lock)
+        end
+
+        def read!(key) do
+          Amnesia.Table.read!(__MODULE__, key)
         end
       else
         def read(key, lock // :read) do
-          Enum.first(Table.read(unquote(name), key, lock))
+          Enum.first(Amnesia.Table.read(__MODULE__, key, lock))
         end
-      end
 
-      if unquote(opts[:type]) == :bag do
         def read!(key) do
-          Table.read!(unquote(name), key)
-        end
-      else
-        def read!(key) do
-          Enum.first(Table.read!(unquote(name), key))
+          Enum.first(Amnesia.Table.read!(__MODULE__, key))
         end
       end
 
       def keys do
-        Table.keys(unquote(name))
+        Amnesia.Table.keys(__MODULE__)
       end
 
       def keys! do
-        Table.keys!(unquote(name))
+        Amnesia.Table.keys!(__MODULE__)
       end
 
       def first do
-        Table.first(unquote(name))
+        Amnesia.Table.first(__MODULE__)
       end
 
       def first! do
-        Table.first!(unquote(name))
+        Amnesia.Table.first!(__MODULE__)
       end
 
       def key(self) do
@@ -231,27 +229,27 @@ defmodule Amnesia.Table do
       end
 
       def next(self) do
-        Table.next(unquote(name), self.key)
+        Amnesia.Table.next(__MODULE__, self.key)
       end
 
       def next!(self) do
-        Table.next!(unquote(name), self.key)
+        Amnesia.Table.next!(__MODULE__, self.key)
       end
 
       def prev(self) do
-        Table.prev(unquote(name), self.key)
+        Amnesia.Table.prev(__MODULE__, self.key)
       end
 
       def prev!(self) do
-        Table.prev!(unquote(name), self.key)
+        Amnesia.Table.prev!(__MODULE__, self.key)
       end
 
       def last do
-        Table.last(unquote(name))
+        Amnesia.Table.last(__MODULE__)
       end
 
       def last! do
-        Table.last!(unquote(name))
+        Amnesia.Table.last!(__MODULE__)
       end
 
       def delete(self) do
@@ -263,11 +261,11 @@ defmodule Amnesia.Table do
       end
 
       def delete(key, self) do
-        Table.delete(unquote(name), key)
+        Amnesia.Table.delete(__MODULE__, key)
       end
 
       def delete!(key, self) do
-        Table.delete!(unquote(name), key)
+        Amnesia.Table.delete!(__MODULE__, key)
       end
 
       def write(self) do

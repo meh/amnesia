@@ -42,7 +42,7 @@ defmodule Amnesia.Database do
       defrecord unquote(name), unquote(attributes) do
         use Amnesia.Table
 
-        deffunctions(unquote(name), unquote(opts))
+        deffunctions(unquote(opts))
 
         unquote(do_block)
       end

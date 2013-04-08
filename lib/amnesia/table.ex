@@ -133,7 +133,7 @@ defmodule Amnesia.Table do
         unquote(opts)
       end
 
-      def create(copying // [node]) do
+      def create(copying // []) do
         Table.create(unquote(name), [
           record_name: unquote(name),
           attributes:  List.Dict.keys(@record_fields),

@@ -149,6 +149,14 @@ defmodule Amnesia.Table do
     Selection[values: :mnesia.dirty_select(name, spec)]
   end
 
+  def match(name, pattern, lock // :read) do
+    :mnesia.match_object(name, pattern, lock)
+  end
+
+  def match!(name, pattern) do
+    :mnesia.dirty_match_object(name, pattern)
+  end
+
   def delete(name, key) do
     :mnesia.delete(name, key)
   end
@@ -369,6 +377,14 @@ defmodule Amnesia.Table do
 
       def select!(spec) do
         Amnesia.Table.select!(__MODULE__, spec)
+      end
+
+      def match(pattern, lock // :read) do
+        Amnesia.Table.match(__MODULE__, pattern, lock)
+      end
+
+      def match!(pattern) do
+        Amnesia.Table.match!(__MODULE__, pattern)
       end
 
       def delete(self) do

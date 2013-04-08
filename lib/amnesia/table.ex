@@ -123,6 +123,14 @@ defmodule Amnesia.Table do
     :mnesia.dirty_read(name, key)
   end
 
+  def read_at(name, key, position) do
+    :mnesia.index_read(name, key, position)
+  end
+
+  def read_at!(name, key, position) do
+    :mnesia.dirty_index_read(name, key, position)
+  end
+
   defmacro __using__(_opts) do
     quote do
       import Amnesia.Table
@@ -227,6 +235,22 @@ defmodule Amnesia.Table do
         def read!(key) do
           Enum.first(Amnesia.Table.read!(__MODULE__, key))
         end
+      end
+
+      def read_at(key, position) when is_integer position do
+        Table.read_at(__MODULE__, key, position)
+      end
+
+      def read_at(key, position) when is_atom position do
+        Table.read_at(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
+      end
+
+      def read_at!(key, position) when is_integer position do
+        Table.read_at!(__MODULE__, key, position)
+      end
+
+      def read_at!(key, position) when is_atom position do
+        Table.read_at!(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
       end
 
       def keys do

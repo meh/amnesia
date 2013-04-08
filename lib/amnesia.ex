@@ -94,7 +94,7 @@ defmodule Amnesia do
 
   defmacro async(fun) do
     quote do
-      :mnesia.async_dirty(fun)
+      :mnesia.async_dirty(unquote(fun))
     end
   end
 
@@ -110,7 +110,7 @@ defmodule Amnesia do
 
   defmacro sync(fun) do
     quote do
-      :mnesia.sync_dirty(fun)
+      :mnesia.sync_dirty(unquote(fun))
     end
   end
 

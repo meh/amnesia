@@ -146,6 +146,18 @@ defmodule Amnesia.Table do
         ])
       end
 
+      def bag? do
+        unquote(opts[:type]) == :bag
+      end
+
+      def set? do
+        unquote(opts[:type]) == :set
+      end
+
+      def ordered_set? do
+        unquote(opts[:type]) == :ordered_set
+      end
+
       def info(key) do
         Table.info(unquote(name), key)
       end
@@ -178,12 +190,24 @@ defmodule Amnesia.Table do
         Table.clear(unquote(name))
       end
 
-      def read(key, lock // :read) do
-        Table.read(unquote(name), key, lock)
+      if unquote(opts[:type]) == :bag do
+        def read(key, lock // :read) do
+          Table.read(unquote(name), key, lock)
+        end
+      else
+        def read(key, lock // :read) do
+          Enum.first(Table.read(unquote(name), key, lock))
+        end
       end
 
-      def read!(key) do
-        Table.read!(unquote(name), key)
+      if unquote(opts[:type]) == :bag do
+        def read!(key) do
+          Table.read!(unquote(name), key)
+        end
+      else
+        def read!(key) do
+          Enum.first(Table.read!(unquote(name), key))
+        end
       end
 
       def keys do

@@ -134,7 +134,7 @@ defmodule Amnesia.Table do
       end
 
       def create(copying // []) do
-        Table.create(unquote(name), [
+        Amnesia.Table.create(unquote(name), [
           record_name: unquote(name),
           attributes:  List.Dict.keys(@record_fields),
           index:       unquote(indices),

@@ -30,6 +30,10 @@ defmodule Amnesia.Database do
   end
 
   defmacro deftable(name, attributes, opts // [], do_block // []) do
+    if length(attributes) <= 1 do
+      raise ArgumentError, message: "the table attributes must be more than 1"
+    end
+
     if opts[:do] do
       { opts, do_block } = { do_block, opts }
     end

@@ -86,11 +86,35 @@ defmodule Amnesia do
     :mnesia.sync_transaction(fun, args, retries)
   end
 
-  def async(fun, args // []) do
+  defmacro async(do: block) do
+    quote do
+      :mnesia.async_dirty(function(do: (() -> unquote(block))))
+    end
+  end
+
+  defmacro async(fun) do
+    quote do
+      :mnesia.async_dirty(fun)
+    end
+  end
+
+  def async(fun, args) do
     :mnesia.async_dirty(fun, args)
   end
 
-  def sync(fun, args // []) do
+  defmacro sync(do: block) do
+    quote do
+      :mnesia.sync_dirty(function(do: (() -> unquote(block))))
+    end
+  end
+
+  defmacro sync(fun) do
+    quote do
+      :mnesia.sync_dirty(fun)
+    end
+  end
+
+  def sync(fun, args) do
     :mnesia.sync_dirty(fun, args)
   end
 

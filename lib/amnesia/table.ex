@@ -157,6 +157,14 @@ defmodule Amnesia.Table do
     :mnesia.dirty_match_object(name, pattern)
   end
 
+  def foldl(name, acc, fun) do
+    :mnesia.foldl(fun, acc, name)
+  end
+
+  def foldr(name, acc, fun) do
+    :mnesia.foldr(fun, acc, name)
+  end
+
   def delete(name, key) do
     :mnesia.delete(name, key)
   end
@@ -385,6 +393,14 @@ defmodule Amnesia.Table do
 
       def match!(pattern) do
         Amnesia.Table.match!(__MODULE__, pattern)
+      end
+
+      def foldl(acc, fun) do
+        Amnesia.Table.foldl(__MODULE__, acc, fun)
+      end
+
+      def foldr(acc, fun) do
+        Amnesia.Table.foldr(__MODULE__, acc, fun)
       end
 
       def delete(self) do

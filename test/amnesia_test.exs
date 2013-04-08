@@ -5,7 +5,7 @@ defmodule AmnesiaTest do
   use Amnesia
 
   defdatabase Database do
-    deftable Foo, [:id] do
+    deftable Foo, [:id, :message] do
       def bar do
         42
       end
@@ -14,6 +14,20 @@ defmodule AmnesiaTest do
 
   setup do
     start
+
+    Database.create
+
+    :ok
+  end
+
+  test "saves item" do
+    transaction! do
+      Database.Foo[id: 23, message: "yo dawg"].write
+    end
+
+    transaction! do
+      Database.Foo.read(23) == Database.Foo[id: 23, message: "yo dawg"]
+    end
   end
 
   test "transaction works" do

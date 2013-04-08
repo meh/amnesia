@@ -26,6 +26,12 @@ defmodule Amnesia.Database do
           table.create(copying)
         end
       end
+
+      def destroy do
+        Enum.map @tables, fn(table) ->
+          table.destroy
+        end
+      end
     end
   end
 

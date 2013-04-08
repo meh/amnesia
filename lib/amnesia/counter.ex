@@ -17,7 +17,7 @@ defrecord Amnesia.Counter, [:name, :table] do
   end
 
   def destroy(self) do
-    Table.destroy(self.table)
+    Amnesia.Table.destroy(self.table)
   end
 
   def increase(self) do

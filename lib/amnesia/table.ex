@@ -38,7 +38,7 @@ defmodule Amnesia.Table do
     :mnesia.change_table_majority(name, value)
   end
 
-  def add_copy(name, node, type // :disc) do
+  def add_copy(name, node, type // :disk) do
     :mnesia.add_table_copy(name, node, case type do
       :disc  -> :disc_copies
       :disc! -> :disc_only_copies

@@ -22,7 +22,9 @@ defmodule Amnesia.Database do
       end
 
       def create(copying // []) do
-
+        Enum.map @tables, fn(table) ->
+          table.create(copying)
+        end
       end
     end
   end

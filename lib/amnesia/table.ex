@@ -23,16 +23,16 @@ defmodule Amnesia.Table do
     :mnesia.change_table_access_mode(name, value)
   end
 
-  def majority(name, value) do
-    :mnesia.change_table_majority(name, value)
+  def copying(name, node, to) do
+    :mnesia.change_table_copy_type(name, node, to)
   end
 
   def priority(name, value) do
     :mnesia.change_table_load_order(name, value)
   end
 
-  def copying(name, node, to) do
-    :mnesia.change_table_copy_type(name, node, to)
+  def majority(name, value) do
+    :mnesia.change_table_majority(name, value)
   end
 
   def lock(name, mode) do
@@ -139,10 +139,11 @@ defmodule Amnesia.Table do
           attributes:  List.Dict.keys(@record_fields),
           index:       unquote(indices),
 
-          type:        unquote(opts[:type])     || :set,
-          access_mode: unquote(opts[:mode])     || :read_write,
-          majority:    unquote(opts[:majority]) || false,
-          load_order:  unquote(opts[:priority]) || 0
+          type:          unquote(opts[:type])     || :set,
+          access_mode:   unquote(opts[:mode])     || :read_write,
+          majority:      unquote(opts[:majority]) || false,
+          load_order:    unquote(opts[:priority]) || 0,
+          local_content: unquote(opts[:local])    || false
         ])
       end
 
@@ -166,16 +167,16 @@ defmodule Amnesia.Table do
         Amnesia.Table.mode(__MODULE__, value)
       end
 
-      def majority(value) do
-        Amnesia.Table.majority(__MODULE__, value)
+      def copying(node, to) do
+        Amnesia.Table.copying(__MODULE__, node, to)
       end
 
       def priority(value) do
         Amnesia.Table.priority(__MODULE__, value)
       end
 
-      def copying(node, to) do
-        Amnesia.Table.copying(__MODULE__, node, to)
+      def majority(value) do
+        Amnesia.Table.majority(__MODULE__, value)
       end
 
       def lock(mode) do

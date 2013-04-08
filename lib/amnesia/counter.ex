@@ -8,7 +8,7 @@
 
 defrecord Amnesia.Counter, [:name, :table] do
   def create(name, table // Amnesia.Counter, copying // []) do
-    Amnesia.Table.create(Amnesia.Counter, [
+    Amnesia.Table.create(table, [
       record_name: table,
       attributes:  [:name, :value]
     ])

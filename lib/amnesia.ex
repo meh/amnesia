@@ -86,6 +86,22 @@ defmodule Amnesia do
     :mnesia.sync_transaction(fun, args, retries)
   end
 
+  defmacro ets(do: block) do
+    quote do
+      :mnesia.ets(function(do: (() -> unquote(block))))
+    end
+  end
+
+  defmacro ets(fun) do
+    quote do
+      :mnesia.ets(unquote(fun))
+    end
+  end
+
+  def ets(fun, args) do
+    :mnesia.ets(fun, args)
+  end
+
   defmacro async(do: block) do
     quote do
       :mnesia.async_dirty(function(do: (() -> unquote(block))))

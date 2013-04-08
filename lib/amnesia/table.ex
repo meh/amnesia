@@ -35,6 +35,23 @@ defmodule Amnesia.Table do
     :mnesia.change_table_majority(name, value)
   end
 
+  def add_copy(name, node, type // :disc) do
+    :mnesia.add_table_copy(name, node, case type do
+      :disc  -> :disc_copies
+      :disc! -> :disc_only_copies
+
+      :disk  -> :disc_copies
+      :disk! -> :disc_only_copies
+
+      :ram    -> :ram_copies
+      :memory -> :ram_copies
+    end)
+  end
+
+  def delete_copy(name, node) do
+    :mnesia.del_table_copy(name, node)
+  end
+
   def add_index(name, attribute) do
     :mnesia.add_table_index(name, attribute)
   end
@@ -197,6 +214,14 @@ defmodule Amnesia.Table do
 
       def majority(value) do
         Amnesia.Table.majority(__MODULE__, value)
+      end
+
+      def add_copy(node, type // :disk) do
+        Amnesia.Table.add_copy(__MODULE__, node, type)
+      end
+
+      def delete_copy(node) do
+        Amnesia.Table.delete_copy(__MODULE__, node)
       end
 
       def add_index(attribute) do

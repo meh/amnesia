@@ -170,6 +170,10 @@ defmodule Amnesia.Table do
         unquote(opts)
       end
 
+      def wait(timeout // :infinity) do
+        Amnesia.Table.wait([__MODULE__], timeout)
+      end
+
       def create(copying // []) do
         Amnesia.Table.create(__MODULE__, [
           record_name: __MODULE__,

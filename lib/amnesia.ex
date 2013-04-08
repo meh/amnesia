@@ -7,6 +7,13 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defmodule Amnesia do
+  defmacro __using__(_opts) do
+    quote do
+      import  Amnesia
+      require Amnesia
+    end
+  end
+
   def start do
     :mnesia.start
   end
@@ -33,6 +40,62 @@ defmodule Amnesia do
 
   def dump(path) do
     :mnesia.dump_to_textfile(path)
+  end
+
+  def transaction? do
+    :mnesia.is_transaction
+  end
+
+  defmacro transaction(do: block) do
+    quote do
+      :mnesia.transaction(function(do: (() -> unquote(block))))
+    end
+  end
+
+  defmacro transaction(fun) do
+    quote do
+      :mnesia.transaction(unquote(fun))
+    end
+  end
+
+  def transaction(fun, args) do
+    :mnesia.transaction(fun, args)
+  end
+
+  def transaction(fun, args, retries) do
+    :mnesia.transaction(fun, args, retries)
+  end
+
+  defmacro transaction!(do: block) do
+    quote do
+      :mnesia.sync_transaction(function(do: (() -> unquote(block))))
+    end
+  end
+
+  defmacro transaction!(fun) do
+    quote do
+      :mnesia.sync_transaction(unquote(fun))
+    end
+  end
+
+  def transaction!(fun, args) do
+    :mnesia.sync_transaction(fun, args)
+  end
+
+  def transaction!(fun, args, retries) do
+    :mnesia.sync_transaction(fun, args, retries)
+  end
+
+  def async(fun, args // []) do
+    :mnesia.async_dirty(fun, args)
+  end
+
+  def sync(fun, args // []) do
+    :mnesia.sync_dirty(fun, args)
+  end
+
+  def lock(key, nodes, mode) do
+    :mnesia.lock({:global, key, nodes}, mode)
   end
 
   defmacro defdatabase(name, do: block) do

@@ -1,8 +1,8 @@
 Code.require_file "../test_helper.exs", __FILE__
 
 defmodule AmnesiaTest do
-  use    ExUnit.Case
-  import Amnesia
+  use ExUnit.Case
+  use Amnesia
 
   defdatabase Database do
     deftable Foo, [:id] do
@@ -12,6 +12,11 @@ defmodule AmnesiaTest do
     end
   end
 
-  test "creates table properly" do
+  setup do
+    start
+  end
+
+  test "transaction works" do
+    assert transaction(do: 42) == { :atomic, 42 }
   end
 end

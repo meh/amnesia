@@ -15,48 +15,8 @@ defmodule Amnesia.Database do
     end
   end
 
-  defmodule Table do
-    defmacro __using__(_opts) do
-      quote do
-        import Amnesia.Database.Table
-      end
-    end
+  def create(copying // []) do
 
-    def create(name, definition // []) do
-      :mnesia.create_table(name, definition)
-    end
-
-    def delete(name) do
-      :mnesia.delete_table(name)
-    end
-
-    def clear(name) do
-      :mnesia.clear_table(name)
-    end
-
-    def keys(name) do
-      if Amnesia.Transaction.inside?
-        :mnesia.all_keys(name)
-      else
-        :mnesia.dirty_all_keys(name)
-      end
-    end
-
-    def mode(name, value) do
-      :mnesia.change_table_access_mode(name, value)
-    end
-
-    def majority(name, value) do
-      :mnesia.change_table_majority(name, value)
-    end
-
-    def priority(name, value) do
-      :mnesia.change_table_load_order(name, value)
-    end
-
-    def copying(name, node, to) do
-      :mnesia.change_table_copy_type(name, node, to)
-    end
   end
 
   defmacro deftable(name, attributes, opts // [], do_block // []) do
@@ -64,19 +24,27 @@ defmodule Amnesia.Database do
       { opts, do_block } = { do_block, opts }
     end
 
+    indices = if opts[:index] do
+      [opts[:index]]
+    else
+      opts[:indices] || []
+    end
+
+    if indices == [1] do
+      indices = []
+    end
+
     quote do
       defrecord unquote(name), unquote(attributes) do
-        use Amnesia.Database.Table
-
         def __options__ do
           unquote(opts)
         end
 
         def create(copying // []) do
-          create(unquote(name), [
+          Table.create(unquote(name), [
             record_name: unquote(name),
             attributes:  List.Dict.keys(@record_fields),
-            index:       unquote(opts[:indices]) || 1,
+            index:       unquote(indices),
 
             type:        unquote(opts[:type])     || :set,
             access_mode: unquote(opts[:mode])     || :read_write,
@@ -85,32 +53,112 @@ defmodule Amnesia.Database do
           ])
         end
 
-        def delete do
-          delete(unquote(name))
-        end
-
-        def clear do
-          clear(unquote(name))
-        end
-
-        def keys do
-          keys(unquote(name))
+        def info(key) do
+          Table.info(unquote(name), key)
         end
 
         def mode(value) do
-          mode(unquote(name), value)
+          Table.mode(unquote(name), value)
         end
 
         def majority(value) do
-          majority(unquote(name), value)
+          Table.majority(unquote(name), value)
         end
 
         def priority(value) do
-          priority(unquote(name), value)
+          Table.priority(unquote(name), value)
         end
 
         def copying(node, to) do
-          copying(unquote(name), node, to)
+          Table.copying(unquote(name), node, to)
+        end
+
+        def lock(mode) do
+          Table.lock(unquote(name), mode)
+        end
+
+        def destroy do
+          Table.destroy(unquote(name))
+        end
+
+        def clear do
+          Table.clear(unquote(name))
+        end
+
+        def read(key, lock // :read) do
+          Table.read(unquote(name), key, lock)
+        end
+
+        def read!(key) do
+          Table.read!(unquote(name), key)
+        end
+
+        def keys do
+          Table.keys(unquote(name))
+        end
+
+        def keys! do
+          Table.keys!(unquote(name))
+        end
+
+        def first do
+          Table.first(unquote(name))
+        end
+
+        def first! do
+          Table.first!(unquote(name))
+        end
+
+        def key(self) do
+          elem self, Enum.at!(unquote(indices), 0)
+        end
+
+        def next(self) do
+          Table.next(unquote(name), self.key)
+        end
+
+        def next!(self) do
+          Table.next!(unquote(name), self.key)
+        end
+
+        def prev(self) do
+          Table.prev(unquote(name), self.key)
+        end
+
+        def prev!(self) do
+          Table.prev!(unquote(name), self.key)
+        end
+
+        def last do
+          Table.last(unquote(name))
+        end
+
+        def last! do
+          Table.last!(unquote(name))
+        end
+
+        def delete(self) do
+          :mnesia.delete_object(self)
+        end
+
+        def delete!(self) do
+          :mnesia.dirty_delete_object(self)
+        end
+
+        def delete(key, self) do
+          Table.delete(unquote(name), key)
+        end
+
+        def delete!(key, self) do
+          Table.delete!(unquote(name), key)
+        end
+
+        def write(self) do
+          :mnesia.write(self)
+        end
+
+        def write!(self) do
+          :mnesia.dirty_write(self)
         end
 
         unquote(do_block)

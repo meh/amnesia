@@ -19,7 +19,7 @@ defmodule Amnesia.Schema do
     :mnesia.create_schema(nodes)
   end
 
-  def delete(nodes // [node]) do
+  def destroy(nodes // [node]) do
     :mnesia.delete_schema(nodes)
   end
 end

@@ -20,7 +20,10 @@ defmodule Amnesia.Table do
   end
 
   def mode(name, value) do
-    :mnesia.change_table_access_mode(name, value)
+    :mnesia.change_table_access_mode(name, case value do
+      :both  -> :read_write
+      :read! -> :read_only
+    end)
   end
 
   def copying(name, node, to) do

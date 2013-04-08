@@ -119,6 +119,36 @@ defmodule Amnesia.Table do
     :mnesia.dirty_last(name)
   end
 
+  defrecord Selection, values: [], continuation: nil do
+    def from(value) do
+      case value do
+        :"$end_of_table"         -> nil
+        { values, continuation } -> { Selection, values, continuation }
+        result                   -> result
+      end
+    end
+
+    def next({ Selection, _, nil } = self) do
+      nil
+    end
+
+    def next(self) do
+      from(:mnesia.select(self.continuation))
+    end
+  end
+
+  def select(name, spec, step // nil, lock // :read) do
+    if step do
+      Selection.from(:mnesia.select(name, spec, step, lock))
+    else
+      Selection[values: :mnesia.select(name, spec, lock)]
+    end
+  end
+
+  def select!(name, spec) do
+    Selection[values: :mnesia.dirty_select(name, spec)]
+  end
+
   def delete(name, key) do
     :mnesia.delete(name, key)
   end
@@ -331,6 +361,14 @@ defmodule Amnesia.Table do
 
       def last! do
         Amnesia.Table.last!(__MODULE__)
+      end
+
+      def select(spec, step // nil, lock // :read) do
+        Amnesia.Table.select(__MODULE__, spec, step, lock)
+      end
+
+      def select!(spec) do
+        Amnesia.Table.select!(__MODULE__, spec)
       end
 
       def delete(self) do

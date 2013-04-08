@@ -15,6 +15,7 @@ defmodule AmnesiaTest do
   setup do
     start
 
+    Amnesia.Schema.create
     Database.create
 
     :ok
@@ -25,9 +26,9 @@ defmodule AmnesiaTest do
       Database.Foo[id: 23, message: "yo dawg"].write
     end
 
-    transaction! do
-      Database.Foo.read(23) == Database.Foo[id: 23, message: "yo dawg"]
-    end
+    assert(transaction! do
+      Database.Foo.read(23)
+    end == { :atomic, Database.Foo[id: 23, message: "yo dawg"] })
   end
 
   test "transaction works" do

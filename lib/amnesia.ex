@@ -105,9 +105,7 @@ defmodule Amnesia do
 
         unquote(block)
 
-        def __tables__ do
-          @tables
-        end
+        deffunctions
       end
     end
   end

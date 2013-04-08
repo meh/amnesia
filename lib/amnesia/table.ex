@@ -35,6 +35,14 @@ defmodule Amnesia.Table do
     :mnesia.change_table_majority(name, value)
   end
 
+  def add_index(name, attribute) do
+    :mnesia.add_table_index(name, attribute)
+  end
+
+  def delete_index(name, attribute) do
+    :mnesia.del_table_index(name, attribute)
+  end
+
   def lock(name, mode) do
     :mnesia.lock({ :table, name }, mode)
   end
@@ -177,6 +185,14 @@ defmodule Amnesia.Table do
 
       def majority(value) do
         Amnesia.Table.majority(__MODULE__, value)
+      end
+
+      def add_index(attribute) do
+        Amnesia.Table.add_index(__MODULE__, attribute)
+      end
+
+      def delete_index(attribute) do
+        Amnesia.Table.delete_index(__MODULE__, attribute)
       end
 
       def lock(mode) do

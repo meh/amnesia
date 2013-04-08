@@ -15,6 +15,14 @@ defmodule Amnesia.Table do
     :mnesia.create_table(name, definition)
   end
 
+  def transform(name, attributes, fun) do
+    :mnesia.transform_table(name, fun, attributes)
+  end
+
+  def transform(name, new_name, attributes, fun) do
+    :mnesia.transform_table(name, fun, attributes, new_name)
+  end
+
   def info(name, key) do
     :mnesia.table_info(name, key)
   end

@@ -63,6 +63,10 @@ defmodule Amnesia.Table do
     :mnesia.dirty_all_keys(name)
   end
 
+  def at!(name, position) do
+    :mnesia.dirty_slot(name, position)
+  end
+
   def first(name) do
     :mnesia.first(name)
   end
@@ -231,6 +235,10 @@ defmodule Amnesia.Table do
 
       def keys! do
         Amnesia.Table.keys!(__MODULE__)
+      end
+
+      def at!(position) do
+        Amnesia.Table.at!(__MODULE__, position)
       end
 
       def first do

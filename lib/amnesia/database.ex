@@ -21,7 +21,7 @@ defmodule Amnesia.Database do
         @tables
       end
 
-      def create(copying // [node]) do
+      def create(copying // []) do
 
       end
     end

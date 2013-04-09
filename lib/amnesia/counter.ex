@@ -29,6 +29,13 @@ defrecord Amnesia.Counter, [:name, :table] do
   end
 
   def value(self) do
+    case :mnesia.read(self.table, self.name) do
+      [{ _, _, value }] -> value
+      _                 -> 0
+    end
+  end
+
+  def value!(self) do
     case :mnesia.dirty_read(self.table, self.name) do
       [{ _, _, value }] -> value
       _                 -> 0

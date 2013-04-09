@@ -135,7 +135,11 @@ defmodule Amnesia do
   end
 
   def lock(key, nodes, mode) do
-    :mnesia.lock({ :global, key, nodes }, mode)
+    :mnesia.lock({ :global, key, nodes }, case mode do
+      :write  -> :write
+      :write! -> :sticky_write
+      :read   -> :read
+    end)
   end
 
   defmacro defdatabase(name, do: block) do

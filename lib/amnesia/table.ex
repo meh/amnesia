@@ -155,7 +155,7 @@ defmodule Amnesia.Table do
       end
     end
 
-    def next({ Selection, _, nil } = self) do
+    def next({ Selection, _, nil }) do
       nil
     end
 

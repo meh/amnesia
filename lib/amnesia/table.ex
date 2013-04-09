@@ -265,7 +265,15 @@ defmodule Amnesia.Table do
     end
   end
 
-  defmacro deffunctions(opts) do
+  def deftable!(name, attributes, opts // [], do_block // []) do
+    if length(attributes) <= 1 do
+      raise ArgumentError, message: "the table attributes must be more than 1"
+    end
+
+    if opts[:do] do
+      { opts, do_block } = { do_block, opts }
+    end
+
     indices = if opts[:index] do
       [opts[:index]]
     else
@@ -277,221 +285,229 @@ defmodule Amnesia.Table do
     end
 
     quote do
-      def __options__ do
-        unquote(opts)
-      end
+      defrecord unquote(name), unquote(attributes) do
+        use Amnesia.Table
 
-      def wait(timeout // :infinity) do
-        Amnesia.Table.wait([__MODULE__], timeout)
-      end
-
-      def force do
-        Amnesia.Table.force(__MODULE__)
-      end
-
-      def create(copying // []) do
-        Amnesia.Table.create(__MODULE__, [
-          record_name: __MODULE__,
-          attributes:  List.Dict.keys(@record_fields),
-          index:       unquote(indices),
-
-          type:          unquote(opts[:type])     || :set,
-          access_mode:   unquote(opts[:mode])     || :read_write,
-          majority:      unquote(opts[:majority]) || false,
-          load_order:    unquote(opts[:priority]) || 0,
-          local_content: unquote(opts[:local])    || false
-        ])
-      end
-
-      def bag? do
-        unquote(opts[:type]) == :bag
-      end
-
-      def set? do
-        unquote(opts[:type]) == :set
-      end
-
-      def ordered_set? do
-        unquote(opts[:type]) == :ordered_set
-      end
-
-      def info(key) do
-        Amnesia.Table.info(__MODULE__, key)
-      end
-
-      def mode(value) do
-        Amnesia.Table.mode(__MODULE__, value)
-      end
-
-      def copying(node, to) do
-        Amnesia.Table.copying(__MODULE__, node, to)
-      end
-
-      def priority(value) do
-        Amnesia.Table.priority(__MODULE__, value)
-      end
-
-      def majority(value) do
-        Amnesia.Table.majority(__MODULE__, value)
-      end
-
-      def add_copy(node, type // :disk) do
-        Amnesia.Table.add_copy(__MODULE__, node, type)
-      end
-
-      def delete_copy(node) do
-        Amnesia.Table.delete_copy(__MODULE__, node)
-      end
-
-      def add_index(attribute) do
-        Amnesia.Table.add_index(__MODULE__, attribute)
-      end
-
-      def delete_index(attribute) do
-        Amnesia.Table.delete_index(__MODULE__, attribute)
-      end
-
-      def lock(mode) do
-        Amnesia.Table.lock(__MODULE__, mode)
-      end
-
-      def destroy do
-        Amnesia.Table.destroy(__MODULE__)
-      end
-
-      def clear do
-        Amnesia.Table.clear(__MODULE__)
-      end
-
-      if unquote(opts[:type]) == :bag do
-        def read(key, lock // :read) do
-          Amnesia.Table.read(__MODULE__, key, lock)
+        def __options__ do
+          unquote(opts)
         end
 
-        def read!(key) do
-          Amnesia.Table.read!(__MODULE__, key)
-        end
-      else
-        def read(key, lock // :read) do
-          Enum.first(Amnesia.Table.read(__MODULE__, key, lock))
+        def wait(timeout // :infinity) do
+          Amnesia.Table.wait([__MODULE__], timeout)
         end
 
-        def read!(key) do
-          Enum.first(Amnesia.Table.read!(__MODULE__, key))
+        def force do
+          Amnesia.Table.force(__MODULE__)
         end
+
+        def create(copying // []) do
+          Amnesia.Table.create(__MODULE__, [
+            record_name: __MODULE__,
+            attributes:  List.Dict.keys(@record_fields),
+            index:       unquote(indices),
+
+            type:          unquote(opts[:type])     || :set,
+            access_mode:   unquote(opts[:mode])     || :read_write,
+            majority:      unquote(opts[:majority]) || false,
+            load_order:    unquote(opts[:priority]) || 0,
+            local_content: unquote(opts[:local])    || false
+          ])
+        end
+
+        def bag? do
+          unquote(opts[:type]) == :bag
+        end
+
+        def set? do
+          unquote(opts[:type]) == :set
+        end
+
+        def ordered_set? do
+          unquote(opts[:type]) == :ordered_set
+        end
+
+        def info(key) do
+          Amnesia.Table.info(__MODULE__, key)
+        end
+
+        def mode(value) do
+          Amnesia.Table.mode(__MODULE__, value)
+        end
+
+        def copying(node, to) do
+          Amnesia.Table.copying(__MODULE__, node, to)
+        end
+
+        def priority(value) do
+          Amnesia.Table.priority(__MODULE__, value)
+        end
+
+        def majority(value) do
+          Amnesia.Table.majority(__MODULE__, value)
+        end
+
+        def add_copy(node, type // :disk) do
+          Amnesia.Table.add_copy(__MODULE__, node, type)
+        end
+
+        def delete_copy(node) do
+          Amnesia.Table.delete_copy(__MODULE__, node)
+        end
+
+        def add_index(attribute) do
+          Amnesia.Table.add_index(__MODULE__, attribute)
+        end
+
+        def delete_index(attribute) do
+          Amnesia.Table.delete_index(__MODULE__, attribute)
+        end
+
+        def lock(mode) do
+          Amnesia.Table.lock(__MODULE__, mode)
+        end
+
+        def destroy do
+          Amnesia.Table.destroy(__MODULE__)
+        end
+
+        def clear do
+          Amnesia.Table.clear(__MODULE__)
+        end
+
+        if unquote(opts[:type]) == :bag do
+          def read(key, lock // :read) do
+            Amnesia.Table.read(__MODULE__, key, lock)
+          end
+
+          def read!(key) do
+            Amnesia.Table.read!(__MODULE__, key)
+          end
+        else
+          def read(key, lock // :read) do
+            Enum.first(Amnesia.Table.read(__MODULE__, key, lock))
+          end
+
+          def read!(key) do
+            Enum.first(Amnesia.Table.read!(__MODULE__, key))
+          end
+        end
+
+        def read_at(key, position) when is_integer position do
+          Table.read_at(__MODULE__, key, position)
+        end
+
+        def read_at(key, position) when is_atom position do
+          Table.read_at(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
+        end
+
+        def read_at!(key, position) when is_integer position do
+          Table.read_at!(__MODULE__, key, position)
+        end
+
+        def read_at!(key, position) when is_atom position do
+          Table.read_at!(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
+        end
+
+        def keys do
+          Amnesia.Table.keys(__MODULE__)
+        end
+
+        def keys! do
+          Amnesia.Table.keys!(__MODULE__)
+        end
+
+        def at!(position) do
+          Amnesia.Table.at!(__MODULE__, position)
+        end
+
+        def first do
+          Amnesia.Table.first(__MODULE__)
+        end
+
+        def first! do
+          Amnesia.Table.first!(__MODULE__)
+        end
+
+        def key(self) do
+          elem self, Enum.at!(unquote(indices), 0) || 1
+        end
+
+        def next(self) do
+          Amnesia.Table.next(__MODULE__, self.key)
+        end
+
+        def next!(self) do
+          Amnesia.Table.next!(__MODULE__, self.key)
+        end
+
+        def prev(self) do
+          Amnesia.Table.prev(__MODULE__, self.key)
+        end
+
+        def prev!(self) do
+          Amnesia.Table.prev!(__MODULE__, self.key)
+        end
+
+        def last do
+          Amnesia.Table.last(__MODULE__)
+        end
+
+        def last! do
+          Amnesia.Table.last!(__MODULE__)
+        end
+
+        def select(spec, step // nil, lock // :read) do
+          Amnesia.Table.select(__MODULE__, spec, step, lock)
+        end
+
+        def select!(spec) do
+          Amnesia.Table.select!(__MODULE__, spec)
+        end
+
+        def match(pattern, lock // :read) do
+          Amnesia.Table.match(__MODULE__, pattern, lock)
+        end
+
+        def match!(pattern) do
+          Amnesia.Table.match!(__MODULE__, pattern)
+        end
+
+        def foldl(acc, fun) do
+          Amnesia.Table.foldl(__MODULE__, acc, fun)
+        end
+
+        def foldr(acc, fun) do
+          Amnesia.Table.foldr(__MODULE__, acc, fun)
+        end
+
+        def delete(self) do
+          :mnesia.delete_object(self)
+        end
+
+        def delete!(self) do
+          :mnesia.dirty_delete_object(self)
+        end
+
+        def delete(key, self) do
+          Amnesia.Table.delete(__MODULE__, key)
+        end
+
+        def delete!(key, self) do
+          Amnesia.Table.delete!(__MODULE__, key)
+        end
+
+        def write(self) do
+          :mnesia.write(self)
+        end
+
+        def write!(self) do
+          :mnesia.dirty_write(self)
+        end
+
+        unquote(do_block)
       end
 
-      def read_at(key, position) when is_integer position do
-        Table.read_at(__MODULE__, key, position)
-      end
-
-      def read_at(key, position) when is_atom position do
-        Table.read_at(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
-      end
-
-      def read_at!(key, position) when is_integer position do
-        Table.read_at!(__MODULE__, key, position)
-      end
-
-      def read_at!(key, position) when is_atom position do
-        Table.read_at!(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
-      end
-
-      def keys do
-        Amnesia.Table.keys(__MODULE__)
-      end
-
-      def keys! do
-        Amnesia.Table.keys!(__MODULE__)
-      end
-
-      def at!(position) do
-        Amnesia.Table.at!(__MODULE__, position)
-      end
-
-      def first do
-        Amnesia.Table.first(__MODULE__)
-      end
-
-      def first! do
-        Amnesia.Table.first!(__MODULE__)
-      end
-
-      def key(self) do
-        elem self, Enum.at!(unquote(indices), 0)
-      end
-
-      def next(self) do
-        Amnesia.Table.next(__MODULE__, self.key)
-      end
-
-      def next!(self) do
-        Amnesia.Table.next!(__MODULE__, self.key)
-      end
-
-      def prev(self) do
-        Amnesia.Table.prev(__MODULE__, self.key)
-      end
-
-      def prev!(self) do
-        Amnesia.Table.prev!(__MODULE__, self.key)
-      end
-
-      def last do
-        Amnesia.Table.last(__MODULE__)
-      end
-
-      def last! do
-        Amnesia.Table.last!(__MODULE__)
-      end
-
-      def select(spec, step // nil, lock // :read) do
-        Amnesia.Table.select(__MODULE__, spec, step, lock)
-      end
-
-      def select!(spec) do
-        Amnesia.Table.select!(__MODULE__, spec)
-      end
-
-      def match(pattern, lock // :read) do
-        Amnesia.Table.match(__MODULE__, pattern, lock)
-      end
-
-      def match!(pattern) do
-        Amnesia.Table.match!(__MODULE__, pattern)
-      end
-
-      def foldl(acc, fun) do
-        Amnesia.Table.foldl(__MODULE__, acc, fun)
-      end
-
-      def foldr(acc, fun) do
-        Amnesia.Table.foldr(__MODULE__, acc, fun)
-      end
-
-      def delete(self) do
-        :mnesia.delete_object(self)
-      end
-
-      def delete!(self) do
-        :mnesia.dirty_delete_object(self)
-      end
-
-      def delete(key, self) do
-        Amnesia.Table.delete(__MODULE__, key)
-      end
-
-      def delete!(key, self) do
-        Amnesia.Table.delete!(__MODULE__, key)
-      end
-
-      def write(self) do
-        :mnesia.write(self)
-      end
-
-      def write!(self) do
-        :mnesia.dirty_write(self)
-      end
+      @tables unquote(name)
     end
   end
 end

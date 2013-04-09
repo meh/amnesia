@@ -15,49 +15,37 @@ defmodule Amnesia.Database do
     end
   end
 
-  defmacro deffunctions do
+  def defdatabase!(name, do: block) do
     quote do
-      def __tables__ do
-        @tables
-      end
+      defmodule unquote(name) do
+        use Amnesia.Database
 
-      def create(copying // []) do
-        Enum.map @tables, fn(table) ->
-          table.create(copying)
+        unquote(block)
+
+        def __tables__ do
+          @tables
         end
-      end
 
-      def destroy do
-        Enum.map @tables, fn(table) ->
-          table.destroy
+        def create(copying // []) do
+          Enum.map @tables, fn(table) ->
+            table.create(copying)
+          end
         end
-      end
 
-      def wait(timeout // :infinity) do
-        Amnesia.Table.wait(@tables, timeout)
+        def destroy do
+          Enum.map @tables, fn(table) ->
+            table.destroy
+          end
+        end
+
+        def wait(timeout // :infinity) do
+          Amnesia.Table.wait(@tables, timeout)
+        end
       end
     end
   end
 
   defmacro deftable(name, attributes, opts // [], do_block // []) do
-    if length(attributes) <= 1 do
-      raise ArgumentError, message: "the table attributes must be more than 1"
-    end
-
-    if opts[:do] do
-      { opts, do_block } = { do_block, opts }
-    end
-
-    quote do
-      defrecord unquote(name), unquote(attributes) do
-        use Amnesia.Table
-
-        deffunctions(unquote(opts))
-
-        unquote(do_block)
-      end
-
-      @tables unquote(name)
-    end
+    Amnesia.Table.deftable!(name, attributes, opts, do_block)
   end
 end

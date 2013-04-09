@@ -31,7 +31,7 @@ defmodule Amnesia do
   end
 
   def error(code) do
-    :mnesia.error_description(code)
+    to_binary :mnesia.error_description(code)
   end
 
   def load(path) do

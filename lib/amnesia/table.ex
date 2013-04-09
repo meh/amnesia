@@ -212,9 +212,9 @@ defmodule Amnesia.Table do
     end
   end
 
-  def select(name, spec, step // nil, lock // :read) do
-    if step do
-      Selection.from(:mnesia.select(name, spec, step, lock))
+  def select(name, spec, limit // nil, lock // :read) do
+    if limit do
+      Selection.from(:mnesia.select(name, spec, limit, lock))
     else
       Selection.from(:mnesia.select(name, spec, lock))
     end
@@ -456,8 +456,8 @@ defmodule Amnesia.Table do
           Amnesia.Table.last!(__MODULE__)
         end
 
-        def select(spec, step // nil, lock // :read) do
-          Amnesia.Table.select(__MODULE__, spec, step, lock)
+        def select(spec, limit // nil, lock // :read) do
+          Amnesia.Table.select(__MODULE__, spec, limit, lock)
         end
 
         def select!(spec) do

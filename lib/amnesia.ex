@@ -52,17 +52,17 @@ defmodule Amnesia do
     end
   end
 
-  defmacro transaction(fun) do
+  defmacro transaction(fun) when is_function fun, 0 do
     quote do
       :mnesia.transaction(unquote(fun))
     end
   end
 
-  def transaction(fun, args) do
+  def transaction(fun, args) when is_function fun, length args do
     :mnesia.transaction(fun, args)
   end
 
-  def transaction(fun, args, retries) do
+  def transaction(fun, args, retries) when is_function fun, length args do
     :mnesia.transaction(fun, args, retries)
   end
 
@@ -72,17 +72,17 @@ defmodule Amnesia do
     end
   end
 
-  defmacro transaction!(fun) do
+  defmacro transaction!(fun) when is_function fun, 0 do
     quote do
       :mnesia.sync_transaction(unquote(fun))
     end
   end
 
-  def transaction!(fun, args) do
+  def transaction!(fun, args) when is_function fun, length args do
     :mnesia.sync_transaction(fun, args)
   end
 
-  def transaction!(fun, args, retries) do
+  def transaction!(fun, args, retries) when is_function fun, length args do
     :mnesia.sync_transaction(fun, args, retries)
   end
 
@@ -92,13 +92,13 @@ defmodule Amnesia do
     end
   end
 
-  defmacro ets(fun) do
+  defmacro ets(fun) when is_function fun, 0 do
     quote do
       :mnesia.ets(unquote(fun))
     end
   end
 
-  def ets(fun, args) do
+  def ets(fun, args) when is_function fun, length args do
     :mnesia.ets(fun, args)
   end
 
@@ -108,13 +108,13 @@ defmodule Amnesia do
     end
   end
 
-  defmacro async(fun) do
+  defmacro async(fun) when is_function fun, 0 do
     quote do
       :mnesia.async_dirty(unquote(fun))
     end
   end
 
-  def async(fun, args) do
+  def async(fun, args) when is_function fun, length args do
     :mnesia.async_dirty(fun, args)
   end
 
@@ -124,13 +124,13 @@ defmodule Amnesia do
     end
   end
 
-  defmacro sync(fun) do
+  defmacro sync(fun) when is_function fun, 0 do
     quote do
       :mnesia.sync_dirty(unquote(fun))
     end
   end
 
-  def sync(fun, args) do
+  def sync(fun, args) when is_function fun, length args do
     :mnesia.sync_dirty(fun, args)
   end
 

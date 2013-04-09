@@ -39,7 +39,16 @@ defmodule Amnesia.Table do
   end
 
   def copying(name, node, to) do
-    :mnesia.change_table_copy_type(name, node, to)
+    :mnesia.change_table_copy_type(name, node, case to do
+      :disc  -> :disc_copies
+      :disc! -> :disc_only_copies
+
+      :disk  -> :disc_copies
+      :disk! -> :disc_only_copies
+
+      :ram    -> :ram_copies
+      :memory -> :ram_copies
+    end)
   end
 
   def priority(name, value) do
@@ -76,7 +85,11 @@ defmodule Amnesia.Table do
   end
 
   def lock(name, mode) do
-    :mnesia.lock({ :table, name }, mode)
+    :mnesia.lock({ :table, name }, case mode do
+      :write  -> :write
+      :write! -> :sticky_write
+      :read   -> :read
+    end)
   end
 
   def destroy(name) do
@@ -85,6 +98,26 @@ defmodule Amnesia.Table do
 
   def clear(name) do
     :mnesia.clear_table(name)
+  end
+
+  def read(name, key, lock // :read) do
+    :mnesia.read(name, key, case lock do
+      :read   -> :read
+      :write  -> :write
+      :write! -> :sticky_write
+    end)
+  end
+
+  def read!(name, key) do
+    :mnesia.dirty_read(name, key)
+  end
+
+  def read_at(name, key, position) do
+    :mnesia.index_read(name, key, position)
+  end
+
+  def read_at!(name, key, position) do
+    :mnesia.dirty_index_read(name, key, position)
   end
 
   def keys(name) do
@@ -131,31 +164,46 @@ defmodule Amnesia.Table do
   end
 
   def prev(name, key) do
-    :mnesia.prev(name, key)
+    case :mnesia.prev(name, key) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def prev!(name, key) do
-    :mnesia.dirty_prev(name, key)
+    case :mnesia.dirty_prev(name, key) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def last(name) do
-    :mnesia.last(name)
+    case :mnesia.last(name) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def last!(name) do
-    :mnesia.dirty_last(name)
+    case :mnesia.dirty_last(name) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   defrecord Selection, values: [], continuation: nil do
     def from(value) do
       case value do
-        :"$end_of_table"         -> nil
-        { values, continuation } -> { Selection, values, continuation }
-        result                   -> result
+        :"$end_of_table" -> nil
+        []               -> nil
+        { [], _ }        -> nil
+
+        { v, c } -> __MODULE__[values: v, continuation: c]
+        [_|_]    -> __MODULE__[values: value]
       end
     end
 
-    def next({ Selection, _, nil }) do
+    def next(__MODULE__[continuation: nil]) do
       nil
     end
 
@@ -168,12 +216,12 @@ defmodule Amnesia.Table do
     if step do
       Selection.from(:mnesia.select(name, spec, step, lock))
     else
-      Selection[values: :mnesia.select(name, spec, lock)]
+      Selection.from(:mnesia.select(name, spec, lock))
     end
   end
 
   def select!(name, spec) do
-    Selection[values: :mnesia.dirty_select(name, spec)]
+    Selection.from(:mnesia.dirty_select(name, spec))
   end
 
   def match(name, pattern, lock // :read) do
@@ -201,27 +249,14 @@ defmodule Amnesia.Table do
   end
 
   def write(name, data, lock // :write) do
-    :mnesia.write(name, data, lock)
+    :mnesia.write(name, data, case lock do
+      :write  -> :write
+      :write! -> :sticky_write
+    end)
   end
 
   def write!(name, data) do
     :mnesia.dirty_write(name, data)
-  end
-
-  def read(name, key, lock // :read) do
-    :mnesia.read(name, key, lock)
-  end
-
-  def read!(name, key) do
-    :mnesia.dirty_read(name, key)
-  end
-
-  def read_at(name, key, position) do
-    :mnesia.index_read(name, key, position)
-  end
-
-  def read_at!(name, key, position) do
-    :mnesia.dirty_index_read(name, key, position)
   end
 
   defmacro __using__(_opts) do

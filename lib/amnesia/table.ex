@@ -11,6 +11,10 @@ defmodule Amnesia.Table do
     :mnesia.wait_for_tables(names, timeout)
   end
 
+  def force(name) do
+    :mnesia.force_load_table(name)
+  end
+
   def create(name, definition // []) do
     :mnesia.create_table(name, definition)
   end
@@ -229,6 +233,10 @@ defmodule Amnesia.Table do
 
       def wait(timeout // :infinity) do
         Amnesia.Table.wait([__MODULE__], timeout)
+      end
+
+      def force do
+        Amnesia.Table.force(__MODULE__)
       end
 
       def create(copying // []) do

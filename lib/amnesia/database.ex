@@ -32,6 +32,10 @@ defmodule Amnesia.Database do
           table.destroy
         end
       end
+
+      def wait(timeout // :infinity) do
+        Amnesia.Table.wait(@tables, timeout)
+      end
     end
   end
 

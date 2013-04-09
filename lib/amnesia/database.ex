@@ -15,7 +15,7 @@ defmodule Amnesia.Database do
     end
   end
 
-  def defdatabase!(name, do: block) do
+  defmacro defdatabase!(name, do: block) do
     quote do
       defmodule unquote(name) do
         use Amnesia.Database

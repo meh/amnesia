@@ -143,6 +143,8 @@ defmodule Amnesia do
   end
 
   defmacro defdatabase(name, do: block) do
+    require Amnesia.Database
+
     Amnesia.Database.defdatabase!(name, do: block)
   end
 end

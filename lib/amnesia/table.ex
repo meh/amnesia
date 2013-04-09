@@ -284,6 +284,15 @@ defmodule Amnesia.Table do
       indices = []
     end
 
+    mode = if opts[:mode] do
+      case opts[:mode] do
+        :both  -> :read_write
+        :read! -> :read_only
+      end
+    else
+      :read_write
+    end
+
     quote do
       defrecord unquote(name), unquote(attributes) do
         use Amnesia.Table
@@ -306,8 +315,8 @@ defmodule Amnesia.Table do
             attributes:  List.Dict.keys(@record_fields),
             index:       unquote(indices),
 
+            access_mode:   unquote(mode),
             type:          unquote(opts[:type])     || :set,
-            access_mode:   unquote(opts[:mode])     || :read_write,
             majority:      unquote(opts[:majority]) || false,
             load_order:    unquote(opts[:priority]) || 0,
             local_content: unquote(opts[:local])    || false

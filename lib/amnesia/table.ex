@@ -96,23 +96,38 @@ defmodule Amnesia.Table do
   end
 
   def at!(name, position) do
-    :mnesia.dirty_slot(name, position)
+    case :mnesia.dirty_slot(name, position) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def first(name) do
-    :mnesia.first(name)
+    case :mnesia.first(name) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def first!(name) do
-    :mnesia.dirty_first(name)
+    case :mnesia.dirty_first(name) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def next(name, key) do
-    :mnesia.next(name, key)
+    case :mnesia.next(name, key) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def next!(name, key) do
-    :mnesia.dirty_next(name, key)
+    case :mnesia.dirty_next(name, key) do
+      :"$end_of_table" -> nil
+      value            -> value
+    end
   end
 
   def prev(name, key) do

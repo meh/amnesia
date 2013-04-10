@@ -8,7 +8,7 @@ defmodule AmnesiaTest do
     deftable User
 
     deftable Message, [:user_id, :content], type: :bag do
-      @type t :: __MODULE__[user_id: integer, content: String.t]
+      @type t :: Message[user_id: integer, content: String.t]
 
       def user(self) do
         User.read(self.user_id)
@@ -20,7 +20,7 @@ defmodule AmnesiaTest do
     end
 
     deftable User, [:id, :name, :email], type: :ordered_set, index: [:email] do
-      @type t :: __MODULE__[id: integer, name: String.t, email: String.t]
+      @type t :: User[id: integer, name: String.t, email: String.t]
 
       def add_message(content, self) do
         Message[user_id: self.id, content: content].write

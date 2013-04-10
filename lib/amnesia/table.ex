@@ -589,7 +589,7 @@ defmodule Amnesia.Table do
         """
         @spec set? :: boolean
         def set? do
-          unquote(opts[:type]) == :set
+          (unquote(opts[:type]) || :set) == :set
         end
 
         @doc """

@@ -3,30 +3,6 @@ Code.require_file "../test_helper.exs", __FILE__
 defmodule CounterTest do
   use ExUnit.Case
 
-  setup_all do
-    :error_logger.tty(false)
-
-    Amnesia.Schema.create
-    Amnesia.start
-
-    :ok
-  end
-
-  teardown_all do
-    Amnesia.stop
-    Amnesia.Schema.destroy
-
-    :error_logger.tty(true)
-
-    :ok
-  end
-
-  teardown do
-    Amnesia.Counter.destroy
-
-    :ok
-  end
-
   test "creates it" do
     c = Amnesia.Counter.get(:foo)
 
@@ -61,5 +37,29 @@ defmodule CounterTest do
 
     c.clear!
     assert c.value! == 0
+  end
+
+  setup_all do
+    :error_logger.tty(false)
+
+    Amnesia.Schema.create
+    Amnesia.start
+
+    :ok
+  end
+
+  teardown_all do
+    Amnesia.stop
+    Amnesia.Schema.destroy
+
+    :error_logger.tty(true)
+
+    :ok
+  end
+
+  teardown do
+    Amnesia.Counter.destroy
+
+    :ok
   end
 end

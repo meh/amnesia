@@ -5,11 +5,32 @@ defmodule AmnesiaTest do
   use Amnesia
 
   defdatabase Database do
-    deftable Foo, [:id, :message] do
+    deftable Message, [:user, :message], type: :bag do
+      @type t :: __MODULE__[user: integer, message: String.t]
+
       def bar do
         42
       end
     end
+
+    deftable User, [:id, :name, :email] do
+      @type t :: __MODULE__[id: integer, name: String.t, email: String.t]
+    end
+  end
+
+  test "type checking works" do
+    assert Database.Message.bag?
+    assert Database.User.set?
+  end
+
+  test "saves item" do
+    transaction! do
+      Database.Message[user: 23, message: "yo dawg"].write
+    end
+
+    assert(transaction! do
+      Database.Message.read(23)
+    end == { :atomic, [Database.Message[user: 23, message: "yo dawg"]] })
   end
 
   setup_all do
@@ -40,15 +61,5 @@ defmodule AmnesiaTest do
     Database.destroy
 
     :ok
-  end
-
-  test "saves item" do
-    transaction! do
-      Database.Foo[id: 23, message: "yo dawg"].write
-    end
-
-    assert(transaction! do
-      Database.Foo.read(23)
-    end == { :atomic, Database.Foo[id: 23, message: "yo dawg"] })
   end
 end

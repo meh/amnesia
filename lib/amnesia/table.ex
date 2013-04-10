@@ -7,30 +7,69 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defmodule Amnesia.Table do
+  @type cv :: :disc | :disc! | :disk | :disk! | :ram | :memory
+  @type c  :: [{ cv, [node] }]
+  @type o  :: { :atomic, :ok } | { :aborted, any }
+
+  @doc """
+  Wait for the passed tables for the given timeout, see `mnesia:wait_for_tables`.
+  """
+  @spec wait([atom], integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
   def wait(names, timeout // :infinity) do
     :mnesia.wait_for_tables(names, timeout)
   end
 
+  @doc """
+  Force the loading of the given table, see `mnesia:force_load_table`.
+  """
+  @spec force(atom) :: :yes | { :error, any }
   def force(name) do
     :mnesia.force_load_table(name)
   end
 
+  @doc """
+  Create a table with the given name and definition, see `mnesia:create_table`.
+  """
+  @spec create(atom, c) :: o
   def create(name, definition // []) do
     :mnesia.create_table(name, definition)
   end
 
+  @doc """
+  Transform a table, useful to change tables in a running instance, see
+  `mnesia:transform_table`.
+  """
+  @spec transform(atom, [atom], function) :: o
   def transform(name, attributes, fun) do
     :mnesia.transform_table(name, fun, attributes)
   end
 
+  @doc """
+  Transform a table, renaming it, useful to change tables in a running
+  instance, see `mnesia:transform_table`.
+  """
+  @spec transform(atom, atom, [atom], function) :: o
   def transform(name, new_name, attributes, fun) do
     :mnesia.transform_table(name, fun, attributes, new_name)
   end
 
+  @doc """
+  Get information about a given table, see `mnesia:table_info`.
+  """
+  @spec info(atom, atom) :: any
   def info(name, key) do
     :mnesia.table_info(name, key)
   end
 
+  @doc """
+  Change the access mode of the given table, see `mnesia:change_table_access_mode`.
+
+  ## Modes
+
+  * `:both` sets read and write mode, it's the default.
+  * `:read!` sets read-only mode.
+  """
+  @spec mode(atom, :both | :read!) :: o
   def mode(name, value) do
     :mnesia.change_table_access_mode(name, case value do
       :both  -> :read_write
@@ -38,6 +77,17 @@ defmodule Amnesia.Table do
     end)
   end
 
+  @doc """
+  Change the copying mode of the given table on the given node, see
+  `mnesia:change_table_copy_type`.
+
+  ## Modes
+
+  * `:disc` `:disk` sets `:disc_copies` mode
+  * `:disc!` `:disk!` sets `:disc_only_copies` mode
+  * `:ram` `:memory` sets `:ram_copies` mode
+  """
+  @spec copying(atom, node, cv) :: o
   def copying(name, node, to) do
     :mnesia.change_table_copy_type(name, node, case to do
       :disc  -> :disc_copies
@@ -51,14 +101,31 @@ defmodule Amnesia.Table do
     end)
   end
 
+  @doc """
+  Change the given table loading priority.
+  """
+  @spec priority(atom, integer) :: o
   def priority(name, value) do
     :mnesia.change_table_load_order(name, value)
   end
 
+  @doc """
+  Change the given table majority, see `mnesia:change_table_majority`.
+  """
+  @spec majority(atom, boolean) :: o
   def majority(name, value) do
     :mnesia.change_table_majority(name, value)
   end
 
+  @doc """
+  Add a copy of the table to the given node with the given mode, see
+  `mnesia:add_table_copy`.
+
+  * `:disc` `:disk` sets `:disc_copies` mode
+  * `:disc!` `:disk!` sets `:disc_only_copies` mode
+  * `:ram` `:memory` sets `:ram_copies` mode
+  """
+  @spec add_copy(atom, node, cv) :: o
   def add_copy(name, node, type // :disk) do
     :mnesia.add_table_copy(name, node, case type do
       :disc  -> :disc_copies
@@ -72,18 +139,42 @@ defmodule Amnesia.Table do
     end)
   end
 
+  @doc """
+  Delete a copy of the table on the given node, see `mnesia:del_table_copy`.
+  """
+  @spec delete_copy(atom, node) :: o
   def delete_copy(name, node) do
     :mnesia.del_table_copy(name, node)
   end
 
+  @doc """
+  Add an index to the given table for the given attribute, see
+  `mnesia:add_table_index`.
+  """
+  @spec add_index(atom, atom) :: o
   def add_index(name, attribute) do
     :mnesia.add_table_index(name, attribute)
   end
 
+  @doc """
+  Delete an index on the given table for the given attribute, see
+  `mnesia:del_table_index`.
+  """
+  @spec delete_index(atom, atom) :: o
   def delete_index(name, attribute) do
     :mnesia.del_table_index(name, attribute)
   end
 
+  @doc """
+  Lock the given table for the given kind of lock, see `mnesia:lock`.
+
+  ## Locks
+
+  * `:write` sets a `:write` lock
+  * `:write!` sets a `:sticky_write` lock
+  * `:read` sets a `:read` lock
+  """
+  @spec lock(atom, :write | :write! | :read) :: [node] | :ok | no_return
   def lock(name, mode) do
     :mnesia.lock({ :table, name }, case mode do
       :write  -> :write
@@ -92,14 +183,31 @@ defmodule Amnesia.Table do
     end)
   end
 
+  @doc """
+  Destroy the given table, see `mnesia:delete_table`.
+  """
+  @spec destroy(atom) :: o
   def destroy(name) do
     :mnesia.delete_table(name)
   end
 
+  @doc """
+  Clear the given table, see `mnesia:clear_table`.
+  """
+  @spec clear(atom) :: o
   def clear(name) do
     :mnesia.clear_table(name)
   end
 
+  @doc """
+  Read records from the given table with the given key, locking in the given
+  mode, see `mnesia:read`.
+
+  * `:write` sets a `:write` lock
+  * `:write!` sets a `:sticky_write` lock
+  * `:read` sets a `:read` lock
+  """
+  @spec read(atom, any, :read | :write | :write!) :: [record] | no_return
   def read(name, key, lock // :read) do
     :mnesia.read(name, key, case lock do
       :read   -> :read
@@ -108,26 +216,52 @@ defmodule Amnesia.Table do
     end)
   end
 
+  @doc """
+  Read records from the given table with the given key, see `mnesia:dirty_read`.
+  """
+  @spec read!(atom, any) :: [record] | no_return
   def read!(name, key) do
     :mnesia.dirty_read(name, key)
   end
 
+  @doc """
+  Read records on the given table based on a secondary index given as position,
+  see `mnesia:index_read`.
+  """
+  @spec read_at(atom, any, integer | atom) :: [record] | no_return
   def read_at(name, key, position) do
     :mnesia.index_read(name, key, position)
   end
 
+  @doc """
+  Read records on the given table based on a secondary index given as position,
+  see `mnesia:dirty_index_read`.
+  """
+  @spec read_at!(atom, any, integer | atom) :: [record] | no_return
   def read_at!(name, key, position) do
     :mnesia.dirty_index_read(name, key, position)
   end
 
+  @doc """
+  Read all keys in the given table, see `mnesia:all_keys`.
+  """
+  @spec keys(atom) :: list | no_return
   def keys(name) do
     :mnesia.all_keys(name)
   end
 
+  @doc """
+  Read all keys in the given table, see `mnesia:dirty_all_keys`.
+  """
+  @spec keys!(atom) :: list | no_return
   def keys!(name) do
     :mnesia.dirty_all_keys(name)
   end
 
+  @doc """
+  Read a slot from the given table, see `mnesia:dirty_slot`.
+  """
+  @spec at!(atom, integer) :: record | nil | no_return
   def at!(name, position) do
     case :mnesia.dirty_slot(name, position) do
       :"$end_of_table" -> nil
@@ -135,6 +269,10 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the first key in the table, see `mnesia:first`.
+  """
+  @spec first(atom) :: any | nil | no_return
   def first(name) do
     case :mnesia.first(name) do
       :"$end_of_table" -> nil
@@ -142,6 +280,10 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the first key in the table, see `mnesia:dirty_read`.
+  """
+  @spec first!(atom) :: any | nil | no_return
   def first!(name) do
     case :mnesia.dirty_first(name) do
       :"$end_of_table" -> nil
@@ -149,6 +291,10 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the next key in the table starting from the given key, see `mnesia:next`.
+  """
+  @spec next(atom, any) :: any | nil | no_return
   def next(name, key) do
     case :mnesia.next(name, key) do
       :"$end_of_table" -> nil
@@ -156,6 +302,11 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the next key in the table starting from the given key, see
+  `mnesia:dirty_next`.
+  """
+  @spec next!(atom, any) :: any | nil | no_return
   def next!(name, key) do
     case :mnesia.dirty_next(name, key) do
       :"$end_of_table" -> nil
@@ -163,6 +314,11 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the previous key in the table starting from the given key, see
+  `mnesia:prev`.
+  """
+  @spec prev(atom, any) :: any | nil | no_return
   def prev(name, key) do
     case :mnesia.prev(name, key) do
       :"$end_of_table" -> nil
@@ -170,6 +326,11 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the previous key in the table starting from the given key, see
+  `mnesia:dirty_prev`.
+  """
+  @spec prev!(atom, any) :: any | nil | no_return
   def prev!(name, key) do
     case :mnesia.dirty_prev(name, key) do
       :"$end_of_table" -> nil
@@ -177,6 +338,10 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the last key in the table, see `mnesia:last`.
+  """
+  @spec last(atom) :: any | nil | no_return
   def last(name) do
     case :mnesia.last(name) do
       :"$end_of_table" -> nil
@@ -184,6 +349,10 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Get the last key in the table, see `mnesia:dirty_last`.
+  """
+  @spec last!(atom) :: any | nil | no_return
   def last!(name) do
     case :mnesia.dirty_last(name) do
       :"$end_of_table" -> nil
@@ -192,6 +361,18 @@ defmodule Amnesia.Table do
   end
 
   defrecord Selection, values: [], continuation: nil do
+    @moduledoc """
+    Selection wraps a `mnesia:select` result, which may or may not contain a
+    continuation, in case of continuations you can access the next set of
+    values by calling `.next`.
+    """
+
+    @type t :: __MODULE__[values: [record], continuation: any]
+
+    @doc """
+    Get a selection from the various select results.
+    """
+    @spec from(:"$end_of_table" | list | { list, any }) :: t | nil
     def from(value) do
       case value do
         :"$end_of_table" -> nil
@@ -203,6 +384,11 @@ defmodule Amnesia.Table do
       end
     end
 
+    @doc """
+    Get the next set of values wrapped in another Selection record, returns nil
+    if there are no more.
+    """
+    @spec next(t) :: t | nil | no_return
     def next(__MODULE__[continuation: nil]) do
       nil
     end
@@ -212,6 +398,12 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Select records in the given table using a match_spec, optionally passing a
+  limit to use for each number of returned records and a lock, see
+  `mnesia:select`.
+  """
+  @spec select(atom, any, integer, :read | :write) :: Selection.t | nil | no_return
   def select(name, spec, limit // nil, lock // :read) do
     if limit do
       Selection.from(:mnesia.select(name, spec, limit, lock))
@@ -220,26 +412,58 @@ defmodule Amnesia.Table do
     end
   end
 
+  @doc """
+  Select records in the given table using a match_spec, see
+  `mnesia:dirty_select`.
+  """
+  @spec select!(atom, any) :: Selection.t | nil | no_return
   def select!(name, spec) do
     Selection.from(:mnesia.dirty_select(name, spec))
   end
 
+  @doc """
+  Select records in the given table using simple don't care values, see
+  `mnesia:match_object`.
+  """
+  @spec match(atom, any, :read | :write) :: [record] | no_return
   def match(name, pattern, lock // :read) do
     :mnesia.match_object(name, pattern, lock)
   end
 
+  @doc """
+  Select records in the given table using simple don't care values, see
+  `mnesia:dirty_match_object`.
+  """
+  @spec match(atom, any) :: [record] | no_return
   def match!(name, pattern) do
     :mnesia.dirty_match_object(name, pattern)
   end
 
+  @doc """
+  Fold the whole given table from the left, see `mnesia:foldl`.
+  """
+  @spec foldl(atom, any, (fun(record, any) -> any)) :: any | no_return
   def foldl(name, acc, fun) do
     :mnesia.foldl(fun, acc, name)
   end
 
+  @doc """
+  Fold the whole given table from the right, see `mnesia:foldr`.
+  """
+  @spec foldl(atom, any, (fun(record, any) -> any)) :: any | no_return
   def foldr(name, acc, fun) do
     :mnesia.foldr(fun, acc, name)
   end
 
+  @doc """
+  Delete the given record in the given table, see `mnesia:delete`.
+
+  ## Locks
+
+  * `:write` sets a `:write` lock
+  * `:write!` sets a `:sticky_write` lock
+  """
+  @spec delete(atom, any, :write | :write!) :: :ok | no_return
   def delete(name, key, lock // :write) do
     :mnesia.delete(name, key, case lock do
       :write  -> :write
@@ -247,10 +471,24 @@ defmodule Amnesia.Table do
     end)
   end
 
+  @doc """
+  Delete the given record in the given table, see `mnesia:dirty_delete`.
+  """
+  @spec delete!(atom, any) :: :ok | no_return
   def delete!(name, key) do
     :mnesia.dirty_delete(name, key)
   end
 
+  @doc """
+  Write the given record in the given table, using the given lock, see
+  `mnesia:write`.
+
+  ## Locks
+
+  * `:write` sets a `:write` lock
+  * `:write!` sets a `:sticky_write` lock
+  """
+  @spec write(atom, record, :write | :write!) :: :ok | no_return
   def write(name, data, lock // :write) do
     :mnesia.write(name, data, case lock do
       :write  -> :write
@@ -258,11 +496,15 @@ defmodule Amnesia.Table do
     end)
   end
 
+  @doc """
+  Write the given record in the given table, see `mnesia:dirty_write`.
+  """
+  @spec write!(atom, record) :: :ok | no_return
   def write!(name, data) do
     :mnesia.dirty_write(name, data)
   end
 
-
+  @doc false
   def deftable!(name, attributes, opts // [], do_block // []) do
     if length(attributes) <= 1 do
       raise ArgumentError, message: "the table attributes must be more than 1"
@@ -293,18 +535,33 @@ defmodule Amnesia.Table do
 
     quote do
       defrecord unquote(name), unquote(attributes) do
+        @doc """
+        Get the options used to define the table.
+        """
         def __options__ do
           unquote(opts)
         end
 
+        @doc """
+        Wait for the table optionally with a timeout.
+        """
+        @spec wait(integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
         def wait(timeout // :infinity) do
           Amnesia.Table.wait([__MODULE__], timeout)
         end
 
+        @doc """
+        Force load the table.
+        """
+        @spec force :: :yes | { :error, any }
         def force do
           Amnesia.Table.force(__MODULE__)
         end
 
+        @doc """
+        Create the table with the given copying mode.
+        """
+        @spec create(Amnesia.Table.c) :: { :atomic, :ok } | { :aborted, any }
         def create(copying // []) do
           Amnesia.Table.create(__MODULE__, [
             record_name: __MODULE__,
@@ -319,84 +576,200 @@ defmodule Amnesia.Table do
           ])
         end
 
+        @doc """
+        Check if the table is a bag.
+        """
+        @spec bag? :: boolean
         def bag? do
           unquote(opts[:type]) == :bag
         end
 
+        @doc """
+        Check if the table is a set.
+        """
+        @spec set? :: boolean
         def set? do
           unquote(opts[:type]) == :set
         end
 
+        @doc """
+        Check if the table is an ordered set.
+        """
+        @spec ordered_set? :: boolean
         def ordered_set? do
           unquote(opts[:type]) == :ordered_set
         end
 
+        @doc """
+        Get information about the table, see `mnesia:table_info`.
+        """
+        @spec info(atom) :: any
         def info(key) do
           Amnesia.Table.info(__MODULE__, key)
         end
 
+        @doc """
+        Change the access of the table, see `mnesia:change_table_access_mode`.
+
+        ## Modes
+
+        * `:both` sets read and write mode, it's the default.
+        * `:read!` sets read-only mode.
+        """
+        @spec mode(:both | :read!) :: Amnesia.Table.o
         def mode(value) do
           Amnesia.Table.mode(__MODULE__, value)
         end
 
+        @doc """
+        Change the copying mode of the table on the given node, see
+        `mnesia:change_table_copy_type`.
+
+        ## Modes
+
+        * `:disc` `:disk` sets `:disc_copies` mode
+        * `:disc!` `:disk!` sets `:disc_only_copies` mode
+        * `:ram` `:memory` sets `:ram_copies` mode
+        """
+        @spec copying(node, Amnesia.Table.cv) :: Amnesia.Table.o
         def copying(node, to) do
           Amnesia.Table.copying(__MODULE__, node, to)
         end
 
+        @doc """
+        Change the table loading priority.
+        """
+        @spec priority(integer) :: Amnesia.Table.o
         def priority(value) do
           Amnesia.Table.priority(__MODULE__, value)
         end
 
+        @doc """
+        Change the table majority.
+        """
+        @spec majority(boolean) :: Amnesia.Table.o
         def majority(value) do
           Amnesia.Table.majority(__MODULE__, value)
         end
 
+        @doc """
+        Add a copy of the table on the given node with the given mode.
+        """
+        @spec add_copy(node, Amnesia.Table.cv) :: Amnesia.Table.o
         def add_copy(node, type // :disk) do
           Amnesia.Table.add_copy(__MODULE__, node, type)
         end
 
+        @doc """
+        Delete a copy of the table from the given node.
+        """
+        @spec delete_copy(node) :: Amnesia.Table.o
         def delete_copy(node) do
           Amnesia.Table.delete_copy(__MODULE__, node)
         end
 
+        @doc """
+        Add the index in the table for the given attribute.
+        """
+        @spec add_index(atom) :: Amnesia.Table.o
         def add_index(attribute) do
           Amnesia.Table.add_index(__MODULE__, attribute)
         end
 
+        @doc """
+        Delete the index in the table for the given attribute.
+        """
+        @spec delete_index(atom) :: Amnesia.Table.o
         def delete_index(attribute) do
           Amnesia.Table.delete_index(__MODULE__, attribute)
         end
 
+        @doc """
+        Lock the table with the given lock.
+
+        ## Locks
+
+        * `:write` sets a `:write` lock
+        * `:write!` sets a `:sticky_write` lock
+        * `:read` sets a `:read` lock
+        """
+        @spec lock(:write | :write! | :read) :: [node] | :ok | no_return
         def lock(mode) do
           Amnesia.Table.lock(__MODULE__, mode)
         end
 
+        @doc """
+        Destroy the table.
+        """
+        @spec destroy :: Amnesia.Table.o
         def destroy do
           Amnesia.Table.destroy(__MODULE__)
         end
 
+        @doc """
+        Clear the content of the table.
+        """
+        @spec clear :: Amnesia.Table.o
         def clear do
           Amnesia.Table.clear(__MODULE__)
         end
 
         if unquote(opts[:type]) == :bag do
+          @doc """
+          Read records from the table with the given key and given lock, see
+          `mnesia:read`.
+
+          ## Locks
+
+          * `:write` sets a `:write` lock
+          * `:write!` sets a `:sticky_write` lock
+          * `:read` sets a `:read` lock
+          """
+          @spec read(any, :read | :write | :write!) :: [record] | no_return
           def read(key, lock // :read) do
             Amnesia.Table.read(__MODULE__, key, lock)
           end
 
+          @doc """
+          Read records from the table, see `mnesia:dirty_read`.
+          """
+          @spec read!(any) :: [record] | no_return
           def read!(key) do
             Amnesia.Table.read!(__MODULE__, key)
           end
         else
+          @doc """
+          Read a record from the table with the given lock, see `mnesia:read`.
+
+          Unlike `mnesia:read` this returns either the record or nil.
+
+          ## Locks
+
+          * `:write` sets a `:write` lock
+          * `:write!` sets a `:sticky_write` lock
+          * `:read` sets a `:read` lock
+          """
+          @spec read(any, :read | :write | :write!) :: record | nil | no_return
           def read(key, lock // :read) do
             Enum.first(Amnesia.Table.read(__MODULE__, key, lock))
           end
 
+          @doc """
+          Read a record from the table, see `mnesia:dirty_read`.
+
+          Unlike `mnesia:dirty_read` this returns either the record or nil.
+          """
+          @spec read!(any) :: record | nil | no_return
           def read!(key) do
             Enum.first(Amnesia.Table.read!(__MODULE__, key))
           end
         end
 
+        @doc """
+        Read records from the table based on a secondary index given as position,
+        see `mnesia:index_read`.
+        """
+        @spec read_at(any, integer | atom) :: [record] | no_return
         def read_at(key, position) when is_integer position do
           Table.read_at(__MODULE__, key, position)
         end
@@ -405,6 +778,11 @@ defmodule Amnesia.Table do
           Table.read_at(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
         end
 
+        @doc """
+        Read records from the table based on a secondary index given as position,
+        see `mnesia:dirty_index_read`.
+        """
+        @spec read_at!(any, integer | atom) :: [record] | no_return
         def read_at!(key, position) when is_integer position do
           Table.read_at!(__MODULE__, key, position)
         end
@@ -413,22 +791,49 @@ defmodule Amnesia.Table do
           Table.read_at!(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
         end
 
+        @doc """
+        Return all the keys in the table, see `mnesia:all_keys`.
+        """
+        @spec keys :: list | no_return
         def keys do
           Amnesia.Table.keys(__MODULE__)
         end
 
+        @doc """
+        Return all keys in the table, see `mnesia:dirty_all_keys`.
+        """
+        @spec keys! :: list | no_return
         def keys! do
           Amnesia.Table.keys!(__MODULE__)
         end
 
+        @doc """
+        Read a record based on a slot, see `mnesia:dirty_slot`.
+        """
+        @spec at!(integer) :: record | nil | no_return
         def at!(position) do
           Amnesia.Table.at!(__MODULE__, position)
         end
 
+        @doc """
+        Return the key of the record.
+        """
+        @spec key(record) :: any
         def key(self) do
           elem self, Enum.at!(unquote(indices), 0) || 1
         end
 
+        @doc """
+        Return the first key or record in the table, see `mnesia:first`.
+
+        By default it returns the record, if you want only the key pass true as
+        first parameter.
+
+        If the table is a bag, it will return a list of records.
+        """
+        @spec first                :: any | record | nil | no_return
+        @spec first(boolean)       :: any | record | nil | no_return
+        @spec first(boolean, atom) :: any | record | nil | no_return
         def first(key // false, lock // :read)
 
         def first(true, lock) do
@@ -439,6 +844,16 @@ defmodule Amnesia.Table do
           read(Amnesia.Table.first(__MODULE__), lock)
         end
 
+        @doc """
+        Return the first key or record in the table, see `mnesia:dirty_first`.
+
+        By default it returns the record, if you want only the key pass true as
+        first parameter.
+
+        If the table is a bag, it will return a list of records.
+        """
+        @spec first!          :: any | record | nil | no_return
+        @spec first!(boolean) :: any | record | nil | no_return
         def first!(key // false)
 
         def first!(false) do
@@ -449,6 +864,15 @@ defmodule Amnesia.Table do
           read!(Amnesia.Table.first!(__MODULE__))
         end
 
+        @doc """
+        Return the next key or record in the table, see `mnesia:next`.
+
+        If you're calling this function from an instance of the table (a record
+        in it), it will get you the next record, if you're calling it directly
+        on the module it will treat the argument as key to start from and
+        return you the next key.
+        """
+        @spec next(any | record) :: any | record | nil | no_return
         def next(__MODULE__[] = self) do
           read(Amnesia.Table.next(__MODULE__, self.key))
         end
@@ -457,6 +881,15 @@ defmodule Amnesia.Table do
           Amnesia.Table.next(__MODULE__, key)
         end
 
+        @doc """
+        Return the next key or record in the table, see `mnesia:dirty_next`.
+
+        If you're calling this function from an instance of the table (a record
+        in it), it will get you the next record, if you're calling it directly
+        on the module it will treat the argument as key to start from and
+        return you the next key.
+        """
+        @spec next!(any | record) :: any | record | nil | no_return
         def next!(__MODULE__[] = self) do
           read!(Amnesia.Table.next!(__MODULE__, self.key))
         end
@@ -465,6 +898,15 @@ defmodule Amnesia.Table do
           Amnesia.Table.next!(__MODULE__, key)
         end
 
+        @doc """
+        Return the previous key or record in the table, see `mnesia:prev`.
+
+        If you're calling this function from an instance of the table (a record
+        in it), it will get you the previous record, if you're calling it
+        directly on the module it will treat the argument as key to start from
+        and return you the previous key.
+        """
+        @spec prev(any | record) :: any | record | nil | no_return
         def prev(__MODULE__[] = self) do
           read(Amnesia.Table.prev(__MODULE__, self.key))
         end
@@ -473,6 +915,15 @@ defmodule Amnesia.Table do
           Amnesia.Table.prev(__MODULE__, key)
         end
 
+        @doc """
+        Return the previous key or record in the table, see `mnesia:dirty_prev`.
+
+        If you're calling this function from an instance of the table (a record
+        in it), it will get you the previous record, if you're calling it
+        directly on the module it will treat the argument as key to start from
+        and return you the previous key.
+        """
+        @spec prev!(any | record) :: any | record | nil | no_return
         def prev!(__MODULE__[] = self) do
           read!(Amnesia.Table.prev!(__MODULE__, self.key))
         end
@@ -481,6 +932,16 @@ defmodule Amnesia.Table do
           Amnesia.Table.prev!(__MODULE__, key)
         end
 
+        @doc """
+        Return the last key or record in the table, see `mnesia:last`.
+
+        By default it returns the record, if you want only the key pass true as
+        first parameter.
+
+        If the table is a bag, it will return a list of records.
+        """
+        @spec last          :: any | record | nil | no_return
+        @spec last(boolean) :: any | record | nil | no_return
         def last(key // false)
 
         def last (false) do
@@ -491,6 +952,16 @@ defmodule Amnesia.Table do
           Amnesia.Table.last(__MODULE__)
         end
 
+        @doc """
+        Return the last key or record in the table, see `mnesia:dirty_last`.
+
+        By default it returns the record, if you want only the key pass true as
+        first parameter.
+
+        If the table is a bag, it will return a list of records.
+        """
+        @spec last!          :: any | record | nil | no_return
+        @spec last!(boolean) :: any | record | nil | no_return
         def last!(key // false)
 
         def last!(false) do
@@ -501,30 +972,64 @@ defmodule Amnesia.Table do
           Amnesia.Table.last!(__MODULE__)
         end
 
+        @doc """
+        Select records in the table using a match_spec, optionally passing a
+        limit to use for each number of returned records and a lock, see
+        `mnesia:select`.
+        """
+        @spec select(any, integer, :read | :write) :: Selection.t | nil | no_return
         def select(spec, limit // nil, lock // :read) do
           Amnesia.Table.select(__MODULE__, spec, limit, lock)
         end
 
+        @doc """
+        Select records in the table using a match_spec, see
+        `mnesia:dirty_select`.
+        """
+        @spec select!(any) :: Selection.t | nil | no_return
         def select!(spec) do
           Amnesia.Table.select!(__MODULE__, spec)
         end
 
+        @doc """
+        Select records in the table using simple don't care values, see
+        `mnesia:match_object`.
+        """
+        @spec match(any, :read | :write) :: [record] | no_return
         def match(pattern, lock // :read) do
           Amnesia.Table.match(__MODULE__, pattern, lock)
         end
 
+        @doc """
+        Select records in the table using simple don't care values, see
+        `mnesia:dirty_match_object`.
+        """
+        @spec match!(any) :: [record] | no_return
         def match!(pattern) do
           Amnesia.Table.match!(__MODULE__, pattern)
         end
 
+        @doc """
+        Fold the whole table from the left, see `mnesia:foldl`.
+        """
+        @spec foldl(any, (fun(record, any) -> any)) :: any | no_return
         def foldl(acc, fun) do
           Amnesia.Table.foldl(__MODULE__, acc, fun)
         end
 
+        @doc """
+        Fold the whole table from the right, see `mnesia:foldr`.
+        """
+        @spec foldr(any, (fun(record, any) -> any)) :: any | no_return
         def foldr(acc, fun) do
           Amnesia.Table.foldr(__MODULE__, acc, fun)
         end
 
+        @doc """
+        Delete the record or the given key from the table, see `mnesia:delete`
+        and `mnesia:delete_object`.
+        """
+        @spec delete(any | record) :: :ok | no_return
         def delete(__MODULE__[] = self) do
           delete(:write, self)
         end
@@ -533,6 +1038,16 @@ defmodule Amnesia.Table do
           delete(key, :write)
         end
 
+        @doc """
+        Delete the record or the given key from the table with the given lock,
+        see `mnesia:delete` and `mnesia:delete_object`.
+
+        ## Locks
+
+        * `:write` sets a `:write` lock
+        * `:write!` sets a `:sticky_write` lock
+        """
+        @spec delete(atom | any, record | atom) :: :ok | no_return
         def delete(lock, __MODULE__[] = self) do
           :mnesia.delete_object(__MODULE__, self, case lock do
             :write  -> :write
@@ -547,6 +1062,11 @@ defmodule Amnesia.Table do
           end)
         end
 
+        @doc """
+        Delete the record or the given key from the table, see
+        `mnesia:dirty_delete` and `mnesia:dirty_delete_object`.
+        """
+        @spec delete!(record | any) :: :ok | no_return
         def delete!(__MODULE__[] = self) do
           :mnesia.dirty_delete_object(__MODULE__, self)
         end
@@ -555,10 +1075,18 @@ defmodule Amnesia.Table do
           Amnesia.Table.delete!(__MODULE__, key)
         end
 
+        @doc """
+        Write the record to the table, see `mnesia:write`.
+        """
+        @spec write(record) :: :ok | no_return
         def write(self) do
           :mnesia.write(self)
         end
 
+        @doc """
+        Write the record to the table, see `mnesia:dirty_write`.
+        """
+        @spec write!(record) :: :ok | no_return
         def write!(self) do
           :mnesia.dirty_write(self)
         end
@@ -566,6 +1094,7 @@ defmodule Amnesia.Table do
         unquote(do_block)
       end
 
+      # add the defined table to the list
       @tables unquote(name)
     end
   end

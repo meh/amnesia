@@ -133,6 +133,30 @@ defmodule AmnesiaTest do
     end == { :atomic, true })
   end
 
+  test "last fetches a key" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.last(true) == 3
+    end == { :atomic, true })
+  end
+
+  test "last fetches the record" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.last == Database.User[id: 3, name: "David"]
+    end == { :atomic, true })
+  end
+
   setup_all do
     :error_logger.tty(false)
 

@@ -5,6 +5,8 @@ defmodule AmnesiaTest do
   use Amnesia
 
   defdatabase Database do
+    deftable User
+
     deftable Message, [:user_id, :content], type: :bag do
       @type t :: __MODULE__[user_id: integer, content: String.t]
 
@@ -17,7 +19,7 @@ defmodule AmnesiaTest do
       end
     end
 
-    deftable User, [:id, :name, :email] do
+    deftable User, [:id, :name, :email], type: :ordered_set, index: [:email] do
       @type t :: __MODULE__[id: integer, name: String.t, email: String.t]
 
       def add_message(content, self) do
@@ -39,7 +41,7 @@ defmodule AmnesiaTest do
   end
 
   test "type checking works" do
-    assert Database.User.set?
+    assert Database.User.ordered_set?
     assert Database.Message.bag?
   end
 
@@ -50,12 +52,85 @@ defmodule AmnesiaTest do
       user.write
     end
 
+    Enum.first(Database.User.read!(23).messages!).user!
+
     assert(transaction! do
       assert Database.User.read(23) == Database.User[id: 23]
       assert Database.User.read(23).messages == [Database.Message[user_id: 23, content: "yo dawg"]]
+      assert Enum.first(Database.User.read(23).messages).user == Database.User[id: 23]
+    end == { :atomic, true })
+  end
 
-      :ok
-    end == { :atomic, :ok })
+  test "first fetches a key" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.first(true) == 1
+    end == { :atomic, true })
+  end
+
+  test "first fetches the record" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.first == Database.User[id: 1, name: "John"]
+    end == { :atomic, true })
+  end
+
+  test "next fetches the next key" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.next(Database.User.first(true)) == 2
+    end == { :atomic, true })
+  end
+
+  test "next fetches the next record" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.first.next == Database.User[id: 2, name: "Lucas"]
+    end == { :atomic, true })
+  end
+
+  test "prev fetches the prev key" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.prev(Database.User.last(true)) == 2
+    end == { :atomic, true })
+  end
+
+  test "prev fetches the prev record" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.last.prev == Database.User[id: 2, name: "Lucas"]
+    end == { :atomic, true })
   end
 
   setup_all do
@@ -77,9 +152,9 @@ defmodule AmnesiaTest do
   end
 
   setup do
-    Database.create
-
-    :ok
+    Enum.all?(Database.create, fn(result) ->
+      result == { :atomic, :ok }
+    end) && :ok
   end
 
   teardown do

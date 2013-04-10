@@ -820,7 +820,7 @@ defmodule Amnesia.Table do
         """
         @spec key(t) :: any
         def key(self) do
-          elem self, Enum.at!(unquote(indices), 0) || 1
+          elem self, 1
         end
 
         @doc """

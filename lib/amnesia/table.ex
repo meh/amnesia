@@ -259,11 +259,6 @@ defmodule Amnesia.Table do
     :mnesia.dirty_write(name, data)
   end
 
-  defmacro __using__(_opts) do
-    quote do
-      import Amnesia.Table
-    end
-  end
 
   def deftable!(name, attributes, opts // [], do_block // []) do
     if length(attributes) <= 1 do
@@ -295,8 +290,6 @@ defmodule Amnesia.Table do
 
     quote do
       defrecord unquote(name), unquote(attributes) do
-        use Amnesia.Table
-
         def __options__ do
           unquote(opts)
         end

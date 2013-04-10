@@ -505,23 +505,27 @@ defmodule Amnesia.Table do
   end
 
   @doc false
-  def deftable!(name, attributes, opts // [], do_block // []) do
+  def deftable!(name, attributes, opts // []) do
     if length(attributes) <= 1 do
       raise ArgumentError, message: "the table attributes must be more than 1"
     end
 
-    if opts[:do] do
-      { opts, do_block } = { do_block, opts }
-    end
+    block = Keyword.get(opts, :do, nil)
+    opts  = Keyword.delete(opts, :do)
 
-    indices = if opts[:index] do
-      [opts[:index]]
-    else
-      opts[:indices] || []
-    end
+    index = Enum.map(Keyword.get(opts, :index, []), fn
+      a when is_integer a -> a + 1
+      a ->
+        Enum.find_index(attributes, fn(i) ->
+          case i do
+            { name, _ } -> a == name
+            name        -> a == name
+          end
+        end) + 1
+    end)
 
-    if indices == [1] do
-      indices = []
+    if index == [1] do
+      index = []
     end
 
     mode = if opts[:mode] do
@@ -566,7 +570,7 @@ defmodule Amnesia.Table do
           Amnesia.Table.create(__MODULE__, [
             record_name: __MODULE__,
             attributes:  List.Dict.keys(@record_fields),
-            index:       unquote(indices),
+            index:       unquote(index),
 
             access_mode:   unquote(mode),
             type:          unquote(opts[:type])     || :set,
@@ -1091,7 +1095,7 @@ defmodule Amnesia.Table do
           :mnesia.dirty_write(self)
         end
 
-        unquote(do_block)
+        unquote(block)
       end
 
       # add the defined table to the list

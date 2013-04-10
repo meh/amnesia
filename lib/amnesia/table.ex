@@ -857,11 +857,11 @@ defmodule Amnesia.Table do
         def first!(key // false)
 
         def first!(false) do
-          Amnesia.Table.first!(__MODULE__)
+          read!(Amnesia.Table.first!(__MODULE__))
         end
 
         def first!(true) do
-          read!(Amnesia.Table.first!(__MODULE__))
+          Amnesia.Table.first!(__MODULE__)
         end
 
         @doc """

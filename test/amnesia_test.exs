@@ -174,6 +174,19 @@ defmodule AmnesiaTest do
     end == { :atomic, true })
   end
 
+  test "match matches records" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.match(Database.User[name: "Lucas", _: :_]) ==
+        [Database.User[id: 2, name: "Lucas"]]
+    end == { :atomic, true })
+  end
+
   setup_all do
     :error_logger.tty(false)
 

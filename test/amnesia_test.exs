@@ -157,6 +157,23 @@ defmodule AmnesiaTest do
     end == { :atomic, true })
   end
 
+  test "delete deletes the record" do
+    transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(transaction! do
+      assert Database.User.last == Database.User[id: 3, name: "David"]
+      assert Database.User.last.delete == :ok
+    end == { :atomic, true })
+
+    assert(transaction! do
+      assert Database.User.last == Database.User[id: 2, name: "Lucas"]
+    end == { :atomic, true })
+  end
+
   setup_all do
     :error_logger.tty(false)
 

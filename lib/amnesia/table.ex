@@ -367,7 +367,7 @@ defmodule Amnesia.Table do
     values by calling `.next`.
     """
 
-    @type t :: __MODULE__[values: [record], continuation: any]
+    @type t :: Selection[values: [record], continuation: any]
 
     @doc """
     Get a selection from the various select results.
@@ -379,8 +379,8 @@ defmodule Amnesia.Table do
         []               -> nil
         { [], _ }        -> nil
 
-        { v, c } -> __MODULE__[values: v, continuation: c]
-        [_|_]    -> __MODULE__[values: value]
+        { v, c } -> Selection[values: v, continuation: c]
+        [_|_]    -> Selection[values: value]
       end
     end
 
@@ -389,7 +389,7 @@ defmodule Amnesia.Table do
     if there are no more.
     """
     @spec next(t) :: t | nil | no_return
-    def next(__MODULE__[continuation: nil]) do
+    def next(Selection[continuation: nil]) do
       nil
     end
 

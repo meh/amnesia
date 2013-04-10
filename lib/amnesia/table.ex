@@ -422,39 +422,79 @@ defmodule Amnesia.Table do
           Amnesia.Table.at!(__MODULE__, position)
         end
 
-        def first do
-          Amnesia.Table.first(__MODULE__)
-        end
-
-        def first! do
-          Amnesia.Table.first!(__MODULE__)
-        end
-
         def key(self) do
           elem self, Enum.at!(unquote(indices), 0) || 1
         end
 
-        def next(self) do
-          Amnesia.Table.next(__MODULE__, self.key)
+        def first(key // false, lock // :read)
+
+        def first(true, lock) do
+          Amnesia.Table.first(__MODULE__)
         end
 
-        def next!(self) do
-          Amnesia.Table.next!(__MODULE__, self.key)
+        def first(false, lock) do
+          read(Amnesia.Table.first(__MODULE__), lock)
         end
 
-        def prev(self) do
-          Amnesia.Table.prev(__MODULE__, self.key)
+        def first!(key // false)
+
+        def first!(false) do
+          Amnesia.Table.first!(__MODULE__)
         end
 
-        def prev!(self) do
-          Amnesia.Table.prev!(__MODULE__, self.key)
+        def first!(true) do
+          read!(Amnesia.Table.first!(__MODULE__))
         end
 
-        def last do
+        def next(__MODULE__[] = self) do
+          read(Amnesia.Table.next(__MODULE__, self.key))
+        end
+
+        def next(key) do
+          Amnesia.Table.next(__MODULE__, key)
+        end
+
+        def next!(__MODULE__[] = self) do
+          read!(Amnesia.Table.next!(__MODULE__, self.key))
+        end
+
+        def next!(key) do
+          Amnesia.Table.next!(__MODULE__, key)
+        end
+
+        def prev(__MODULE__[] = self) do
+          read(Amnesia.Table.prev(__MODULE__, self.key))
+        end
+
+        def prev(key) do
+          Amnesia.Table.prev(__MODULE__, key)
+        end
+
+        def prev!(__MODULE__[] = self) do
+          read!(Amnesia.Table.prev!(__MODULE__, self.key))
+        end
+
+        def prev!(key) do
+          Amnesia.Table.prev!(__MODULE__, key)
+        end
+
+        def last(key // false)
+
+        def last (false) do
+          read(Amnesia.Table.last(__MODULE__))
+        end
+
+        def last(true) do
           Amnesia.Table.last(__MODULE__)
         end
 
-        def last! do
+        def last!(key // false)
+
+        def last!(false) do
+          read!(Amnesia.Table.last!(__MODULE__))
+        end
+
+        def last!(true) do
           Amnesia.Table.last!(__MODULE__)
         end
 

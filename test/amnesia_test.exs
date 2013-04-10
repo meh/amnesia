@@ -12,11 +12,32 @@ defmodule AmnesiaTest do
     end
   end
 
-  setup do
-    start
+  setup_all do
+    :error_logger.tty(false)
 
     Amnesia.Schema.create
+    Amnesia.start
+
+    :ok
+  end
+
+  teardown_all do
+    Amnesia.stop
+    Amnesia.Schema.destroy
+
+    :error_logger.tty(true)
+
+    :ok
+  end
+
+  setup do
     Database.create
+
+    :ok
+  end
+
+  teardown do
+    Database.destroy
 
     :ok
   end
@@ -29,9 +50,5 @@ defmodule AmnesiaTest do
     assert(transaction! do
       Database.Foo.read(23)
     end == { :atomic, Database.Foo[id: 23, message: "yo dawg"] })
-  end
-
-  test "transaction works" do
-    assert transaction(do: 42) == { :atomic, 42 }
   end
 end

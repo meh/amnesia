@@ -66,6 +66,8 @@ defmodule Amnesia.Database do
   @doc """
   Define a table in the database with the given name, attributes and options.
 
+  If only a name is given, it will forward declare a table.
+
   The created table will actually be a record, so you can define functions on
   it like you would normally do for a record, various helper methods are added
   by default.
@@ -97,7 +99,13 @@ defmodule Amnesia.Database do
       end
 
   """
-  defmacro deftable(name, attributes, opts // [], do_block // []) do
-    Amnesia.Table.deftable!(name, attributes, opts, do_block)
+  defmacro deftable(name, attributes // nil, opts // [], do_block // []) do
+    if attributes do
+      Amnesia.Table.deftable!(name, attributes, Keyword.merge(opts, do_block))
+    else
+      quote do
+        alias __MODULE__.unquote(name)
+      end
+    end
   end
 end

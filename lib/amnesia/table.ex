@@ -240,8 +240,11 @@ defmodule Amnesia.Table do
     :mnesia.foldr(fun, acc, name)
   end
 
-  def delete(name, key) do
-    :mnesia.delete(name, key)
+  def delete(name, key, lock // :write) do
+    :mnesia.delete(name, key, case lock do
+      :write  -> :write
+      :write! -> :sticky_write
+    end)
   end
 
   def delete!(name, key) do
@@ -522,19 +525,33 @@ defmodule Amnesia.Table do
           Amnesia.Table.foldr(__MODULE__, acc, fun)
         end
 
-        def delete(self) do
-          :mnesia.delete_object(self)
+        def delete(__MODULE__[] = self) do
+          delete(:write, self)
         end
 
-        def delete!(self) do
-          :mnesia.dirty_delete_object(self)
+        def delete(key) do
+          delete(key, :write)
         end
 
-        def delete(key, self) do
-          Amnesia.Table.delete(__MODULE__, key)
+        def delete(lock, __MODULE__[] = self) do
+          :mnesia.delete_object(__MODULE__, self, case lock do
+            :write  -> :write
+            :write! -> :sticky_write
+          end)
         end
 
-        def delete!(key, self) do
+        def delete(key, lock) do
+          :mnesia.delete(__MODULE__, key, case lock do
+            :write  -> :write
+            :write! -> :sticky_write
+          end)
+        end
+
+        def delete!(__MODULE__[] = self) do
+          :mnesia.dirty_delete_object(__MODULE__, self)
+        end
+
+        def delete!(key) do
           Amnesia.Table.delete!(__MODULE__, key)
         end
 

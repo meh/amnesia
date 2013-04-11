@@ -510,8 +510,9 @@ defmodule Amnesia.Table do
       raise ArgumentError, message: "the table attributes must be more than 1"
     end
 
-    block = Keyword.get(opts, :do, nil)
-    opts  = Keyword.delete(opts, :do)
+    block      = Keyword.get(opts, :do, nil)
+    opts       = Keyword.delete(opts, :do)
+    definition = Keyword.new
 
     index = Enum.map(Keyword.get(opts, :index, []), fn
       a when is_integer a -> a + 1
@@ -524,17 +525,31 @@ defmodule Amnesia.Table do
         end) + 1
     end)
 
-    if index == [1] do
-      index = []
-    end
+    definition = Keyword.put(definition, :index, if index == [1], do: [], else: index)
 
-    mode = if opts[:mode] do
+    definition = Keyword.put(definition, :access_mode, if opts[:mode] do
       case opts[:mode] do
         :both  -> :read_write
         :read! -> :read_only
       end
     else
       :read_write
+    end)
+
+    if opts[:type] do
+      definition = Keyword.put(definition, :type, opts[:type])
+    end
+
+    if opts[:majority] do
+      definition = Keyword.put(definition, :majority, opts[:majority])
+    end
+
+    if opts[:priority] do
+      definition = Keyword.put(definition, :load_order, opts[:priority])
+    end
+
+    if opts[:local] do
+      definition = Keyword.put(definition, :local_content, opts[:local])
     end
 
     quote do
@@ -567,17 +582,24 @@ defmodule Amnesia.Table do
         """
         @spec create(Amnesia.Table.c) :: { :atomic, :ok } | { :aborted, any }
         def create(copying // []) do
-          Amnesia.Table.create(__MODULE__, [
+          definition = Keyword.merge(unquote(definition), [
             record_name: __MODULE__,
-            attributes:  List.Dict.keys(@record_fields),
-            index:       unquote(index),
-
-            access_mode:   unquote(mode),
-            type:          unquote(opts[:type])     || :set,
-            majority:      unquote(opts[:majority]) || false,
-            load_order:    unquote(opts[:priority]) || 0,
-            local_content: unquote(opts[:local])    || false
+            attributes:  List.Dict.keys(@record_fields)
           ])
+
+          if copying[:memory] || copying[:ram] do
+            definition = Keyword.put(definition, :ram_copies, copying[:memory] || copying[:ram])
+          end
+
+          if copying[:disc] || copying[:disk] do
+            definition = Keyword.put(definition, :disc_copies, copying[:disc] || copying[:disk])
+          end
+
+          if copying[:disc!] || copying[:disk!] do
+            definition = Keyword.put(definition, :disc_only_copies, copying[:disc!] || copying[:disk!])
+          end
+
+          Amnesia.Table.create(__MODULE__, definition)
         end
 
         @doc """

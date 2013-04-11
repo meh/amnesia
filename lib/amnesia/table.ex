@@ -552,6 +552,38 @@ defmodule Amnesia.Table do
       definition = Keyword.put(definition, :local_content, opts[:local])
     end
 
+    if opts[:fragmentation] do
+      properties = Keyword.new
+
+      if number = opts[:fragmentation][:number] do
+        properties = Keyword.put(properties, :n_fragments, number)
+      end
+
+      if copying = opts[:fragmentation][:copying] do
+        if copying[:memory] || copying[:ram] do
+          properties = Keyword.put(properties, :n_ram_copies, copying[:memory] || copying[:ram])
+        end
+
+        if copying[:disc] || copying[:disk] do
+          properties = Keyword.put(properties, :n_disc_copies, copying[:disc] || copying[:disk])
+        end
+
+        if copying[:disc!] || copying[:disk!] do
+          properties = Keyword.put(properties, :n_disc_only_copies, copying[:disc!] || copying[:disk!])
+        end
+      end
+
+      if nodes = opts[:fragmentation][:nodes] do
+        properties = Keyword.put(properties, :node_pool, nodes)
+      end
+
+      if key = opts[:fragmentation][:key] do
+        properties = Keyword.put(properties, :foreign_key, key)
+      end
+
+      definition = Keyword.put(definition, :frag_properties, properties)
+    end
+
     quote do
       defrecord unquote(name), unquote(attributes) do
         @doc """

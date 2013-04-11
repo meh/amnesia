@@ -101,7 +101,12 @@ defmodule Amnesia.Database do
   """
   defmacro deftable(name, attributes // nil, opts // [], do_block // []) do
     if attributes do
-      Amnesia.Table.deftable!(name, attributes, Keyword.merge(opts, do_block))
+      quote do
+        unquote Amnesia.Table.deftable!(name, attributes, Keyword.merge(opts, do_block))
+
+        # add the defined table to the list
+        @tables unquote(name)
+      end
     else
       quote do
         alias __MODULE__.unquote(name)

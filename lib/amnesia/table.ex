@@ -1097,9 +1097,6 @@ defmodule Amnesia.Table do
 
         unquote(block)
       end
-
-      # add the defined table to the list
-      @tables unquote(name)
     end
   end
 end

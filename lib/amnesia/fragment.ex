@@ -97,4 +97,151 @@ defmodule Amnesia.Fragment do
   def delete_node(name, node) do
     :mnesia.change_table_frag(name, { :del_node, node })
   end
+
+  @doc """
+  Start a transaction with the given block or function, see `mnesia:transaction`.
+  """
+  @spec transaction([] | function) :: { :aborted, any } | { :atomic, any }
+  defmacro transaction(do: block) do
+    quote do
+      :mnesia.activity(:transaction, function(do: (() -> unquote(block))), [], :mnesia_frag)
+    end
+  end
+
+  defmacro transaction(fun) when is_function fun, 0 do
+    quote do
+      :mnesia.activity(:transaction, unquote(fun), [], :mnesia_frag)
+    end
+  end
+
+  @doc """
+  Start a transaction with the given function passing the passed arguments to
+  it, see `mnesia:transaction`.
+  """
+  @spec transaction(function, list) :: { :aborted, any } | { :atomic, any }
+  def transaction(fun, args) when is_function fun, length args do
+    :mnesia.activity(:transaction, fun, args, :mnesia_frag)
+  end
+
+  @doc """
+  Start a transaction with the given function passing the passed arguments to it,
+  trying to take a lock maximum *retries* times, see `mnesia:transaction`.
+  """
+  @spec transaction(function, list, integer) :: { :aborted, any } | { :atomic, any }
+  def transaction(fun, args, retries) when is_function fun, length args do
+    :mnesia.activity({ :transaction, retries }, fun, args, :mnesia_frag)
+  end
+
+  @doc """
+  Start a synchronous transaction with the given block or function, see
+  `mnesia:sync_transaction`.
+  """
+  @spec transaction!([] | function) :: { :aborted, any } | { :atomic, any }
+  defmacro transaction!(do: block) do
+    quote do
+      :mnesia.activity(:sync_transaction, function(do: (() -> unquote(block))), [], :mnesia_frag)
+    end
+  end
+
+  defmacro transaction!(fun) when is_function fun, 0 do
+    quote do
+      :mnesia.activity(:sync_transaction, unquote(fun), [], :mnesia_frag)
+    end
+  end
+
+  @doc """
+  Start a synchronous transaction with the given function passing the passed
+  arguments to it, see `mnesia:sync_transaction`.
+  """
+  @spec transaction!(function, list) :: { :aborted, any} | { :atomic, any }
+  def transaction!(fun, args) when is_function fun, length args do
+    :mnesia.activity(:sync_transaction, fun, args, :mnesia_frag)
+  end
+
+  @doc """
+  Start a synchronous transaction with the given function passing the passed
+  arguments to it, trying to take a lock maximum *retries* times, see
+  `mnesia:sync_transaction`.
+  """
+  @spec transaction!(function, list, integer) :: { :aborted, any } | { :atomic, any }
+  def transaction!(fun, args, retries) when is_function fun, length args do
+    :mnesia.activity({ :sync_transaction, retries }, fun, args, :mnesia_frag)
+  end
+
+  @doc """
+  Run the passed function or block in the ETS context, see `mnesia:ets`.
+  """
+  @spec ets([] | function) :: any
+  defmacro ets(do: block) do
+    quote do
+      :mnesia.activity(:ets, function(do: (() -> unquote(block))), [], :mnesia_frag)
+    end
+  end
+
+  defmacro ets(fun) when is_function fun, 0 do
+    quote do
+      :mnesia.activity(:ets, unquote(fun), [], :mnesia_frag)
+    end
+  end
+
+  @doc """
+  Run the passed function in the ETS context passing over the passed arguments,
+  see `mnesia:ets`.
+  """
+  @spec ets(function, list) :: any
+  def ets(fun, args) when is_function fun, length args do
+    :mnesia.activity(:ets, fun, args, :mnesia_frag)
+  end
+
+  @doc """
+  Run the passed function or block in a dirty asynchronous context, see
+  `mnesia:async_dirty`.
+  """
+  @spec async([] | function) :: any
+  defmacro async(do: block) do
+    quote do
+      :mnesia.activity(:async_dirty, function(do: (() -> unquote(block))), [], :mnesia_frag)
+    end
+  end
+
+  defmacro async(fun) when is_function fun, 0 do
+    quote do
+      :mnesia.activity(:async_dirty, unquote(fun), [], :mnesia_frag)
+    end
+  end
+
+  @doc """
+  Run the passed function in a dirty asynchronous context passing over the
+  passed arguments, see `mnesia:async_dirty`.
+  """
+  @spec async(function, list) :: any
+  def async(fun, args) when is_function fun, length args do
+    :mnesia.activity(:async_dirty, fun, args, :mnesia_frag)
+  end
+
+  @doc """
+  Run the passed function or block in a dirty synchronous context, see
+  `mnesia:sync_dirty`.
+  """
+  @spec sync([] | function) :: any
+  defmacro sync(do: block) do
+    quote do
+      :mnesia.activity(:sync_dirty, function(do: (() -> unquote(block))), [], :mnesia_frag)
+    end
+  end
+
+  defmacro sync(fun) when is_function fun, 0 do
+    quote do
+      :mnesia.activity(:sync_dirty, unquote(fun), [], :mnesia_frag)
+    end
+  end
+
+  @doc """
+  Run the passed function in a dirty synchronous context passing over the
+  passed arguments, see `mnesia:sync_dirty`.
+  """
+  @spec sync(function, list) :: any
+  def sync(fun, args) when is_function fun, length args do
+    :mnesia.activity(:sync_dirty, fun, args, :mnesia_frag)
+  end
 end

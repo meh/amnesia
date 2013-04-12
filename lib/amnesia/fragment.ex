@@ -8,37 +8,6 @@
 
 defmodule Amnesia.Fragment do
   @doc """
-  Get the fragment properties of the given table.
-  """
-  @spec properties(atom) :: Keyword.t
-  def properties(atom) do
-    result     = Keyword.new
-    properties = :mnesia.table_info(atom, :frag_properties)
-
-    if number = properties[:n_fragments] do
-      result = Keyword.put(result, :number, number)
-    end
-
-    if nodes = properties[:node_pool] do
-      result = Keyword.put(result, :nodes, nodes)
-    end
-
-    if (key = properties[:foreign_key]) != :undefined do
-      result = Keyword.put(result, :key, key)
-    end
-
-    if size = properties[:size] do
-      result = Keyword.put(result, :size, size)
-    end
-
-    if memory = properties[:memory] do
-      result = Keyword.put(result, :memory, memory)
-    end
-
-    result
-  end
-
-  @doc """
   Activate fragmentation on the given table, see `mnesia:change_table_frag`.
   """
   @spec activate(atom) :: Amnesia.Table.o
@@ -275,5 +244,38 @@ defmodule Amnesia.Fragment do
   @spec sync(function, list) :: any
   def sync(fun, args) when is_function fun, length args do
     :mnesia.activity(:sync_dirty, fun, args, :mnesia_frag)
+  end
+
+  @doc """
+  Get the fragment properties of the given table.
+  """
+  @spec properties(atom) :: Keyword.t
+  def properties(name) do
+    async do
+      Keyword.new([
+        number: :mnesia.table_info(name, :n_fragments),
+        nodes:  :mnesia.table_info(name, :node_pool),
+
+        copying: [
+          memory: :mnesia.table_info(name, :n_ram_copies),
+          disk:   :mnesia.table_info(name, :n_disc_copies),
+          disk!:  :mnesia.table_info(name, :n_disc_only_copies)
+        ],
+
+        foreign: [
+          key: case :mnesia.table_info(name, :foreign_key) do
+            :undefined -> nil
+            key        -> key
+          end,
+
+          tables: :mnesia.table_info(name, :foreigners)
+        ],
+
+        names:  :mnesia.table_info(name, :frag_names),
+        dist:   :mnesia.table_info(name, :frag_dist),
+        size:   :mnesia.table_info(name, :frag_size),
+        memory: :mnesia.table_info(name, :frag_memory)
+      ])
+    end
   end
 end

@@ -10,7 +10,7 @@ defmodule Amnesia do
   @doc false
   defmacro __using__(_opts) do
     quote do
-      import  Amnesia
+      import  Amnesia, only: [defdatabase: 2]
       require Amnesia
     end
   end

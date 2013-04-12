@@ -46,7 +46,7 @@ defmodule AmnesiaTest do
   end
 
   test "saves item" do
-    transaction! do
+    Amnesia.transaction! do
       user = Database.User[id: 23]
       user.add_message("yo dawg")
       user.write
@@ -54,7 +54,7 @@ defmodule AmnesiaTest do
 
     Enum.first(Database.User.read!(23).messages!).user!
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.read(23) == Database.User[id: 23]
       assert Database.User.read(23).messages == [Database.Message[user_id: 23, content: "yo dawg"]]
       assert Enum.first(Database.User.read(23).messages).user == Database.User[id: 23]
@@ -62,126 +62,126 @@ defmodule AmnesiaTest do
   end
 
   test "first fetches a key" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.first(true) == 1
     end == { :atomic, true })
   end
 
   test "first fetches the record" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.first == Database.User[id: 1, name: "John"]
     end == { :atomic, true })
   end
 
   test "next fetches the next key" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.next(Database.User.first(true)) == 2
     end == { :atomic, true })
   end
 
   test "next fetches the next record" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.first.next == Database.User[id: 2, name: "Lucas"]
     end == { :atomic, true })
   end
 
   test "prev fetches the prev key" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.prev(Database.User.last(true)) == 2
     end == { :atomic, true })
   end
 
   test "prev fetches the prev record" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.last.prev == Database.User[id: 2, name: "Lucas"]
     end == { :atomic, true })
   end
 
   test "last fetches a key" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.last(true) == 3
     end == { :atomic, true })
   end
 
   test "last fetches the record" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.last == Database.User[id: 3, name: "David"]
     end == { :atomic, true })
   end
 
   test "delete deletes the record" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.last == Database.User[id: 3, name: "David"]
       assert Database.User.last.delete == :ok
     end == { :atomic, true })
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.last == Database.User[id: 2, name: "Lucas"]
     end == { :atomic, true })
   end
 
   test "match matches records" do
-    transaction! do
+    Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
       Database.User[id: 3, name: "David"].write
     end
 
-    assert(transaction! do
+    assert(Amnesia.transaction! do
       assert Database.User.match(Database.User[name: "Lucas", _: :_]) ==
         [Database.User[id: 2, name: "Lucas"]]
     end == { :atomic, true })

@@ -514,7 +514,13 @@ defmodule Amnesia.Table do
     opts       = Keyword.delete(opts, :do)
     definition = Keyword.new
 
-    index = Enum.map(Keyword.get(opts, :index, []), fn
+    index = Keyword.get(opts, :index, [])
+
+    unless is_list index do
+      index = [index]
+    end
+
+    index = Enum.map(index, fn
       a when is_integer a -> a + 1
       a ->
         Enum.find_index(attributes, fn(i) ->

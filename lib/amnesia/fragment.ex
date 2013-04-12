@@ -252,6 +252,8 @@ defmodule Amnesia.Fragment do
   @spec properties(atom) :: Keyword.t
   def properties(name) do
     async do
+      props = :mnesia.table_info(name, :frag_properties)
+
       Keyword.new([
         number: :mnesia.table_info(name, :n_fragments),
         nodes:  :mnesia.table_info(name, :node_pool),
@@ -263,7 +265,7 @@ defmodule Amnesia.Fragment do
         ],
 
         foreign: [
-          key: case :mnesia.table_info(name, :foreign_key) do
+          key: case props[:foreign_key] do
             :undefined -> nil
             key        -> key
           end,
@@ -274,7 +276,12 @@ defmodule Amnesia.Fragment do
         names:  :mnesia.table_info(name, :frag_names),
         dist:   :mnesia.table_info(name, :frag_dist),
         size:   :mnesia.table_info(name, :frag_size),
-        memory: :mnesia.table_info(name, :frag_memory)
+        memory: :mnesia.table_info(name, :frag_memory),
+
+        hash: [
+          module: props[:hash_module],
+          state:  props[:hash_state]
+        ]
       ])
     end
   end

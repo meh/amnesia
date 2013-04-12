@@ -104,13 +104,21 @@ defmodule Amnesia.Fragment do
   @spec transaction([] | function) :: { :aborted, any } | { :atomic, any }
   defmacro transaction(do: block) do
     quote do
-      :mnesia.activity(:transaction, function(do: (() -> unquote(block))), [], :mnesia_frag)
+      try do
+        { :atomic, :mnesia.activity(:transaction, function(do: (() -> unquote(block))), [], :mnesia_frag) }
+      catch
+        :exit, error -> error
+      end
     end
   end
 
   defmacro transaction(fun) when is_function fun, 0 do
     quote do
-      :mnesia.activity(:transaction, unquote(fun), [], :mnesia_frag)
+      try do
+        { :atomic, :mnesia.activity(:transaction, unquote(fun), [], :mnesia_frag) }
+      catch
+        :exit, error -> error
+      end
     end
   end
 
@@ -120,7 +128,11 @@ defmodule Amnesia.Fragment do
   """
   @spec transaction(function, list) :: { :aborted, any } | { :atomic, any }
   def transaction(fun, args) when is_function fun, length args do
-    :mnesia.activity(:transaction, fun, args, :mnesia_frag)
+    try do
+      { :atomic, :mnesia.activity(:transaction, fun, args, :mnesia_frag) }
+    catch
+      :exit, error -> error
+    end
   end
 
   @doc """
@@ -129,7 +141,11 @@ defmodule Amnesia.Fragment do
   """
   @spec transaction(function, list, integer) :: { :aborted, any } | { :atomic, any }
   def transaction(fun, args, retries) when is_function fun, length args do
-    :mnesia.activity({ :transaction, retries }, fun, args, :mnesia_frag)
+    try do
+      { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, :mnesia_frag) }
+    catch
+      :exit, error -> error
+    end
   end
 
   @doc """
@@ -139,13 +155,21 @@ defmodule Amnesia.Fragment do
   @spec transaction!([] | function) :: { :aborted, any } | { :atomic, any }
   defmacro transaction!(do: block) do
     quote do
-      :mnesia.activity(:sync_transaction, function(do: (() -> unquote(block))), [], :mnesia_frag)
+      try do
+        { :atomic, :mnesia.activity(:sync_transaction, function(do: (() -> unquote(block))), [], :mnesia_frag) }
+      catch
+        :exit, error -> error
+      end
     end
   end
 
   defmacro transaction!(fun) when is_function fun, 0 do
     quote do
-      :mnesia.activity(:sync_transaction, unquote(fun), [], :mnesia_frag)
+      try do
+        { :atomic, :mnesia.activity(:sync_transaction, unquote(fun), [], :mnesia_frag) }
+      catch
+        :exit, error -> error
+      end
     end
   end
 
@@ -155,7 +179,11 @@ defmodule Amnesia.Fragment do
   """
   @spec transaction!(function, list) :: { :aborted, any} | { :atomic, any }
   def transaction!(fun, args) when is_function fun, length args do
-    :mnesia.activity(:sync_transaction, fun, args, :mnesia_frag)
+    try do
+      { :atomic, :mnesia.activity(:sync_transaction, fun, args, :mnesia_frag) }
+    catch
+      :exit, error -> error
+    end
   end
 
   @doc """
@@ -165,7 +193,11 @@ defmodule Amnesia.Fragment do
   """
   @spec transaction!(function, list, integer) :: { :aborted, any } | { :atomic, any }
   def transaction!(fun, args, retries) when is_function fun, length args do
-    :mnesia.activity({ :sync_transaction, retries }, fun, args, :mnesia_frag)
+    try do
+      { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, :mnesia_frag) }
+    catch
+      :exit, error -> error
+    end
   end
 
   @doc """

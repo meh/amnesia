@@ -19,7 +19,7 @@ defmodule Amnesia.Fragment do
       result = Keyword.put(result, :number, number)
     end
 
-    if nodes = properties[:node_pool]
+    if nodes = properties[:node_pool] do
       result = Keyword.put(result, :nodes, nodes)
     end
 

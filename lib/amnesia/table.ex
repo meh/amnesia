@@ -577,8 +577,10 @@ defmodule Amnesia.Table do
         properties = Keyword.put(properties, :node_pool, nodes)
       end
 
-      if key = opts[:fragmentation][:key] do
-        properties = Keyword.put(properties, :foreign_key, key)
+      if foreign = opts[:fragmentation][:foreign] do
+        if foreign[:key] do
+          properties = Keyword.put(properties, :foreign_key, foreign[:key])
+        end
       end
 
       definition = Keyword.put(definition, :frag_properties, properties)

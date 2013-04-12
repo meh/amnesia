@@ -583,6 +583,16 @@ defmodule Amnesia.Table do
         end
       end
 
+      if hash = opts[:hash] do
+        if hash[:module] do
+          properties = Keyword.put(properties, :hash_module, hash[:module])
+        end
+
+        if hash[:state] do
+          properties = Keyword.put(properties, :hash_state, hash[:state])
+        end
+      end
+
       definition = Keyword.put(definition, :frag_properties, properties)
     end
 

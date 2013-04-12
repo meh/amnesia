@@ -586,9 +586,7 @@ defmodule Amnesia.Table do
 
     quote do
       defrecord unquote(name), unquote(attributes) do
-        @doc """
-        Get the options used to define the table.
-        """
+        @doc false
         def __options__ do
           unquote(opts)
         end

@@ -14,10 +14,24 @@ defrecord Amnesia.Counter, [:name, :table] do
   """
   @spec create(atom, Amnesia.Table.c) :: Amnesia.Table.o
   def create(table // Amnesia.Counter, copying // []) do
-    Amnesia.Table.create(table, [
+    definition = Keyword.new
+
+    if copying[:memory] || copying[:ram] do
+      definition = Keyword.put(definition, :n_ram_copies, copying[:memory] || copying[:ram])
+    end
+
+    if copying[:disc] || copying[:disk] do
+      definition = Keyword.put(definition, :n_disc_copies, copying[:disc] || copying[:disk])
+    end
+
+    if copying[:disc!] || copying[:disk!] do
+      definition = Keyword.put(definition, :n_disc_only_copies, copying[:disc!] || copying[:disk!])
+    end
+
+    Amnesia.Table.create(table, Keyword.merge(definition, [
       record_name: table,
       attributes:  [:name, :value]
-    ])
+    ]))
   end
 
   @doc """

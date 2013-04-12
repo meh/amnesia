@@ -12,6 +12,7 @@ defmodule Amnesia do
     quote do
       import  Amnesia, only: [defdatabase: 2]
       require Amnesia
+      require Amnesia.Fragment
     end
   end
 

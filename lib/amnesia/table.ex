@@ -140,6 +140,15 @@ defmodule Amnesia.Table do
   end
 
   @doc """
+  Move the copy of the given table from the given node to another given
+  node, see `mnesia:move_table_copy`.
+  """
+  @spec move_copy(atom, node, node) :: o
+  def move_copy(name, from, to) do
+    :mnesia.move_copy(name, from, to)
+  end
+
+  @doc """
   Delete a copy of the table on the given node, see `mnesia:del_table_copy`.
   """
   @spec delete_copy(atom, node) :: o
@@ -732,6 +741,14 @@ defmodule Amnesia.Table do
         @spec add_copy(node, Amnesia.Table.cv) :: Amnesia.Table.o
         def add_copy(node, type // :disk) do
           Amnesia.Table.add_copy(__MODULE__, node, type)
+        end
+
+        @doc """
+        Move a copy of the table from the given node to another given node.
+        """
+        @spec move_copy(node, node) :: Amnesia.Table.o
+        def move_copy(from, to) do
+          Amnesia.Table.move_copy(__MODULE__, from, to)
         end
 
         @doc """

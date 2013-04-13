@@ -367,7 +367,7 @@ defmodule Amnesia.Table do
     values by calling `.next`.
     """
 
-    @type t :: Selection[values: [record], continuation: any]
+    @type t :: Selection[values: [any], continuation: any]
 
     @doc """
     Get a selection from the various select results.

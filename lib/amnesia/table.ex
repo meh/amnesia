@@ -175,6 +175,14 @@ defmodule Amnesia.Table do
   end
 
   @doc """
+  Set master nodes for the given table, see `mnesia:set_master_nodes`.
+  """
+  @spec master_nodes(atom, [node]) :: :ok | { :error, any }
+  def master_nodes(name, nodes) do
+    :mnesia.set_master_nodes(name, nodes)
+  end
+
+  @doc """
   Lock the given table for the given kind of lock, see `mnesia:lock`.
 
   ## Locks
@@ -773,6 +781,14 @@ defmodule Amnesia.Table do
         @spec delete_index(atom) :: Amnesia.Table.o
         def delete_index(attribute) do
           Amnesia.Table.delete_index(__MODULE__, attribute)
+        end
+
+        @doc """
+        Set master nodes for the table, see `mnesia:set_master_nodes`.
+        """
+        @spec master_nodes([node]) :: :ok | { :error, any }
+        def master_nodes(nodes) do
+          Amnesia.Table.master_nodes(__MODULE__, nodes)
         end
 
         @doc """

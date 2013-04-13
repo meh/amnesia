@@ -83,6 +83,14 @@ defmodule Amnesia do
   end
 
   @doc """
+  Set master nodes, see `mnesia:set_master_nodes`.
+  """
+  @spec master_nodes([node]) :: :ok | { :error, any }
+  def master_nodes(nodes) do
+    :mnesia.set_master_nodes(nodes)
+  end
+
+  @doc """
   Lock the whole database on the given node for the given keys with the given
   lock, see `mnesia:lock`.
 

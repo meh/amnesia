@@ -6,7 +6,7 @@
 #
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-defmodule Amnesia.Hash do
+defmodule Amnesia.Fragment.Hash do
   use Behaviour
 
   @doc """

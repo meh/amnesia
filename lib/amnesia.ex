@@ -83,6 +83,25 @@ defmodule Amnesia do
   end
 
   @doc """
+  Lock the whole database on the given node for the given keys with the given
+  lock, see `mnesia:lock`.
+
+  ## Locks
+
+  * `:write` sets a `:write` lock
+  * `:write!` sets a `:sticky_write` lock
+  * `:read` sets a `:read` lock
+  """
+  @spec lock(atom, [node], :write | :write! | :read) :: [node] | :ok | no_return
+  def lock(key, nodes, mode) do
+    :mnesia.lock({ :global, key, nodes }, case mode do
+      :write  -> :write
+      :write! -> :sticky_write
+      :read   -> :read
+    end)
+  end
+
+  @doc """
   Check if it's inside a transaction or not, see `mnesia:is_transaction`.
   """
   @spec transaction? :: boolean
@@ -235,25 +254,6 @@ defmodule Amnesia do
   @spec sync(function, list) :: any
   def sync(fun, args) when is_function fun, length args do
     :mnesia.sync_dirty(fun, args)
-  end
-
-  @doc """
-  Lock the whole database on the given node for the given keys with the given
-  lock, see `mnesia:lock`.
-
-  ## Locks
-
-  * `:write` sets a `:write` lock
-  * `:write!` sets a `:sticky_write` lock
-  * `:read` sets a `:read` lock
-  """
-  @spec lock(atom, [node], :write | :write! | :read) :: [node] | :ok | no_return
-  def lock(key, nodes, mode) do
-    :mnesia.lock({ :global, key, nodes }, case mode do
-      :write  -> :write
-      :write! -> :sticky_write
-      :read   -> :read
-    end)
   end
 
   @doc """

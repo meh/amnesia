@@ -32,6 +32,16 @@ defmodule Amnesia do
     :mnesia.stop
   end
 
+  @type debug_level :: :none | :verbose | :debug | :trace | false | true
+
+  @doc """
+  Change the debug level.
+  """
+  @spec debug(debug_level) :: debug_level
+  def debug(level) do
+    :mnesia.set_debug_level(level)
+  end
+
   @doc """
   Print information about the mnesia database, see `mnesia:info`.
   """

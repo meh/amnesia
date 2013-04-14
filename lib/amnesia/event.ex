@@ -7,6 +7,25 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defmodule Amnesia.Event do
+  @type system :: { :mnesia_up, node } |
+                  { :mnesia_down, node } |
+                  { :mnesia_checkpoint_activated, any } |
+                  { :mnesia_overload, any } |
+                  { :inconsistent_database, any } |
+                  { :mnesia_fatal, char_list, [any], binary } |
+                  { :mnesia_info, char_list, [any] } |
+                  { :mnesia_user, any }
+
+  @type activity :: { :complete, Amnesia.Access.id }
+
+  @type table :: { :write, record, Amnesia.Access.id } |
+                 { :delete_object, record, Amnesia.Access.id } |
+                 { :delete, { atom, any }, Amnesia.Access.id } |
+                 { :write, atom, record, [record], Amnesia.Access.id } |
+                 { :delete, atom, any, [record], Amnesia.Access.id }
+
+  @type category :: system | activity | table
+
   defp handle([], fun) do
     receive do
       v -> fun.(v)
@@ -21,6 +40,10 @@ defmodule Amnesia.Event do
     handle([], fun)
   end
 
+  @doc """
+  Observe the given events with the given function.
+  """
+  @spec observe(category | [category], (fun(any) -> none)) :: pid
   def observe(categories, fun) when is_list categories do
     spawn __MODULE__, :handle, [categories, fun]
   end
@@ -29,14 +52,26 @@ defmodule Amnesia.Event do
     observe([category], fun)
   end
 
+  @doc """
+  Subscribe to events of a given category, see `mnesia:subscribe`.
+  """
+  @spec subscribe(category) :: none
   def subscribe(category) do
     :mnesia.subscribe(category)
   end
 
+  @doc """
+  Unsubscribe from events of a given category, see `mnesia:unsubscribe`.
+  """
+  @spec unsubscribe(category) :: none
   def unsubscribe(category) do
     :mnesia.unsubscribe(category)
   end
 
+  @doc """
+  Report an event, see `mnesia:report_event`.
+  """
+  @spec report(any) :: :ok
   def report(event) do
     :mnesia.report_event(event)
   end

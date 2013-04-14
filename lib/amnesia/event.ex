@@ -36,4 +36,8 @@ defmodule Amnesia.Event do
   def unsubscribe(category) do
     :mnesia.unsubscribe(category)
   end
+
+  def report(event) do
+    :mnesia.report_event(event)
+  end
 end

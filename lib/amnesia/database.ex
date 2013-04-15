@@ -35,6 +35,7 @@ defmodule Amnesia.Database do
         @doc """
         Create the database, it calls `.create` on every defined table.
         """
+        @spec create :: [Amnesia.Table.o]
         @spec create(Amnesia.Table.c) :: [Amnesia.Table.o]
         def create(copying // []) do
           Enum.map @tables, fn(table) ->
@@ -55,6 +56,7 @@ defmodule Amnesia.Database do
         @doc """
         Wait for the database to be loaded.
         """
+        @spec wait :: :ok | { :timeout, [atom] } | { :error, atom }
         @spec wait(integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
         def wait(timeout // :infinity) do
           Amnesia.Table.wait(@tables, timeout)
@@ -99,6 +101,10 @@ defmodule Amnesia.Database do
       end
 
   """
+  @spec deftable(atom) :: none
+  @spec deftable(atom, [atom | { atom, any }]) :: none
+  @spec deftable(atom, [atom | { atom, any }], Keyword.t) :: none
+  @spec deftable(atom, [atom | { atom, any }], Keyword.t, Keyword.t) :: none
   defmacro deftable(name, attributes // nil, opts // [], do_block // []) do
     if attributes do
       quote do

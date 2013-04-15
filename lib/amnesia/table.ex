@@ -739,6 +739,9 @@ defmodule Amnesia.Table do
           elem self, 0
         end
 
+        @doc """
+        Return the type of the table.
+        """
         @spec type(t) :: :set | :ordered_set | :bag
         def type(self) do
           unquote(opts[:type])

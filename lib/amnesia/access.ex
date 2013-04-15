@@ -17,7 +17,7 @@ defmodule Amnesia.Access do
 
   use Behaviour
 
-  @type id :: { :tid, integer, pid } | { :async_dirty, pid } | { :sync_dirty, pid } | { :ets, pid }
+  @opaque id :: { :tid, integer, pid } | { :async_dirty, pid } | { :sync_dirty, pid } | { :ets, pid }
 
   @type lock_item :: { :table, atom } | { :global, any, [node] }
   @type lock_kind :: :write | :read | :sticky_write

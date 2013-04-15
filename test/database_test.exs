@@ -188,21 +188,11 @@ defmodule DatabaseTest do
   end
 
   setup_all do
-    :error_logger.tty(false)
-
-    Amnesia.Schema.create
-    Amnesia.start
-
-    :ok
+    Amnesia.Test.start
   end
 
   teardown_all do
-    Amnesia.stop
-    Amnesia.Schema.destroy
-
-    :error_logger.tty(true)
-
-    :ok
+    Amnesia.Test.stop
   end
 
   setup do

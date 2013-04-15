@@ -26,6 +26,7 @@ defmodule Amnesia.Schema do
   @doc """
   Create the schema on the given nodes.
   """
+  @spec create :: :ok | { :error, any }
   @spec create([node]) :: :ok | { :error, any }
   def create(nodes // [node]) do
     :mnesia.create_schema(nodes)
@@ -34,6 +35,7 @@ defmodule Amnesia.Schema do
   @doc """
   Destroy the schema on the given nodes.
   """
+  @spec destroy :: :ok | { :error, any }
   @spec destroy([node]) :: :ok | { :error, any }
   def destroy(nodes // [node]) do
     :mnesia.delete_schema(nodes)

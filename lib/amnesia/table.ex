@@ -63,21 +63,33 @@ defmodule Amnesia.Table do
     :mnesia.table_info(name, key)
   end
 
+  @doc """
+  Return the type of the given table.
+  """
   @spec type(atom) :: :set | :ordered_set | :bag
   def type(name) do
     info(name, :type)
   end
 
+  @doc """
+  Check if the given table is a bag.
+  """
   @spec bag?(atom) :: boolean
   def bag?(name) do
     type(name) == :bag
   end
 
+  @doc """
+  Check if the given table is a set.
+  """
   @spec set?(atom) :: boolean
   def set?(name) do
     type(name) == :set
   end
 
+  @doc """
+  Check if the given table is an ordered set.
+  """
   @spec ordered_set?(atom) :: boolean
   def ordered_set?(name) do
     type(name) == :ordered_set

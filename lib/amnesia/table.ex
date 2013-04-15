@@ -14,6 +14,7 @@ defmodule Amnesia.Table do
   @doc """
   Wait for the passed tables for the given timeout, see `mnesia:wait_for_tables`.
   """
+  @spec wait([atom]) :: :ok | { :timeout, [atom] } | { :error, atom }
   @spec wait([atom], integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
   def wait(names, timeout // :infinity) do
     :mnesia.wait_for_tables(names, timeout)
@@ -30,6 +31,7 @@ defmodule Amnesia.Table do
   @doc """
   Create a table with the given name and definition, see `mnesia:create_table`.
   """
+  @spec create(atom) :: o
   @spec create(atom, c) :: o
   def create(name, definition // []) do
     :mnesia.create_table(name, definition)
@@ -145,6 +147,7 @@ defmodule Amnesia.Table do
   * `:disc!` `:disk!` sets `:disc_only_copies` mode
   * `:ram` `:memory` sets `:ram_copies` mode
   """
+  @spec add_copy(atom, node) :: o
   @spec add_copy(atom, node, cv) :: o
   def add_copy(name, node, type // :disk) do
     :mnesia.add_table_copy(name, node, case type do
@@ -244,6 +247,7 @@ defmodule Amnesia.Table do
   * `:write!` sets a `:sticky_write` lock
   * `:read` sets a `:read` lock
   """
+  @spec read(atom, any) :: [record] | no_return
   @spec read(atom, any, :read | :write | :write!) :: [record] | no_return
   def read(name, key, lock // :read) do
     :mnesia.read(name, key, case lock do
@@ -440,6 +444,8 @@ defmodule Amnesia.Table do
   limit to use for each number of returned records and a lock, see
   `mnesia:select`.
   """
+  @spec select(atom, any) :: Selection.t | nil | no_return
+  @spec select(atom, any, integer) :: Selection.t | nil | no_return
   @spec select(atom, any, integer, :read | :write) :: Selection.t | nil | no_return
   def select(name, spec, limit // nil, lock // :read) do
     if limit do
@@ -522,6 +528,7 @@ defmodule Amnesia.Table do
   * `:write` sets a `:write` lock
   * `:write!` sets a `:sticky_write` lock
   """
+  @spec delete(atom, any) :: :ok | no_return
   @spec delete(atom, any, :write | :write!) :: :ok | no_return
   def delete(name, key, lock // :write) do
     :mnesia.delete(name, key, case lock do
@@ -547,6 +554,7 @@ defmodule Amnesia.Table do
   * `:write` sets a `:write` lock
   * `:write!` sets a `:sticky_write` lock
   """
+  @spec write(atom, record) :: :ok | no_return
   @spec write(atom, record, :write | :write!) :: :ok | no_return
   def write(name, data, lock // :write) do
     :mnesia.write(name, data, case lock do
@@ -671,6 +679,7 @@ defmodule Amnesia.Table do
         @doc """
         Wait for the table optionally with a timeout.
         """
+        @spec wait :: :ok | { :timeout, [atom] } | { :error, atom }
         @spec wait(integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
         def wait(timeout // :infinity) do
           Amnesia.Table.wait([__MODULE__], timeout)
@@ -687,6 +696,7 @@ defmodule Amnesia.Table do
         @doc """
         Create the table with the given copying mode.
         """
+        @spec create :: { :atomic, :ok } | { :aborted, any }
         @spec create(Amnesia.Table.c) :: { :atomic, :ok } | { :aborted, any }
         def create(copying // []) do
           definition = Keyword.merge(unquote(definition), [
@@ -801,6 +811,7 @@ defmodule Amnesia.Table do
         @doc """
         Add a copy of the table on the given node with the given mode.
         """
+        @spec add_copy(node) :: Amnesia.Table.o
         @spec add_copy(node, Amnesia.Table.cv) :: Amnesia.Table.o
         def add_copy(node, type // :disk) do
           Amnesia.Table.add_copy(__MODULE__, node, type)
@@ -887,6 +898,7 @@ defmodule Amnesia.Table do
           * `:write!` sets a `:sticky_write` lock
           * `:read` sets a `:read` lock
           """
+          @spec read(any) :: [t] | no_return
           @spec read(any, :read | :write | :write!) :: [t] | no_return
           def read(key, lock // :read) do
             Amnesia.Table.read(__MODULE__, key, lock)
@@ -911,6 +923,7 @@ defmodule Amnesia.Table do
           * `:write!` sets a `:sticky_write` lock
           * `:read` sets a `:read` lock
           """
+          @spec read(any) :: t | nil | no_return
           @spec read(any, :read | :write | :write!) :: t | nil | no_return
           def read(key, lock // :read) do
             Enum.first(Amnesia.Table.read(__MODULE__, key, lock))
@@ -1139,6 +1152,7 @@ defmodule Amnesia.Table do
         limit to use for each number of returned records and a lock, see
         `mnesia:select`.
         """
+        @spec select(any) :: Selection.t | nil | no_return
         @spec select(any, integer, :read | :write) :: Selection.t | nil | no_return
         def select(spec, limit // nil, lock // :read) do
           Amnesia.Table.select(__MODULE__, spec, limit, lock)
@@ -1157,6 +1171,7 @@ defmodule Amnesia.Table do
         Select records in the table using simple don't care values, see
         `mnesia:match_object`.
         """
+        @spec match(any) :: [t] | no_return
         @spec match(any, :read | :write) :: [t] | no_return
         def match(pattern, lock // :read) do
           Amnesia.Table.match(__MODULE__, pattern, lock)

@@ -7,6 +7,11 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defmodule Amnesia.Backup do
+  @moduledoc """
+  This module provides a behavior to implement a backup module and helpers to
+  use backups.
+  """
+
   use Behaviour
 
   @type o :: { :ok, any } | { :error, any }
@@ -232,6 +237,7 @@ defmodule Amnesia.Backup do
     uninstall(Keyword.put(options, :module, module))
   end
 
+  @doc false
   defmacro __using__(_opts) do
     quote do
       @behaviour Amnesia.Backup

@@ -16,6 +16,8 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   @doc """
   Create a table for the counter.
   """
+  @spec create :: Amnesia.Table.o
+  @spec create(atom) :: Amnesia.Table.o
   @spec create(atom, Amnesia.Table.c) :: Amnesia.Table.o
   def create(table // Amnesia.Counter, copying // []) do
     definition = Keyword.new
@@ -62,6 +64,8 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   If no table name is given a global table will be used, so name clashing is
   possible and the copying mode is linked to the previously created counters.
   """
+  @spec get(atom) :: t
+  @spec get(atom, atom) :: t
   @spec get(atom, atom, Amnesia.Table.c) :: t
   def get(name, table // Amnesia.Counter, copying // []) do
     create(table, copying)

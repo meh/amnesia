@@ -61,6 +61,26 @@ defmodule Amnesia.Table do
     :mnesia.table_info(name, key)
   end
 
+  @spec type(atom) :: :set | :ordered_set | :bag
+  def type(name) do
+    info(name, :type)
+  end
+
+  @spec bag?(atom) :: boolean
+  def bag?(name) do
+    type(name) == :bag
+  end
+
+  @spec set?(atom) :: boolean
+  def set?(name) do
+    type(name) == :set
+  end
+
+  @spec ordered_set?(atom) :: boolean
+  def ordered_set?(name) do
+    type(name) == :ordered_set
+  end
+
   @doc """
   Change the access mode of the given table, see `mnesia:change_table_access_mode`.
 
@@ -665,6 +685,19 @@ defmodule Amnesia.Table do
           end
 
           Amnesia.Table.create(__MODULE__, definition)
+        end
+
+        @doc """
+        Get the table name from the record.
+        """
+        @spec table(t) :: atom
+        def table(self) do
+          elem self, 0
+        end
+
+        @spec type(t) :: :set | :ordered_set | :bag
+        def type(self) do
+          unquote(opts[:type])
         end
 
         @doc """

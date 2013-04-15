@@ -30,7 +30,7 @@ defmodule Amnesia.Event do
 
   @type category :: system | activity | table
 
-  defp handle([], fun) do
+  def handle([], fun) do
     receive do
       v -> fun.(v)
     end
@@ -38,7 +38,7 @@ defmodule Amnesia.Event do
     handle([], fun)
   end
 
-  defp handle(categories, fun) do
+  def handle(categories, fun) do
     Enum.each categories, subscribe(&1)
 
     handle([], fun)

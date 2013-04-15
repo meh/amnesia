@@ -7,28 +7,51 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defrecord Amnesia.Table.Iterator, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false do
+  @moduledoc """
+  This iterator wraps a table with certain options and allows you to use Enum
+  functions on the records in the table.
+
+  This module uses `first`, `last`, `next`, `prev` and `read`, so be sure to
+  understand what this entails when using it.
+  """
+
   @type t :: __MODULE__[table: atom, type: atom, key: any, dirty: boolean, reverse: boolean]
 
+  @doc """
+  Check if the table wrapped by the iterator is a bag.
+  """
   @spec bag?(t) :: boolean
   def bag?(self) do
     self.type == :bag
   end
 
+  @doc """
+  Check if the table wrapped by the iterator is a set.
+  """
   @spec set?(t) :: boolean
   def set?(self) do
     self.type == :set
   end
 
+  @doc """
+  Check if the table wrapped by the iterator is an ordered set.
+  """
   @spec ordered_set?(t) :: boolean
   def ordered_set?(self) do
     self.type == :ordered_set
   end
 
+  @doc """
+  Check if the iterator uses dirty operations.
+  """
   @spec dirty?(t) :: boolean
   def dirty?(self) do
     self.dirty
   end
 
+  @doc """
+  Check if the iterator is a reverse iterator.
+  """
   @spec reverse?(t) :: boolean
   def reverse?(self) do
     self.reverse

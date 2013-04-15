@@ -6,7 +6,7 @@
 #
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-defrecord Amnesia.Counter, [:name, :table] do
+defrecord Amnesia.Counter, name: nil, table: nil do
   @moduledoc """
   This module implements a simple interface to dirty counters.
   """

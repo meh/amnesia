@@ -7,6 +7,11 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defmodule Amnesia.Fragment.Hash do
+  @moduledoc """
+  This module provides a behavior to implement a different fragment hashing
+  algorithm.
+  """
+
   use Behaviour
 
   @doc """

@@ -64,6 +64,55 @@ defmodule Amnesia.Table do
   end
 
   @doc """
+  Return properties of the given table.
+  """
+  @spec properties(atom) :: Keyword.t
+  def properties(name) do
+    props = info(name, :all)
+
+    Keywords.new([
+      version:     props[:version],
+      type:        props[:type],
+      mode:        props[:access_mode],
+      attributes:  props[:attributes],
+      record:      props[:record_name],
+      arity:       props[:arity],
+      checkpoints: props[:checkpoints],
+      cookie:      props[:cookie],
+      user:        props[:user_properties],
+
+      storage: case props[:storage_type] do
+        :ram_copies       -> :memory
+        :disc_copies      -> :disk
+        :disc_only_copies -> :disk!
+        :unknown          -> :remote
+      end,
+
+      master_nodes: props[:master_nodes],
+
+      where: [
+        read:  props[:where_to_read],
+        write: props[:where_to_write]
+      ],
+
+      load: [
+        node:   props[:load_node],
+        order:  props[:load_order],
+        reason: props[:load_reason]
+      ],
+
+      copying: [
+        memory: props[:ram_copies],
+        disk:   props[:disc_copies],
+        disk!:  props[:disc_only_copies]
+      ],
+
+      size:   props[:size],
+      memory: props[:memory]
+    ])
+  end
+
+  @doc """
   Return the type of the given table.
   """
   @spec type(atom) :: :set | :ordered_set | :bag
@@ -791,6 +840,14 @@ defmodule Amnesia.Table do
         @spec info(atom) :: any
         def info(key) do
           Amnesia.Table.info(__MODULE__, key)
+        end
+
+        @doc """
+        Return properties of the table.
+        """
+        @spec properties :: Keyword.t
+        def properties do
+          Amnesia.Table.properties(__MODULE__)
         end
 
         @doc """

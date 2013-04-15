@@ -7,6 +7,10 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defrecord Amnesia.Counter, [:name, :table] do
+  @moduledoc """
+  This module implements a simple interface to dirty counters.
+  """
+
   @type t :: Amnesia.Counter[name: atom, table: atom]
 
   @doc """

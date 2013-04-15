@@ -7,6 +7,10 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defmodule Amnesia.Event do
+  @moduledoc """
+  This module implements helpers to handle mnesia events.
+  """
+
   @type system :: { :mnesia_up, node } |
                   { :mnesia_down, node } |
                   { :mnesia_checkpoint_activated, any } |

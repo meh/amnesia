@@ -1218,8 +1218,9 @@ defmodule Amnesia.Table do
         end
 
         @spec iterator :: Amnesia.Table.Iterator.t
-        def iterator do
-          Amnesia.Table.iterator(__MODULE__)
+        @spec iterator(:read | :write | :write!) :: Amnesia.Table.Iterator.t
+        def iterator(lock // :read) do
+          Amnesia.Table.iterator(__MODULE__, lock)
         end
 
         @spec iterator! :: Amnesia.Table.Iterator.t
@@ -1228,8 +1229,9 @@ defmodule Amnesia.Table do
         end
 
         @spec reverse_iterator :: Amnesia.Table.Iterator.t
-        def reverse_iterator do
-          Amnesia.Table.reverse_iterator(__MODULE__)
+        @spec reverse_iterator(:read | :write | :write!) :: Amnesia.Table.Iterator.t
+        def reverse_iterator(lock // :read) do
+          Amnesia.Table.reverse_iterator(__MODULE__, lock)
         end
 
         @spec reverse_iterator! :: Amnesia.Table.Iterator.t

@@ -492,6 +492,28 @@ defmodule Amnesia.Table do
     :mnesia.foldr(fun, acc, name)
   end
 
+  @spec iterator(atom) :: Amnesia.Table.Iterator.t
+  @spec iterator(atom, :read | :write | :write!) :: Amnesia.Table.Iterator.t
+  def iterator(name, lock // :read) do
+    Amnesia.Table.Iterator[table: name, type: type(name), lock: lock]
+  end
+
+  @spec iterator!(atom) :: Amnesia.Table.Iterator.t
+  def iterator!(name) do
+    Amnesia.Table.Iterator[table: name, type: type(name), dirty: true]
+  end
+
+  @spec reverse_iterator(atom) :: Amnesia.Table.Iterator.t
+  @spec reverse_iterator(atom, :read | :write | :write!) :: Amnesia.Table.Iterator.t
+  def reverse_iterator(name, lock // :read) do
+    Amnesia.Table.Iterator[table: name, type: type(name), lock: lock, reverse: true]
+  end
+
+  @spec reverse_iterator!(atom) :: Amnesia.Table.Iterator.t
+  def reverse_iterator!(name) do
+    Amnesia.Table.Iterator[table: name, type: type(name), dirty: true, reverse: true]
+  end
+
   @doc """
   Delete the given record in the given table, see `mnesia:delete`.
 
@@ -1163,6 +1185,26 @@ defmodule Amnesia.Table do
         @spec foldr(any, (fun(t, any) -> any)) :: any | no_return
         def foldr(acc, fun) do
           Amnesia.Table.foldr(__MODULE__, acc, fun)
+        end
+
+        @spec iterator :: Amnesia.Table.Iterator.t
+        def iterator do
+          Amnesia.Table.iterator(__MODULE__)
+        end
+
+        @spec iterator! :: Amnesia.Table.Iterator.t
+        def iterator! do
+          Amnesia.Table.iterator!(__MODULE__)
+        end
+
+        @spec reverse_iterator :: Amnesia.Table.Iterator.t
+        def reverse_iterator do
+          Amnesia.Table.reverse_iterator(__MODULE__)
+        end
+
+        @spec reverse_iterator! :: Amnesia.Table.Iterator.t
+        def reverse_iterator! do
+          Amnesia.Table.reverse_iterator!(__MODULE__)
         end
 
         @doc """

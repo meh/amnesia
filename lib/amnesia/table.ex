@@ -7,7 +7,7 @@
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
 defmodule Amnesia.Table do
-  @type cv :: :disc | :disc! | :disk | :disk! | :ram | :memory
+  @type cv :: :disk | :disk! | :memory
   @type c  :: [{ cv, [node] }]
   @type o  :: { :atomic, :ok } | { :aborted, any }
 
@@ -166,20 +166,15 @@ defmodule Amnesia.Table do
 
   ## Modes
 
-  * `:disc` `:disk` sets `:disc_copies` mode
-  * `:disc!` `:disk!` sets `:disc_only_copies` mode
-  * `:ram` `:memory` sets `:ram_copies` mode
+  * `:disk` sets `:disc_copies` mode
+  * `:disk!` sets `:disc_only_copies` mode
+  * `:memory` sets `:ram_copies` mode
   """
   @spec copying(atom, node, cv) :: o
   def copying(name, node, to) do
     :mnesia.change_table_copy_type(name, node, case to do
-      :disc  -> :disc_copies
-      :disc! -> :disc_only_copies
-
-      :disk  -> :disc_copies
-      :disk! -> :disc_only_copies
-
-      :ram    -> :ram_copies
+      :disk   -> :disc_copies
+      :disk!  -> :disc_only_copies
       :memory -> :ram_copies
     end)
   end
@@ -204,21 +199,16 @@ defmodule Amnesia.Table do
   Add a copy of the table to the given node with the given mode, see
   `mnesia:add_table_copy`.
 
-  * `:disc` `:disk` sets `:disc_copies` mode
-  * `:disc!` `:disk!` sets `:disc_only_copies` mode
-  * `:ram` `:memory` sets `:ram_copies` mode
+  * `:disk` sets `:disc_copies` mode
+  * `:disk!` sets `:disc_only_copies` mode
+  * `:memory` sets `:ram_copies` mode
   """
   @spec add_copy(atom, node) :: o
   @spec add_copy(atom, node, cv) :: o
   def add_copy(name, node, type // :disk) do
     :mnesia.add_table_copy(name, node, case type do
-      :disc  -> :disc_copies
-      :disc! -> :disc_only_copies
-
-      :disk  -> :disc_copies
-      :disk! -> :disc_only_copies
-
-      :ram    -> :ram_copies
+      :disk   -> :disc_copies
+      :disk!  -> :disc_only_copies
       :memory -> :ram_copies
     end)
   end
@@ -708,16 +698,16 @@ defmodule Amnesia.Table do
       end
 
       if copying = opts[:fragmentation][:copying] do
-        if copying[:memory] || copying[:ram] do
-          properties = Keyword.put(properties, :n_ram_copies, copying[:memory] || copying[:ram])
+        if copying[:memory] do
+          properties = Keyword.put(properties, :n_ram_copies, copying[:memory])
         end
 
-        if copying[:disc] || copying[:disk] do
-          properties = Keyword.put(properties, :n_disc_copies, copying[:disc] || copying[:disk])
+        if copying[:disk] do
+          properties = Keyword.put(properties, :n_disc_copies, copying[:disk])
         end
 
-        if copying[:disc!] || copying[:disk!] do
-          properties = Keyword.put(properties, :n_disc_only_copies, copying[:disc!] || copying[:disk!])
+        if copying[:disk!] do
+          properties = Keyword.put(properties, :n_disc_only_copies, copying[:disk!])
         end
       end
 
@@ -779,16 +769,16 @@ defmodule Amnesia.Table do
             attributes:  List.Dict.keys(@record_fields)
           ])
 
-          if copying[:memory] || copying[:ram] do
-            definition = Keyword.put(definition, :ram_copies, copying[:memory] || copying[:ram])
+          if copying[:memory] do
+            definition = Keyword.put(definition, :ram_copies, copying[:memory])
           end
 
-          if copying[:disc] || copying[:disk] do
-            definition = Keyword.put(definition, :disc_copies, copying[:disc] || copying[:disk])
+          if copying[:disk] do
+            definition = Keyword.put(definition, :disc_copies, copying[:disk])
           end
 
-          if copying[:disc!] || copying[:disk!] do
-            definition = Keyword.put(definition, :disc_only_copies, copying[:disc!] || copying[:disk!])
+          if copying[:disk!] do
+            definition = Keyword.put(definition, :disc_only_copies, copying[:disk!])
           end
 
           Amnesia.Table.create(__MODULE__, definition)
@@ -869,9 +859,9 @@ defmodule Amnesia.Table do
 
         ## Modes
 
-        * `:disc` `:disk` sets `:disc_copies` mode
-        * `:disc!` `:disk!` sets `:disc_only_copies` mode
-        * `:ram` `:memory` sets `:ram_copies` mode
+        * `:disk` sets `:disc_copies` mode
+        * `:disk!` sets `:disc_only_copies` mode
+        * `:memory` sets `:ram_copies` mode
         """
         @spec copying(node, Amnesia.Table.cv) :: Amnesia.Table.o
         def copying(node, to) do

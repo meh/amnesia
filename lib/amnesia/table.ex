@@ -1191,16 +1191,17 @@ defmodule Amnesia.Table do
 
         If the table is a bag, it will return a list of records.
         """
-        @spec last          :: any | t | nil | no_return
-        @spec last(boolean) :: any | t | nil | no_return
-        def last(key // false)
+        @spec last                :: t | nil | no_return
+        @spec last(boolean)       :: any | t | nil | no_return
+        @spec last(boolean, atom) :: any | t | nil | no_return
+        def last(key // false, lock // :read)
 
-        def last (false) do
-          read(Amnesia.Table.last(__MODULE__))
+        def last(true, lock) do
+          Amnesia.Table.last(__MODULE__)
         end
 
-        def last(true) do
-          Amnesia.Table.last(__MODULE__)
+        def last (false, lock) do
+          read(Amnesia.Table.last(__MODULE__), lock)
         end
 
         @doc """

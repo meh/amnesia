@@ -1082,7 +1082,7 @@ defmodule Amnesia.Table do
 
         If the table is a bag, it will return a list of records.
         """
-        @spec first                :: any | t | nil | no_return
+        @spec first                :: t | nil | no_return
         @spec first(boolean)       :: any | t | nil | no_return
         @spec first(boolean, atom) :: any | t | nil | no_return
         def first(key // false, lock // :read)

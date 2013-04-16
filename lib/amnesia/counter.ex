@@ -22,16 +22,16 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   def create(table // Amnesia.Counter, copying // []) do
     definition = Keyword.new
 
-    if copying[:memory] || copying[:ram] do
-      definition = Keyword.put(definition, :n_ram_copies, copying[:memory] || copying[:ram])
+    if copying[:memory] do
+      definition = Keyword.put(definition, :n_ram_copies, copying[:memory])
     end
 
-    if copying[:disc] || copying[:disk] do
-      definition = Keyword.put(definition, :n_disc_copies, copying[:disc] || copying[:disk])
+    if copying[:disk] do
+      definition = Keyword.put(definition, :n_disc_copies, copying[:disk])
     end
 
-    if copying[:disc!] || copying[:disk!] do
-      definition = Keyword.put(definition, :n_disc_only_copies, copying[:disc!] || copying[:disk!])
+    if copying[:disk!] do
+      definition = Keyword.put(definition, :n_disc_only_copies, copying[:disk!])
     end
 
     Amnesia.Table.create(table, Keyword.merge(definition, [

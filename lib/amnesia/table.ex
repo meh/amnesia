@@ -464,58 +464,82 @@ defmodule Amnesia.Table do
     end
   end
 
-  defrecord Selection, values: [], continuation: nil do
+  defmodule Selection do
+    @opaque t :: record
+
+    defrecordp :selection, values: [], continuation: nil
+
     @moduledoc """
     Selection wraps a `mnesia:select` result, which may or may not contain a
     continuation, in case of continuations you can access the next set of
     values by calling `.next`.
     """
 
-    @type t :: Selection[values: [any], continuation: any]
-
     @doc """
     Get a selection from the various select results.
     """
-    @spec from(:'$end_of_table' | list | { list, any }) :: t | nil
-    def from(value) do
+    @spec new(:'$end_of_table' | list | { list, any }) :: t | nil
+    def new(value) do
       case value do
         :'$end_of_table' -> nil
         []               -> nil
         { [], _ }        -> nil
 
-        { v, c } -> Selection[values: v, continuation: c]
-        [_|_]    -> Selection[values: value]
+        { v, c } -> selection(values: v, continuation: c)
+        [_|_]    -> selection(values: value)
       end
     end
 
+    def values(selection(values: v)) do
+      v
+    end
+
     @doc """
-    Get the next set of values wrapped in another Selection record, returns nil
-    if there are no more.
+    Get the next set of values wrapped in another Selection, returns nil if
+    there are no more.
     """
     @spec next(t) :: t | nil | no_return
-    def next(Selection[continuation: nil]) do
+    def next(selection(continuation: nil)) do
       nil
     end
 
-    def next(self) do
-      from(:mnesia.select(self.continuation))
+    def next(selection(continuation: c)) do
+      new(:mnesia.select(c))
     end
   end
 
   @doc """
-  Select records in the given table using a match_spec, optionally passing a
-  limit to use for each number of returned records and a lock, see
-  `mnesia:select`.
+  Select records in the given table using a match_spec, see `mnesia:select`.
   """
   @spec select(atom, any) :: Selection.t | nil | no_return
-  @spec select(atom, any, integer) :: Selection.t | nil | no_return
-  @spec select(atom, any, integer, :read | :write) :: Selection.t | nil | no_return
-  def select(name, spec, limit // nil, lock // :read) do
-    if limit do
-      Selection.from(:mnesia.select(name, spec, limit, lock))
-    else
-      Selection.from(:mnesia.select(name, spec, lock))
-    end
+  def select(name, spec) do
+    Selection.new(:mnesia.select(name, spec))
+  end
+
+  @doc """
+  Select records in the given table using a match_spec passing a limit or a
+  lock kind, see `mnesia:select`.
+  """
+  @spec select(atom, integer | :read | :write, any) :: Selection.t | nil | no_return
+  def select(name, limit, spec) when is_integer limit do
+    Selection.new(:mnesia.select(name, spec, limit, :read))
+  end
+
+  def select(name, lock, spec) when lock in [:read, :write] do
+    Selection.new(:mnesia.select(name, spec, lock))
+  end
+
+  @doc """
+  Select records in the given table using a match_spec passing a limit and a
+  lock kind, see `mnesia:select`.
+  """
+  @spec select(atom, integer | :read | :write, integer | :read | :write, integer) :: Selection.t | nil | no_return
+  def select(name, lock, limit, spec) when lock in [:read, :write] and is_integer limit do
+    Selection.new(:mnesia.select(name, spec, limit, lock))
+  end
+
+  def select(name, limit, lock, spec) when lock in [:read, :write] and is_integer limit do
+    Selection.new(:mnesia.select(name, spec, limit, lock))
   end
 
   @doc """
@@ -524,7 +548,7 @@ defmodule Amnesia.Table do
   """
   @spec select!(atom, any) :: Selection.t | nil | no_return
   def select!(name, spec) do
-    Selection.from(:mnesia.dirty_select(name, spec))
+    Selection.new(:mnesia.dirty_select(name, spec))
   end
 
   @doc """
@@ -1249,14 +1273,29 @@ defmodule Amnesia.Table do
         end
 
         @doc """
-        Select records in the table using a match_spec, optionally passing a
-        limit to use for each number of returned records and a lock, see
-        `mnesia:select`.
+        Select records in the table using a match_spec, see `mnesia:select`.
         """
-        @spec select(any) :: Selection.t | nil | no_return
-        @spec select(any, integer, :read | :write) :: Selection.t | nil | no_return
-        def select(spec, limit // nil, lock // :read) do
-          Amnesia.Table.select(__MODULE__, spec, limit, lock)
+        @spec select(any) :: Amnesia.Table.Selection.t | nil | no_return
+        def select(spec) do
+          Amnesia.Table.select(__MODULE__, spec)
+        end
+
+        @doc """
+        Select records in the given table using a match_spec passing a limit or a
+        lock kind, see `mnesia:select`.
+        """
+        @spec select(integer | :read | :write, any) :: Amnesia.Table.Selection.t | nil | no_return
+        def select(lock_or_limit, spec) do
+          Amnesia.Table.select(__MODULE__, lock_or_limit, spec)
+        end
+
+        @doc """
+        Select records in the given table using a match_spec passing a limit and a
+        lock kind, see `mnesia:select`.
+        """
+        @spec select(integer | :read | :write, integer | :read | :write, integer) :: Amnesia.Table.Selection.t | nil | no_return
+        def select(lock_or_limit, limit_or_lock, spec) do
+          Amnesia.Table.select(__MODULE__, lock_or_limit, limit_or_lock, spec)
         end
 
         @doc """

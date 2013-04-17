@@ -368,7 +368,7 @@ defmodule Amnesia.Table do
   @spec at!(atom, integer) :: record | nil | no_return
   def at!(name, position) do
     case :mnesia.dirty_slot(name, position) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -379,7 +379,7 @@ defmodule Amnesia.Table do
   @spec first(atom) :: any | nil | no_return
   def first(name) do
     case :mnesia.first(name) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -390,7 +390,7 @@ defmodule Amnesia.Table do
   @spec first!(atom) :: any | nil | no_return
   def first!(name) do
     case :mnesia.dirty_first(name) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -401,7 +401,7 @@ defmodule Amnesia.Table do
   @spec next(atom, any) :: any | nil | no_return
   def next(name, key) do
     case :mnesia.next(name, key) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -413,7 +413,7 @@ defmodule Amnesia.Table do
   @spec next!(atom, any) :: any | nil | no_return
   def next!(name, key) do
     case :mnesia.dirty_next(name, key) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -425,7 +425,7 @@ defmodule Amnesia.Table do
   @spec prev(atom, any) :: any | nil | no_return
   def prev(name, key) do
     case :mnesia.prev(name, key) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -437,7 +437,7 @@ defmodule Amnesia.Table do
   @spec prev!(atom, any) :: any | nil | no_return
   def prev!(name, key) do
     case :mnesia.dirty_prev(name, key) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -448,7 +448,7 @@ defmodule Amnesia.Table do
   @spec last(atom) :: any | nil | no_return
   def last(name) do
     case :mnesia.last(name) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -459,7 +459,7 @@ defmodule Amnesia.Table do
   @spec last!(atom) :: any | nil | no_return
   def last!(name) do
     case :mnesia.dirty_last(name) do
-      :"$end_of_table" -> nil
+      :'$end_of_table' -> nil
       value            -> value
     end
   end
@@ -476,10 +476,10 @@ defmodule Amnesia.Table do
     @doc """
     Get a selection from the various select results.
     """
-    @spec from(:"$end_of_table" | list | { list, any }) :: t | nil
+    @spec from(:'$end_of_table' | list | { list, any }) :: t | nil
     def from(value) do
       case value do
-        :"$end_of_table" -> nil
+        :'$end_of_table' -> nil
         []               -> nil
         { [], _ }        -> nil
 

@@ -31,7 +31,7 @@ defmodule Amnesia.Access do
   defcallback all_keys(id, any, atom, lock_kind) :: [any] | no_return
   defcallback select(id, any, atom, any, lock_kind) :: [any]
   defcallback select(id, any, atom, any, integer, lock_kind) :: [any]
-  defcallback select_cont(id, any, any) :: :"$end_of_table" | { [any], any }
+  defcallback select_cont(id, any, any) :: :'$end_of_table' | { [any], any }
   defcallback index_match_object(id, any, atom, any, atom | integer, lock_kind) :: [any] | no_return
   defcallback index_read(id, any, atom, any, atom | integer, lock_kind) :: [record] | no_return
   defcallback foldl(id, any, function, any, atom, lock_kind) :: any | no_return
@@ -88,7 +88,7 @@ defmodule Amnesia.Access do
     :mnesia.select(id, opaque, table, spec, limit, lock)
   end
 
-  @spec select_cont(id, any, any) :: :"$end_of_table" | { [any], any }
+  @spec select_cont(id, any, any) :: :'$end_of_table' | { [any], any }
   def select_cont(id, opaque, cont) do
     :mnesia.select_cont(id, opaque, cont)
   end

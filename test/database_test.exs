@@ -61,6 +61,13 @@ defmodule DatabaseTest do
     end == { :atomic, true })
   end
 
+  test "read returns nil when empty" do
+    assert(Amnesia.transaction! do
+      assert Database.User.read(23) == nil
+      assert Database.Message.read(23) == nil
+    end == { :atomic, true })
+  end
+
   test "first fetches a key" do
     Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write

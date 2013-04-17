@@ -1022,11 +1022,11 @@ defmodule Amnesia.Table do
         """
         @spec read_at(any, integer | atom) :: [t] | no_return
         def read_at(key, position) when is_integer position do
-          Table.read_at(__MODULE__, key, position)
+          Amnesia.Table.read_at(__MODULE__, key, position)
         end
 
         def read_at(key, position) when is_atom position do
-          Table.read_at(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &1 == position))
+          Amnesia.Table.read_at(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &1 == position))
         end
 
         @doc """
@@ -1035,11 +1035,11 @@ defmodule Amnesia.Table do
         """
         @spec read_at!(any, integer | atom) :: [t] | no_return
         def read_at!(key, position) when is_integer position do
-          Table.read_at!(__MODULE__, key, position)
+          Amnesia.Table.read_at!(__MODULE__, key, position)
         end
 
         def read_at!(key, position) when is_atom position do
-          Table.read_at!(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &1 == position))
+          Amnesia.Table.read_at!(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &1 == position))
         end
 
         @doc """

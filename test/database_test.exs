@@ -194,6 +194,41 @@ defmodule DatabaseTest do
     end == { :atomic, true })
   end
 
+  test "select works" do
+    Amnesia.transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(Amnesia.transaction! do
+      assert Database.User.select([{ Database.User[id: :'$1', name: :'$2', _: :_],
+        [{ :'==', "John", :'$2' }], [:'$1'] }]).values == [1]
+    end == { :atomic, true })
+  end
+
+  test "select works with limit" do
+    Amnesia.transaction! do
+      Database.User[id: 1, name: "John"].write
+      Database.User[id: 2, name: "Lucas"].write
+      Database.User[id: 3, name: "David"].write
+    end
+
+    assert(Amnesia.transaction! do
+      selection = Database.User.select(1, [{ Database.User[id: :'$1', _: :_], [], [:'$1'] }])
+      assert selection.values == [1]
+
+      selection = selection.next
+      assert selection.values == [2]
+
+      selection = selection.next
+      assert selection.values == [3]
+
+      assert selection.next == nil
+    end == { :atomic, true })
+  end
+
+
   test "iterator works" do
     Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write

@@ -299,39 +299,51 @@ defmodule Amnesia.Table do
   * `:read` sets a `:read` lock
   """
   @spec read(atom, any) :: [record] | no_return
-  @spec read(atom, any, :read | :write | :write!) :: [record] | no_return
+  @spec read(atom, any, :read | :write | :write!) :: [record] | nil | no_return
   def read(name, key, lock // :read) do
-    :mnesia.read(name, key, case lock do
+    case :mnesia.read(name, key, case lock do
       :read   -> :read
       :write  -> :write
       :write! -> :sticky_write
-    end)
+    end) do
+      [] -> nil
+      r  -> r
+    end
   end
 
   @doc """
   Read records from the given table with the given key, see `mnesia:dirty_read`.
   """
-  @spec read!(atom, any) :: [record] | no_return
+  @spec read!(atom, any) :: [record] | nil | no_return
   def read!(name, key) do
-    :mnesia.dirty_read(name, key)
+    case :mnesia.dirty_read(name, key) do
+      [] -> nil
+      r  -> r
+    end
   end
 
   @doc """
   Read records on the given table based on a secondary index given as position,
   see `mnesia:index_read`.
   """
-  @spec read_at(atom, any, integer | atom) :: [record] | no_return
+  @spec read_at(atom, any, integer | atom) :: [record] | nil | no_return
   def read_at(name, key, position) do
-    :mnesia.index_read(name, key, position)
+    case :mnesia.index_read(name, key, position) do
+      [] -> nil
+      r  -> r
+    end
   end
 
   @doc """
   Read records on the given table based on a secondary index given as position,
   see `mnesia:dirty_index_read`.
   """
-  @spec read_at!(atom, any, integer | atom) :: [record] | no_return
+  @spec read_at!(atom, any, integer | atom) :: [record] | nil | no_return
   def read_at!(name, key, position) do
-    :mnesia.dirty_index_read(name, key, position)
+    case :mnesia.dirty_index_read(name, key, position) do
+      [] -> nil
+      r  -> r
+    end
   end
 
   @doc """
@@ -519,18 +531,24 @@ defmodule Amnesia.Table do
   Select records in the given table using simple don't care values, see
   `mnesia:match_object`.
   """
-  @spec match(atom, any, :read | :write) :: [record] | no_return
+  @spec match(atom, any, :read | :write) :: [record] | nil | no_return
   def match(name, pattern, lock // :read) do
-    :mnesia.match_object(name, pattern, lock)
+    case :mnesia.match_object(name, pattern, lock) do
+      [] -> nil
+      r  -> r
+    end
   end
 
   @doc """
   Select records in the given table using simple don't care values, see
   `mnesia:dirty_match_object`.
   """
-  @spec match(atom, any) :: [record] | no_return
+  @spec match(atom, any) :: [record] | nil | no_return
   def match!(name, pattern) do
-    :mnesia.dirty_match_object(name, pattern)
+    case :mnesia.dirty_match_object(name, pattern) do
+      [] -> nil
+      r  -> r
+    end
   end
 
   @doc """
@@ -974,8 +992,8 @@ defmodule Amnesia.Table do
           * `:write!` sets a `:sticky_write` lock
           * `:read` sets a `:read` lock
           """
-          @spec read(any) :: [t] | no_return
-          @spec read(any, :read | :write | :write!) :: [t] | no_return
+          @spec read(any) :: [t] | nil | no_return
+          @spec read(any, :read | :write | :write!) :: [t] | nil | no_return
           def read(key, lock // :read) do
             Amnesia.Table.read(__MODULE__, key, lock)
           end
@@ -983,7 +1001,7 @@ defmodule Amnesia.Table do
           @doc """
           Read records from the table, see `mnesia:dirty_read`.
           """
-          @spec read!(any) :: [t] | no_return
+          @spec read!(any) :: [t] | nil | no_return
           def read!(key) do
             Amnesia.Table.read!(__MODULE__, key)
           end
@@ -1002,7 +1020,10 @@ defmodule Amnesia.Table do
           @spec read(any) :: t | nil | no_return
           @spec read(any, :read | :write | :write!) :: t | nil | no_return
           def read(key, lock // :read) do
-            Enum.first(Amnesia.Table.read(__MODULE__, key, lock))
+            case Amnesia.Table.read(__MODULE__, key, lock) do
+              [r] -> r
+              _   -> nil
+            end
           end
 
           @doc """
@@ -1012,7 +1033,10 @@ defmodule Amnesia.Table do
           """
           @spec read!(any) :: t | nil | no_return
           def read!(key) do
-            Enum.first(Amnesia.Table.read!(__MODULE__, key))
+            case Amnesia.Table.read!(__MODULE__, key) do
+              [r] -> r
+              _   -> nil
+            end
           end
         end
 
@@ -1020,7 +1044,7 @@ defmodule Amnesia.Table do
         Read records from the table based on a secondary index given as position,
         see `mnesia:index_read`.
         """
-        @spec read_at(any, integer | atom) :: [t] | no_return
+        @spec read_at(any, integer | atom) :: [t] | nil | no_return
         def read_at(key, position) when is_integer position do
           Amnesia.Table.read_at(__MODULE__, key, position)
         end
@@ -1033,7 +1057,7 @@ defmodule Amnesia.Table do
         Read records from the table based on a secondary index given as position,
         see `mnesia:dirty_index_read`.
         """
-        @spec read_at!(any, integer | atom) :: [t] | no_return
+        @spec read_at!(any, integer | atom) :: [t] | nil | no_return
         def read_at!(key, position) when is_integer position do
           Amnesia.Table.read_at!(__MODULE__, key, position)
         end
@@ -1200,7 +1224,7 @@ defmodule Amnesia.Table do
           Amnesia.Table.last(__MODULE__)
         end
 
-        def last (false, lock) do
+        def last(false, lock) do
           read(Amnesia.Table.last(__MODULE__), lock)
         end
 
@@ -1248,7 +1272,7 @@ defmodule Amnesia.Table do
         Select records in the table using simple don't care values, see
         `mnesia:match_object`.
         """
-        @spec match(any) :: [t] | no_return
+        @spec match(any) :: [t] | nil | no_return
         @spec match(any, :read | :write) :: [t] | no_return
         def match(pattern, lock // :read) do
           Amnesia.Table.match(__MODULE__, pattern, lock)
@@ -1258,7 +1282,7 @@ defmodule Amnesia.Table do
         Select records in the table using simple don't care values, see
         `mnesia:dirty_match_object`.
         """
-        @spec match!(any) :: [t] | no_return
+        @spec match!(any) :: [t] | nil | no_return
         def match!(pattern) do
           Amnesia.Table.match!(__MODULE__, pattern)
         end

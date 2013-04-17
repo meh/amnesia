@@ -30,6 +30,7 @@ defmodule Amnesia.Event do
 
   @type category :: system | activity | table
 
+  @doc false
   def handle([], fun) do
     receive do
       v -> fun.(v)

@@ -766,7 +766,7 @@ defmodule Amnesia.Table do
         def create(copying // []) do
           definition = Keyword.merge(unquote(definition), [
             record_name: __MODULE__,
-            attributes:  List.Dict.keys(@record_fields)
+            attributes:  Keyword.keys(@record_fields)
           ])
 
           if copying[:memory] do
@@ -1026,7 +1026,7 @@ defmodule Amnesia.Table do
         end
 
         def read_at(key, position) when is_atom position do
-          Table.read_at(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
+          Table.read_at(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &1 == position))
         end
 
         @doc """
@@ -1039,7 +1039,7 @@ defmodule Amnesia.Table do
         end
 
         def read_at!(key, position) when is_atom position do
-          Table.read_at!(__MODULE__, key, 1 + Enum.find_index(List.Dict.keys(@record_fields), &1 == position))
+          Table.read_at!(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &1 == position))
         end
 
         @doc """

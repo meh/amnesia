@@ -48,7 +48,7 @@ defmodule Amnesia.Event do
   @doc """
   Observe the given events with the given function.
   """
-  @spec observe(category | [category], (fun(any) -> none)) :: pid
+  @spec observe(category | [category], (any -> none)) :: pid
   def observe(categories, fun) when is_list categories do
     spawn __MODULE__, :handle, [categories, fun]
   end

@@ -41,7 +41,7 @@ defmodule Amnesia.Table do
   Transform a table, useful to change tables in a running instance, see
   `mnesia:transform_table`.
   """
-  @spec transform(atom, [atom], function) :: o
+  @spec transform(atom, [atom], (record -> record)) :: o
   def transform(name, attributes, fun) do
     :mnesia.transform_table(name, fun, attributes)
   end
@@ -50,7 +50,7 @@ defmodule Amnesia.Table do
   Transform a table, renaming it, useful to change tables in a running
   instance, see `mnesia:transform_table`.
   """
-  @spec transform(atom, atom, [atom], function) :: o
+  @spec transform(atom, atom, [atom], (record -> record)) :: o
   def transform(name, new_name, attributes, fun) do
     :mnesia.transform_table(name, fun, attributes, new_name)
   end
@@ -554,7 +554,7 @@ defmodule Amnesia.Table do
   @doc """
   Fold the whole given table from the left, see `mnesia:foldl`.
   """
-  @spec foldl(atom, any, (fun(record, any) -> any)) :: any | no_return
+  @spec foldl(atom, any, (record, any -> any)) :: any | no_return
   def foldl(name, acc, fun) do
     :mnesia.foldl(fun, acc, name)
   end
@@ -562,7 +562,7 @@ defmodule Amnesia.Table do
   @doc """
   Fold the whole given table from the right, see `mnesia:foldr`.
   """
-  @spec foldl(atom, any, (fun(record, any) -> any)) :: any | no_return
+  @spec foldl(atom, any, (record, any -> any)) :: any | no_return
   def foldr(name, acc, fun) do
     :mnesia.foldr(fun, acc, name)
   end
@@ -1290,7 +1290,7 @@ defmodule Amnesia.Table do
         @doc """
         Fold the whole table from the left, see `mnesia:foldl`.
         """
-        @spec foldl(any, (fun(t, any) -> any)) :: any | no_return
+        @spec foldl(any, (t, any -> any)) :: any | no_return
         def foldl(acc, fun) do
           Amnesia.Table.foldl(__MODULE__, acc, fun)
         end
@@ -1298,7 +1298,7 @@ defmodule Amnesia.Table do
         @doc """
         Fold the whole table from the right, see `mnesia:foldr`.
         """
-        @spec foldr(any, (fun(t, any) -> any)) :: any | no_return
+        @spec foldr(any, (t, any -> any)) :: any | no_return
         def foldr(acc, fun) do
           Amnesia.Table.foldr(__MODULE__, acc, fun)
         end

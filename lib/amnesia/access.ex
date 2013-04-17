@@ -34,8 +34,8 @@ defmodule Amnesia.Access do
   defcallback select_cont(id, any, any) :: :'$end_of_table' | { [any], any }
   defcallback index_match_object(id, any, atom, any, atom | integer, lock_kind) :: [any] | no_return
   defcallback index_read(id, any, atom, any, atom | integer, lock_kind) :: [record] | no_return
-  defcallback foldl(id, any, function, any, atom, lock_kind) :: any | no_return
-  defcallback foldr(id, any, function, any, atom, lock_kind) :: any | no_return
+  defcallback foldl(id, any, (record, any -> any), any, atom, lock_kind) :: any | no_return
+  defcallback foldr(id, any, (record, any -> any), any, atom, lock_kind) :: any | no_return
   defcallback table_info(id, any, atom | { atom, atom }, atom) :: any
   defcallback first(id, any, atom) :: any
   defcallback next(id, any, atom, any) :: any

@@ -6,12 +6,14 @@
 #
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-defrecord Amnesia.Counter, name: nil, table: nil do
+defmodule Amnesia.Counter do
   @moduledoc """
   This module implements a simple interface to dirty counters.
   """
 
-  @type t :: Amnesia.Counter[name: atom, table: atom]
+  @opaque t :: record
+
+  defrecordp :counter, name: nil, table: nil
 
   @doc """
   Create a table for the counter.
@@ -45,8 +47,8 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   table, destroy every other counter.
   """
   @spec destroy(t | atom) :: Amnesia.Table.o
-  def destroy(Amnesia.Counter[] = self) do
-    Amnesia.Table.destroy(self.table)
+  def destroy(counter(table: table)) do
+    Amnesia.Table.destroy(table)
   end
 
   def destroy(table) do
@@ -70,30 +72,35 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   def get(name, table // Amnesia.Counter, copying // []) do
     create(table, copying)
 
-    Amnesia.Counter[name: name, table: table]
+    counter(name: name, table: table)
+  end
+
+  @spec name(t) :: atom
+  def name(counter(name: name)) do
+    name
   end
 
   @doc """
   Clear the counter inside a transaction.
   """
   @spec clear(t) :: :ok | no_return
-  def clear(self) do
-    Amnesia.Table.delete(self.table, self.name)
+  def clear(counter(name: name, table: table)) do
+    Amnesia.Table.delete(table, name)
   end
 
   @doc """
   Clear the counter without a transaction.
   """
   @spec clear!(t) :: :ok | no_return
-  def clear!(self) do
-    Amnesia.Table.delete!(self.table, self.name)
+  def clear!(counter(name: name, table: table)) do
+    Amnesia.Table.delete!(table, name)
   end
 
   @doc """
   Increase the counter by 1.
   """
   @spec increase(t) :: integer | no_return
-  def increase(self) do
+  def increase(counter() = self) do
     increase(1, self)
   end
 
@@ -101,8 +108,8 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   Increase the counter by the given amount.
   """
   @spec increase(integer, t) :: integer | no_return
-  def increase(much, self) do
-    :mnesia.dirty_update_counter(self.table, self.name, much)
+  def increase(much, counter(name: name, table: table)) do
+    :mnesia.dirty_update_counter(table, name, much)
   end
 
   defdelegate increase!(self), to: __MODULE__, as: :increase
@@ -112,8 +119,8 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   Get the current value of the counter.
   """
   @spec value(t) :: integer | no_return
-  def value(self) do
-    case :mnesia.read(self.table, self.name) do
+  def value(counter(name: name, table: table)) do
+    case :mnesia.read(table, name) do
       [{ _, _, value }] -> value
       _                 -> 0
     end
@@ -123,8 +130,8 @@ defrecord Amnesia.Counter, name: nil, table: nil do
   Get the current value of the counter.
   """
   @spec value!(t) :: integer | no_return
-  def value!(self) do
-    case :mnesia.dirty_read(self.table, self.name) do
+  def value!(counter(name: name, table: table)) do
+    case :mnesia.dirty_read(table, name) do
       [{ _, _, value }] -> value
       _                 -> 0
     end

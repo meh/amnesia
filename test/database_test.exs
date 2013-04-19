@@ -189,7 +189,7 @@ defmodule DatabaseTest do
     end
 
     assert(Amnesia.transaction! do
-      assert Database.User.match(Database.User[name: "Lucas", _: :_]) ==
+      assert Database.User.match(Database.User[name: "Lucas", _: :_]).values ==
         [Database.User[id: 2, name: "Lucas"]]
     end == { :atomic, true })
   end

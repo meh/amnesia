@@ -555,16 +555,55 @@ defmodule Amnesia.Table do
     Selection.new(:mnesia.dirty_select(name, spec))
   end
 
+  defmodule Match do
+    @moduledoc """
+    Match wraps a `mnesia:match` result, it's done for consistency with select
+    but it really doesn't make any more sense given match doesn't support
+    continuations.
+
+    Still, this makes it easier to consistently access results from select and
+    match alike.
+    """
+
+    @opaque t :: record
+
+    defrecordp :match, values: []
+
+    @doc """
+    Get a match from the various match results.
+    """
+    @spec new([record]) :: t | nil
+    def new(value) do
+      case value do
+        [] -> nil
+        r  -> match(values: r)
+      end
+    end
+
+    @doc """
+    Get the values in the current match.
+    """
+    @spec values(t) :: [record]
+    def values(match(values: v)) do
+      v
+    end
+
+    @doc """
+    Get the next set of matches.
+    """
+    @spec next(t) :: nil
+    def next(match()) do
+      nil
+    end
+  end
+
   @doc """
   Select records in the given table using simple don't care values, see
   `mnesia:match_object`.
   """
   @spec match(atom, any, :read | :write) :: [record] | nil | no_return
   def match(name, pattern, lock // :read) do
-    case :mnesia.match_object(name, pattern, lock) do
-      [] -> nil
-      r  -> r
-    end
+    Match.new(:mnesia.match_object(name, pattern, lock))
   end
 
   @doc """
@@ -573,10 +612,7 @@ defmodule Amnesia.Table do
   """
   @spec match(atom, any) :: [record] | nil | no_return
   def match!(name, pattern) do
-    case :mnesia.dirty_match_object(name, pattern) do
-      [] -> nil
-      r  -> r
-    end
+    Match.new(:mnesia.dirty_match_object(name, pattern))
   end
 
   @doc """

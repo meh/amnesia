@@ -601,7 +601,7 @@ defmodule Amnesia.Table do
   @spec iterator(atom) :: Amnesia.Table.Iterator.t
   @spec iterator(atom, :read | :write | :write!) :: Amnesia.Table.Iterator.t
   def iterator(name, lock // :read) do
-    Amnesia.Table.Iterator[table: name, type: type(name), lock: lock]
+    Amnesia.Table.Iterator.new(name, type(name), lock: lock)
   end
 
   @doc """
@@ -610,7 +610,7 @@ defmodule Amnesia.Table do
   """
   @spec iterator!(atom) :: Amnesia.Table.Iterator.t
   def iterator!(name) do
-    Amnesia.Table.Iterator[table: name, type: type(name), dirty: true]
+    Amnesia.Table.Iterator.new(name, type(name), dirty: true)
   end
 
   @doc """
@@ -619,7 +619,7 @@ defmodule Amnesia.Table do
   @spec reverse_iterator(atom) :: Amnesia.Table.Iterator.t
   @spec reverse_iterator(atom, :read | :write | :write!) :: Amnesia.Table.Iterator.t
   def reverse_iterator(name, lock // :read) do
-    Amnesia.Table.Iterator[table: name, type: type(name), lock: lock, reverse: true]
+    Amnesia.Table.Iterator.new(name, type(name), lock: lock, reverse: true)
   end
 
   @doc """
@@ -628,7 +628,7 @@ defmodule Amnesia.Table do
   """
   @spec reverse_iterator!(atom) :: Amnesia.Table.Iterator.t
   def reverse_iterator!(name) do
-    Amnesia.Table.Iterator[table: name, type: type(name), dirty: true, reverse: true]
+    Amnesia.Table.Iterator.new(name, type(name), dirty: true, reverse: true)
   end
 
   @doc """

@@ -6,7 +6,7 @@
 #
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-defrecord Amnesia.Table.Iterator, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false do
+defmodule Amnesia.Table.Iterator do
   @moduledoc """
   This iterator wraps a table with certain options and allows you to use Enum
   functions on the records in the table.
@@ -15,91 +15,105 @@ defrecord Amnesia.Table.Iterator, table: nil, type: nil, lock: :read, key: nil, 
   understand what this entails when using it.
   """
 
-  @type t :: __MODULE__[table: atom, type: atom, key: any, dirty: boolean, reverse: boolean]
+  @opaque t :: record
+
+  defrecordp :self, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false
+
+  def new(name, type, rest) do
+    if :mnesia.first(name) == :'$end_of_table' do
+      []
+    else
+      lock    = Keyword.get(rest, :lock,    :read)
+      dirty   = Keyword.get(rest, :dirty,   false)
+      reverse = Keyword.get(rest, :reverse, false)
+
+      self(table: name, type: type, lock: lock, dirty: dirty, reverse: reverse)
+    end
+  end
 
   @doc """
   Check if the table wrapped by the iterator is a bag.
   """
   @spec bag?(t) :: boolean
-  def bag?(self) do
-    self.type == :bag
+  def bag?(self(type: type)) do
+    type == :bag
   end
 
   @doc """
   Check if the table wrapped by the iterator is a set.
   """
   @spec set?(t) :: boolean
-  def set?(self) do
-    self.type == :set
+  def set?(self(type: type)) do
+    type == :set
   end
 
   @doc """
   Check if the table wrapped by the iterator is an ordered set.
   """
   @spec ordered_set?(t) :: boolean
-  def ordered_set?(self) do
-    self.type == :ordered_set
+  def ordered_set?(self(type: type)) do
+    type == :ordered_set
   end
 
   @doc """
   Check if the iterator uses dirty operations.
   """
   @spec dirty?(t) :: boolean
-  def dirty?(self) do
-    self.dirty
+  def dirty?(self(dirty: dirty)) do
+    dirty
   end
 
   @doc """
   Check if the iterator is a reverse iterator.
   """
   @spec reverse?(t) :: boolean
-  def reverse?(self) do
-    self.reverse
+  def reverse?(self(reverse: reverse)) do
+    reverse
   end
 
   @doc false
-  def iterate(Amnesia.Table.Iterator[dirty: false, reverse: false] = it) do
-    if it.key == nil do
-      it = it.key(Amnesia.Table.first(it.table))
+  def iterate(self(table: table, lock: lock, dirty: false, reverse: false) = it) do
+    if self(it, :key) == nil do
+      it = self(it, key: Amnesia.Table.first(table))
     end
 
-    current = Amnesia.Table.read(it.table, it.key, it.lock)
-    next    = it.key(Amnesia.Table.next(it.table, it.key))
+    current = Amnesia.Table.read(table, self(it, :key), lock)
+    next    = self(it, key: Amnesia.Table.next(table, self(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(next.key, do: next, else: nil) }
+    { if(it.bag?, do: current, else: hd(current)), if(self(next, :key), do: next) }
   end
 
-  def iterate(Amnesia.Table.Iterator[dirty: true, reverse: false] = it) do
-    if it.key == nil do
-      it = it.key(Amnesia.Table.first!(it.table))
+  def iterate(self(table: table, dirty: true, reverse: false) = it) do
+    if self(it, :key) == nil do
+      it = self(it, key: Amnesia.Table.first!(table))
     end
 
-    current = Amnesia.Table.read!(it.table, it.key)
-    next    = it.key(Amnesia.Table.next!(it.table, it.key))
+    current = Amnesia.Table.read!(table, self(it, :key))
+    next    = self(it, key: Amnesia.Table.next!(table, self(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(next.key, do: next, else: nil) }
+    { if(it.bag?, do: current, else: hd(current)), if(self(next, :key), do: next) }
   end
 
-  def iterate(Amnesia.Table.Iterator[dirty: false, reverse: true] = it) do
-    if it.key == nil do
-      it = it.key(Amnesia.Table.last(it.table))
+  def iterate(self(table: table, lock: lock, dirty: false, reverse: true) = it) do
+    if self(it, :key) == nil do
+      it = self(it, key: Amnesia.Table.last(table))
     end
 
-    current = Amnesia.Table.read(it.table, it.key)
-    prev    = it.key(Amnesia.Table.prev(it.table, it.key))
+    current = Amnesia.Table.read(table, self(it, :key), lock)
+    prev    = self(it, key: Amnesia.Table.prev(table, self(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(prev.key, do: prev, else: nil) }
+    { if(it.bag?, do: current, else: hd(current)), if(self(prev, :key), do: prev) }
   end
 
-  def iterate(Amnesia.Table.Iterator[dirty: true, reverse: true] = it) do
-    if it.key == nil do
-      it = it.key(Amnesia.Table.last!(it.table))
+  def iterate(self(table: table, dirty: true, reverse: true) = it) do
+    if self(it, :key) == nil do
+      it = self(it, key: Amnesia.Table.last!(table))
     end
 
-    current = Amnesia.Table.read!(it.table, it.key)
-    prev    = it.key(Amnesia.Table.prev!(it.table, it.key))
+    current = Amnesia.Table.read!(table, self(it, :key))
+    prev    = self(it, key: Amnesia.Table.prev!(table, self(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(prev.key, do: prev, else: nil) }
+    { if(it.bag?, do: current, else: hd(current)), if(self(prev, :key), do: prev) }
   end
 
   def iterate(nil) do

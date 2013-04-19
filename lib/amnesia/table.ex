@@ -465,15 +465,15 @@ defmodule Amnesia.Table do
   end
 
   defmodule Selection do
-    @opaque t :: record
-
-    defrecordp :selection, values: [], continuation: nil
-
     @moduledoc """
     Selection wraps a `mnesia:select` result, which may or may not contain a
     continuation, in case of continuations you can access the next set of
     values by calling `.next`.
     """
+
+    @opaque t :: record
+
+    defrecordp :selection, values: [], continuation: nil
 
     @doc """
     Get a selection from the various select results.
@@ -490,6 +490,10 @@ defmodule Amnesia.Table do
       end
     end
 
+    @doc """
+    Get the values in the current selection.
+    """
+    @spec values(t) :: [any]
     def values(selection(values: v)) do
       v
     end

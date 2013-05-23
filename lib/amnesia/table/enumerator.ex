@@ -6,7 +6,7 @@
 #
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-defmodule Amnesia.Table.Iterator do
+defmodule Amnesia.Table.Enumerator do
   @moduledoc """
   This iterator wraps a table with certain options and allows you to use Enum
   functions on the records in the table.
@@ -71,6 +71,10 @@ defmodule Amnesia.Table.Iterator do
     reverse
   end
 
+  def reverse(iterator(reverse: reverse) = self) do
+    iterator(self, reverse: !reverse)
+  end
+
   @doc false
   def iterate(iterator(table: table, lock: lock, dirty: false, reverse: false) = it) do
     if iterator(it, :key) == nil do
@@ -121,12 +125,24 @@ defmodule Amnesia.Table.Iterator do
   end
 end
 
-defimpl Enum.Iterator, for: Amnesia.Table.Iterator do
-  def iterator(it) do
-    { Amnesia.Table.Iterator.iterate(&1), Amnesia.Table.Iterator.iterate(it) }
+defimpl Enumerable, for: Amnesia.Table.Enumerator do
+  def reduce(:stop, acc, _) do
+    acc
   end
 
-  def count(it) do
-    Amnesia.Table.info(it.table, :size)
+  def reduce({ h, next }, acc, fun) do
+    reduce(Amnesia.Table.Enumerator.iterate(next), fun.(h, acc), fun)
+  end
+
+  def reduce(enum, acc, fun) do
+    reduce(Amnesia.Table.Enumerator.iterate(enum), acc, fun)
+  end
+
+  def member?(enum, key) do
+    Amnesia.Table.read!(enum.table, key) != nil
+  end
+
+  def count(enum) do
+    Amnesia.Table.info(enum.table, :size)
   end
 end

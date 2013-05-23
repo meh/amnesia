@@ -632,39 +632,21 @@ defmodule Amnesia.Table do
   end
 
   @doc """
-  Return an iterator for the given table to use with Enum functions.
+  Return an enumerator for the given table to use with Enum functions.
   """
-  @spec iterator(atom) :: Amnesia.Table.Iterator.t
-  @spec iterator(atom, :read | :write | :write!) :: Amnesia.Table.Iterator.t
-  def iterator(name, lock // :read) do
-    Amnesia.Table.Iterator.new(name, type(name), lock: lock)
+  @spec to_enum(atom) :: Amnesia.Table.Enumerator.t
+  @spec to_enum(atom, :read | :write | :write!) :: Amnesia.Table.Enumerator.t
+  def to_enum(name, lock // :read) do
+    Amnesia.Table.Enumerator.new(name, type(name), lock: lock)
   end
 
   @doc """
-  Return an iterator for the given table to use with the Enum functions using
+  Return an enumerator for the given table to use with the Enum functions using
   dirty operations to retrieve information.
   """
-  @spec iterator!(atom) :: Amnesia.Table.Iterator.t
-  def iterator!(name) do
-    Amnesia.Table.Iterator.new(name, type(name), dirty: true)
-  end
-
-  @doc """
-  Return a reverse iterator for the given table to use with the Enum functions.
-  """
-  @spec reverse_iterator(atom) :: Amnesia.Table.Iterator.t
-  @spec reverse_iterator(atom, :read | :write | :write!) :: Amnesia.Table.Iterator.t
-  def reverse_iterator(name, lock // :read) do
-    Amnesia.Table.Iterator.new(name, type(name), lock: lock, reverse: true)
-  end
-
-  @doc """
-  Return a reverse iterator for the given table to use with the Enum functions
-  using dirty operations to retrieve information.
-  """
-  @spec reverse_iterator!(atom) :: Amnesia.Table.Iterator.t
-  def reverse_iterator!(name) do
-    Amnesia.Table.Iterator.new(name, type(name), dirty: true, reverse: true)
+  @spec to_enum!(atom) :: Amnesia.Table.Enumerator.t
+  def to_enum!(name) do
+    Amnesia.Table.Enumerator.new(name, type(name), dirty: true)
   end
 
   @doc """
@@ -1385,37 +1367,19 @@ defmodule Amnesia.Table do
         @doc """
         Return an iterator to use with Enum functions.
         """
-        @spec iterator :: Amnesia.Table.Iterator.t
-        @spec iterator(:read | :write | :write!) :: Amnesia.Table.Iterator.t
-        def iterator(lock // :read) do
-          Amnesia.Table.iterator(__MODULE__, lock)
+        @spec to_enum :: Amnesia.Table.Enumerator.t
+        @spec to_enum(:read | :write | :write!) :: Amnesia.Table.Enumerator.t
+        def to_enum(lock // :read) do
+          Amnesia.Table.to_enum(__MODULE__, lock)
         end
 
         @doc """
         Return an iterator to use with the Enum functions using dirty
         operations to retrieve information.
         """
-        @spec iterator! :: Amnesia.Table.Iterator.t
-        def iterator! do
-          Amnesia.Table.iterator!(__MODULE__)
-        end
-
-        @doc """
-        Return a reverse iterator to use with the Enum functions.
-        """
-        @spec reverse_iterator :: Amnesia.Table.Iterator.t
-        @spec reverse_iterator(:read | :write | :write!) :: Amnesia.Table.Iterator.t
-        def reverse_iterator(lock // :read) do
-          Amnesia.Table.reverse_iterator(__MODULE__, lock)
-        end
-
-        @doc """
-        Return a reverse iterator to use with the Enum functions using dirty
-        operations to retrieve information.
-        """
-        @spec reverse_iterator! :: Amnesia.Table.Iterator.t
-        def reverse_iterator! do
-          Amnesia.Table.reverse_iterator!(__MODULE__)
+        @spec to_enum! :: Amnesia.Table.Enumerator.t
+        def to_enum! do
+          Amnesia.Table.to_enum!(__MODULE__)
         end
 
         @doc """

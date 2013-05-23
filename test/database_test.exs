@@ -229,7 +229,7 @@ defmodule DatabaseTest do
   end
 
 
-  test "iterator works" do
+  test "enumerator works" do
     Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
@@ -237,13 +237,13 @@ defmodule DatabaseTest do
     end
 
     assert(Amnesia.transaction! do
-      assert Enum.map(Database.User.iterator, fn(user) ->
+      assert Enum.map(Database.User.to_enum, fn(user) ->
         user.id
       end) == [1, 2, 3]
     end == { :atomic, true })
   end
 
-  test "reverse iterator works" do
+  test "reverse enumerator works" do
     Amnesia.transaction! do
       Database.User[id: 1, name: "John"].write
       Database.User[id: 2, name: "Lucas"].write
@@ -251,7 +251,7 @@ defmodule DatabaseTest do
     end
 
     assert(Amnesia.transaction! do
-      assert Enum.map(Database.User.reverse_iterator, fn(user) ->
+      assert Enum.map(Database.User.to_enum.reverse, fn(user) ->
         user.id
       end) == [3, 2, 1]
     end == { :atomic, true })

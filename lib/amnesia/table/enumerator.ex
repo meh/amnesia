@@ -8,7 +8,7 @@
 
 defmodule Amnesia.Table.Enumerator do
   @moduledoc """
-  This iterator wraps a table with certain options and allows you to use Enum
+  This enumerator wraps a table with certain options and allows you to use Enum
   functions on the records in the table.
 
   This module uses `first`, `last`, `next`, `prev` and `read`, so be sure to
@@ -17,7 +17,7 @@ defmodule Amnesia.Table.Enumerator do
 
   @opaque t :: record
 
-  defrecordp :iterator, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false
+  defrecordp :enumerator, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false
 
   def new(name, type, rest) do
     if :mnesia.first(name) == :'$end_of_table' do
@@ -27,97 +27,97 @@ defmodule Amnesia.Table.Enumerator do
       dirty   = Keyword.get(rest, :dirty,   false)
       reverse = Keyword.get(rest, :reverse, false)
 
-      iterator(table: name, type: type, lock: lock, dirty: dirty, reverse: reverse)
+      enumerator(table: name, type: type, lock: lock, dirty: dirty, reverse: reverse)
     end
   end
 
   @doc """
-  Check if the table wrapped by the iterator is a bag.
+  Check if the table wrapped by the enumerator is a bag.
   """
   @spec bag?(t) :: boolean
-  def bag?(iterator(type: type)) do
+  def bag?(enumerator(type: type)) do
     type == :bag
   end
 
   @doc """
-  Check if the table wrapped by the iterator is a set.
+  Check if the table wrapped by the enumerator is a set.
   """
   @spec set?(t) :: boolean
-  def set?(iterator(type: type)) do
+  def set?(enumerator(type: type)) do
     type == :set
   end
 
   @doc """
-  Check if the table wrapped by the iterator is an ordered set.
+  Check if the table wrapped by the enumerator is an ordered set.
   """
   @spec ordered_set?(t) :: boolean
-  def ordered_set?(iterator(type: type)) do
+  def ordered_set?(enumerator(type: type)) do
     type == :ordered_set
   end
 
   @doc """
-  Check if the iterator uses dirty operations.
+  Check if the enumerator uses dirty operations.
   """
   @spec dirty?(t) :: boolean
-  def dirty?(iterator(dirty: dirty)) do
+  def dirty?(enumerator(dirty: dirty)) do
     dirty
   end
 
   @doc """
-  Check if the iterator is a reverse iterator.
+  Check if the enumerator is a reverse enumerator.
   """
   @spec reverse?(t) :: boolean
-  def reverse?(iterator(reverse: reverse)) do
+  def reverse?(enumerator(reverse: reverse)) do
     reverse
   end
 
-  def reverse(iterator(reverse: reverse) = self) do
-    iterator(self, reverse: !reverse)
+  def reverse(enumerator(reverse: reverse) = self) do
+    enumerator(self, reverse: !reverse)
   end
 
   @doc false
-  def iterate(iterator(table: table, lock: lock, dirty: false, reverse: false) = it) do
-    if iterator(it, :key) == nil do
-      it = iterator(it, key: Amnesia.Table.first(table))
+  def iterate(enumerator(table: table, lock: lock, dirty: false, reverse: false) = it) do
+    if enumerator(it, :key) == nil do
+      it = enumerator(it, key: Amnesia.Table.first(table))
     end
 
-    current = Amnesia.Table.read(table, iterator(it, :key), lock)
-    next    = iterator(it, key: Amnesia.Table.next(table, iterator(it, :key)))
+    current = Amnesia.Table.read(table, enumerator(it, :key), lock)
+    next    = enumerator(it, key: Amnesia.Table.next(table, enumerator(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(iterator(next, :key), do: next) }
+    { if(it.bag?, do: current, else: hd(current)), if(enumerator(next, :key), do: next) }
   end
 
-  def iterate(iterator(table: table, dirty: true, reverse: false) = it) do
-    if iterator(it, :key) == nil do
-      it = iterator(it, key: Amnesia.Table.first!(table))
+  def iterate(enumerator(table: table, dirty: true, reverse: false) = it) do
+    if enumerator(it, :key) == nil do
+      it = enumerator(it, key: Amnesia.Table.first!(table))
     end
 
-    current = Amnesia.Table.read!(table, iterator(it, :key))
-    next    = iterator(it, key: Amnesia.Table.next!(table, iterator(it, :key)))
+    current = Amnesia.Table.read!(table, enumerator(it, :key))
+    next    = enumerator(it, key: Amnesia.Table.next!(table, enumerator(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(iterator(next, :key), do: next) }
+    { if(it.bag?, do: current, else: hd(current)), if(enumerator(next, :key), do: next) }
   end
 
-  def iterate(iterator(table: table, lock: lock, dirty: false, reverse: true) = it) do
-    if iterator(it, :key) == nil do
-      it = iterator(it, key: Amnesia.Table.last(table))
+  def iterate(enumerator(table: table, lock: lock, dirty: false, reverse: true) = it) do
+    if enumerator(it, :key) == nil do
+      it = enumerator(it, key: Amnesia.Table.last(table))
     end
 
-    current = Amnesia.Table.read(table, iterator(it, :key), lock)
-    prev    = iterator(it, key: Amnesia.Table.prev(table, iterator(it, :key)))
+    current = Amnesia.Table.read(table, enumerator(it, :key), lock)
+    prev    = enumerator(it, key: Amnesia.Table.prev(table, enumerator(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(iterator(prev, :key), do: prev) }
+    { if(it.bag?, do: current, else: hd(current)), if(enumerator(prev, :key), do: prev) }
   end
 
-  def iterate(iterator(table: table, dirty: true, reverse: true) = it) do
-    if iterator(it, :key) == nil do
-      it = iterator(it, key: Amnesia.Table.last!(table))
+  def iterate(enumerator(table: table, dirty: true, reverse: true) = it) do
+    if enumerator(it, :key) == nil do
+      it = enumerator(it, key: Amnesia.Table.last!(table))
     end
 
-    current = Amnesia.Table.read!(table, iterator(it, :key))
-    prev    = iterator(it, key: Amnesia.Table.prev!(table, iterator(it, :key)))
+    current = Amnesia.Table.read!(table, enumerator(it, :key))
+    prev    = enumerator(it, key: Amnesia.Table.prev!(table, enumerator(it, :key)))
 
-    { if(it.bag?, do: current, else: hd(current)), if(iterator(prev, :key), do: prev) }
+    { if(it.bag?, do: current, else: hd(current)), if(enumerator(prev, :key), do: prev) }
   end
 
   def iterate(nil) do

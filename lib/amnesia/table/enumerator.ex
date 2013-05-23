@@ -139,7 +139,7 @@ defimpl Enumerable, for: Amnesia.Table.Enumerator do
   end
 
   def member?(enum, key) do
-    Amnesia.Table.read!(enum.table, key) != nil
+    Amnesia.Table.member?(enum.table, key)
   end
 
   def count(enum) do

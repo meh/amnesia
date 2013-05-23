@@ -291,6 +291,17 @@ defmodule Amnesia.Table do
   end
 
   @doc """
+  Check if the key is present in the given table.
+  """
+  @spec member?(atom, any) :: boolean
+  def member?(name, key) do
+    case :mnesia.dirty_read(name, key) do
+      [] -> false
+      _  -> true
+    end
+  end
+
+  @doc """
   Read records from the given table with the given key, locking in the given
   mode, see `mnesia:read`.
 
@@ -1025,6 +1036,14 @@ defmodule Amnesia.Table do
         @spec clear :: Amnesia.Table.o
         def clear do
           Amnesia.Table.clear(__MODULE__)
+        end
+
+        @doc """
+        Check if the key is present in the table.
+        """
+        @spec member?(any) :: boolean
+        def member?(key) do
+          Amnesia.Table.member?(__MODULE__, key)
         end
 
         if unquote(opts[:type]) == :bag do

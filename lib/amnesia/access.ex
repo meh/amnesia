@@ -148,7 +148,7 @@ defmodule Amnesia.Access do
 
     quote do
       if unquote(target) == __MODULE__ do
-        @behavior Amnesia.Access
+        @behaviour Amnesia.Access
       end
 
       @doc """

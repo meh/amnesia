@@ -26,6 +26,15 @@ defmodule Amnesia.Database do
 
         unquote(block)
 
+        @doc """
+        Alias all the table names in the current scope.
+        """
+        def __using__(_opts) do
+          Enum.map @tables, fn module ->
+            quote do: alias unquote(module)
+          end
+        end
+
         @doc false
         @spec __tables__ :: [atom]
         def __tables__ do

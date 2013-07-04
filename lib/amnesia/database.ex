@@ -27,10 +27,13 @@ defmodule Amnesia.Database do
         unquote(block)
 
         @doc """
-        Alias all the table names in the current scope.
+        Alias all the table names in the current scope and require what's
+        needed.
         """
-        def __using__(_opts) do
-          Enum.map @tables, fn module ->
+        defmacro __using__(_opts) do
+          [ quote(do: require Amnesia),
+            quote(do: require Amnesia.Fragment) ]
+          ++ Enum.map @tables, fn module ->
             quote do: alias unquote(module)
           end
         end

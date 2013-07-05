@@ -20,15 +20,11 @@ defmodule Amnesia.Table.Enumerator do
   defrecordp :enumerator, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false
 
   def new(name, type, rest) do
-    if :mnesia.first(name) == :'$end_of_table' do
-      []
-    else
-      lock    = Keyword.get(rest, :lock,    :read)
-      dirty   = Keyword.get(rest, :dirty,   false)
-      reverse = Keyword.get(rest, :reverse, false)
+    lock    = Keyword.get(rest, :lock,    :read)
+    dirty   = Keyword.get(rest, :dirty,   false)
+    reverse = Keyword.get(rest, :reverse, false)
 
-      enumerator(table: name, type: type, lock: lock, dirty: dirty, reverse: reverse)
-    end
+    enumerator(table: name, type: type, lock: lock, dirty: dirty, reverse: reverse)
   end
 
   @doc """

@@ -645,19 +645,19 @@ defmodule Amnesia.Table do
   @doc """
   Return an enumerator for the given table to use with Enum functions.
   """
-  @spec to_enum(atom) :: Amnesia.Table.Enumerator.t
-  @spec to_enum(atom, :read | :write | :write!) :: Amnesia.Table.Enumerator.t
-  def to_enum(name, lock // :read) do
-    Amnesia.Table.Enumerator.new(name, type(name), lock: lock)
+  @spec to_sequence(atom) :: Amnesia.Table.Sequence.t
+  @spec to_sequence(atom, :read | :write | :write!) :: Amnesia.Table.Sequence.t
+  def to_sequence(name, lock // :read) do
+    Amnesia.Table.Sequence.new(name, type(name), lock: lock)
   end
 
   @doc """
   Return an enumerator for the given table to use with the Enum functions using
   dirty operations to retrieve information.
   """
-  @spec to_enum!(atom) :: Amnesia.Table.Enumerator.t
-  def to_enum!(name) do
-    Amnesia.Table.Enumerator.new(name, type(name), dirty: true)
+  @spec to_sequence!(atom) :: Amnesia.Table.Sequence.t
+  def to_sequence!(name) do
+    Amnesia.Table.Sequence.new(name, type(name), dirty: true)
   end
 
   @doc """
@@ -1386,19 +1386,19 @@ defmodule Amnesia.Table do
         @doc """
         Return an iterator to use with Enum functions.
         """
-        @spec to_enum :: Amnesia.Table.Enumerator.t
-        @spec to_enum(:read | :write | :write!) :: Amnesia.Table.Enumerator.t
-        def to_enum(lock // :read) do
-          Amnesia.Table.to_enum(__MODULE__, lock)
+        @spec to_sequence :: Amnesia.Table.Sequence.t
+        @spec to_sequence(:read | :write | :write!) :: Amnesia.Table.Sequence.t
+        def to_sequence(lock // :read) do
+          Amnesia.Table.to_sequence(__MODULE__, lock)
         end
 
         @doc """
         Return an iterator to use with the Enum functions using dirty
         operations to retrieve information.
         """
-        @spec to_enum! :: Amnesia.Table.Enumerator.t
-        def to_enum! do
-          Amnesia.Table.to_enum!(__MODULE__)
+        @spec to_sequence! :: Amnesia.Table.Sequence.t
+        def to_sequence! do
+          Amnesia.Table.to_sequence!(__MODULE__)
         end
 
         @doc """

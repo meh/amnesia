@@ -24,7 +24,11 @@ defmodule Amnesia.Table.Sequence do
     dirty   = Keyword.get(rest, :dirty,   false)
     reverse = Keyword.get(rest, :reverse, false)
 
-    sequence(table: name, type: type, lock: lock, dirty: dirty, reverse: reverse)
+    if if(dirty, do: name.first!(true), else: name.first(true)) do
+      sequence(table: name, type: type, lock: lock, dirty: dirty, reverse: reverse)
+    else
+      []
+    end
   end
 
   @doc """

@@ -13,7 +13,7 @@ defmodule Amnesia.Counter do
 
   @opaque t :: record
 
-  defrecordp :counter, name: nil, table: nil
+  defrecordp :counter, __MODULE__, name: nil, table: nil
 
   @doc """
   Create a table for the counter.

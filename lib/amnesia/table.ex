@@ -484,7 +484,7 @@ defmodule Amnesia.Table do
 
     @opaque t :: record
 
-    defrecordp :selection, values: [], continuation: nil
+    defrecordp :selection, __MODULE__, values: [], continuation: nil
 
     @doc """
     Get a selection from the various select results.
@@ -578,7 +578,7 @@ defmodule Amnesia.Table do
 
     @opaque t :: record
 
-    defrecordp :match, values: []
+    defrecordp :match, __MODULE__, values: []
 
     @doc """
     Get a match from the various match results.

@@ -17,7 +17,7 @@ defmodule Amnesia.Table.Sequence do
 
   @opaque t :: record
 
-  defrecordp :sequence, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false
+  defrecordp :sequence, __MODULE__, table: nil, type: nil, lock: :read, key: nil, dirty: false, reverse: false
 
   def new(name, type, rest) do
     lock    = Keyword.get(rest, :lock,    :read)

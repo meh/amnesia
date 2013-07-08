@@ -738,7 +738,7 @@ defmodule Amnesia.Table do
         end) + 1
     end)
 
-    definition = Keyword.put(definition, :index, if index == [1], do: [], else: index)
+    definition = Keyword.put(definition, :index, if(index == [1], do: [], else: index))
 
     definition = Keyword.put(definition, :access_mode, if opts[:mode] do
       case opts[:mode] do

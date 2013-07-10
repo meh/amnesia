@@ -70,8 +70,7 @@ defmodule Amnesia.Table do
   def properties(name) do
     props = info(name, :all)
 
-    Keywords.new([
-      version:     props[:version],
+    [ version:     props[:version],
       type:        props[:type],
       mode:        props[:access_mode],
       attributes:  props[:attributes],
@@ -108,8 +107,7 @@ defmodule Amnesia.Table do
       ],
 
       size:   props[:size],
-      memory: props[:memory]
-    ])
+      memory: props[:memory] ]
   end
 
   @doc """
@@ -719,7 +717,7 @@ defmodule Amnesia.Table do
 
     block      = Keyword.get(opts, :do, nil)
     opts       = Keyword.delete(opts, :do)
-    definition = Keyword.new
+    definition = []
 
     index = Keyword.get(opts, :index, [])
 
@@ -766,7 +764,7 @@ defmodule Amnesia.Table do
     end
 
     if opts[:fragmentation] do
-      properties = Keyword.new
+      properties = []
 
       if number = opts[:fragmentation][:number] do
         properties = Keyword.put(properties, :n_fragments, number)

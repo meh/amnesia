@@ -14,6 +14,17 @@ defmodule AmnesiaTest do
     end == { :aborted, :doo })
   end
 
+  test "transaction works with funs" do
+    assert(Amnesia.transaction fn ->
+      42
+    end == { :atomic, 42 })
+
+    assert(Amnesia.transaction fn ->
+      exit :doo
+    end == { :aborted, :doo })
+
+  end
+
   setup_all do
     Amnesia.Test.start
   end

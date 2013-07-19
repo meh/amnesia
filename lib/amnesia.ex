@@ -120,16 +120,16 @@ defmodule Amnesia do
   @doc """
   Start a transaction with the given block or function, see `mnesia:transaction`.
   """
-  @spec transaction([] | function) :: { :aborted, any } | { :atomic, any }
+  @spec transaction([do: term] | term) :: { :aborted, any } | { :atomic, any }
   defmacro transaction(do: block) do
     quote do
       :mnesia.transaction(function(do: (() -> unquote(block))))
     end
   end
 
-  defmacro transaction(fun) when is_function fun, 0 do
+  defmacro transaction(term) do
     quote do
-      :mnesia.transaction(unquote(fun))
+      :mnesia.transaction(unquote(term))
     end
   end
 
@@ -155,16 +155,16 @@ defmodule Amnesia do
   Start a synchronous transaction with the given block or function, see
   `mnesia:sync_transaction`.
   """
-  @spec transaction!([] | function) :: { :aborted, any } | { :atomic, any }
+  @spec transaction!([do: term] | term) :: { :aborted, any } | { :atomic, any }
   defmacro transaction!(do: block) do
     quote do
       :mnesia.sync_transaction(function(do: (() -> unquote(block))))
     end
   end
 
-  defmacro transaction!(fun) when is_function fun, 0 do
+  defmacro transaction!(term) do
     quote do
-      :mnesia.sync_transaction(unquote(fun))
+      :mnesia.sync_transaction(unquote(term))
     end
   end
 
@@ -190,16 +190,16 @@ defmodule Amnesia do
   @doc """
   Run the passed function or block in the ETS context, see `mnesia:ets`.
   """
-  @spec ets([] | function) :: any
+  @spec ets([do: term] | term) :: any
   defmacro ets(do: block) do
     quote do
       :mnesia.ets(function(do: (() -> unquote(block))))
     end
   end
 
-  defmacro ets(fun) when is_function fun, 0 do
+  defmacro ets(term) do
     quote do
-      :mnesia.ets(unquote(fun))
+      :mnesia.ets(unquote(term))
     end
   end
 
@@ -216,16 +216,16 @@ defmodule Amnesia do
   Run the passed function or block in a dirty asynchronous context, see
   `mnesia:async_dirty`.
   """
-  @spec async([] | function) :: any
+  @spec async([do: term] | term) :: any
   defmacro async(do: block) do
     quote do
       :mnesia.async_dirty(function(do: (() -> unquote(block))))
     end
   end
 
-  defmacro async(fun) when is_function fun, 0 do
+  defmacro async(term) do
     quote do
-      :mnesia.async_dirty(unquote(fun))
+      :mnesia.async_dirty(unquote(term))
     end
   end
 
@@ -242,16 +242,16 @@ defmodule Amnesia do
   Run the passed function or block in a dirty synchronous context, see
   `mnesia:sync_dirty`.
   """
-  @spec sync([] | function) :: any
+  @spec sync([do: term] | term) :: any
   defmacro sync(do: block) do
     quote do
       :mnesia.sync_dirty(function(do: (() -> unquote(block))))
     end
   end
 
-  defmacro sync(fun) when is_function fun, 0 do
+  defmacro sync(term) do
     quote do
-      :mnesia.sync_dirty(unquote(fun))
+      :mnesia.sync_dirty(unquote(term))
     end
   end
 

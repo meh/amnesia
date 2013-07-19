@@ -144,35 +144,32 @@ defmodule Amnesia.Access do
   end
 
   defmacro __using__(opts) do
-    target = Keyword.get(opts, :module, __MODULE__)
-
     quote do
-      if unquote(target) == __MODULE__ do
+      @target unquote(opts[:module] || __MODULE__)
+
+      if @target == __MODULE__ do
         @behaviour Amnesia.Access
       end
 
       @doc """
       Start a transaction with the given block or function, see `mnesia:transaction`.
       """
-      @spec transaction([] | function) :: { :aborted, any } | { :atomic, any }
+      @spec transaction([do: term] | term) :: { :aborted, any } | { :atomic, any }
       defmacro transaction(do: block) do
-        target = unquote(Macro.escape(target))
-
         quote do
           try do
-            { :atomic, :mnesia.activity(:transaction, function(do: (() -> unquote(block))), [], unquote(target)) }
+            { :atomic, :mnesia.activity(:transaction,
+              function(do: (() -> unquote(block))), [], unquote(@target)) }
           catch
             :exit, error -> error
           end
         end
       end
 
-      defmacro transaction(fun) when is_function fun, 0 do
-        target = unquote(Macro.escape(target))
-
+      defmacro transaction(term) do
         quote do
           try do
-            { :atomic, :mnesia.activity(:transaction, unquote(fun), [], unquote(target)) }
+            { :atomic, :mnesia.activity(:transaction, unquote(term), [], unquote(@target)) }
           catch
             :exit, error -> error
           end
@@ -186,7 +183,7 @@ defmodule Amnesia.Access do
       @spec transaction(function, list) :: { :aborted, any } | { :atomic, any }
       def transaction(fun, args) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity(:transaction, fun, args, unquote(target)) }
+          { :atomic, :mnesia.activity(:transaction, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
         end
@@ -199,7 +196,7 @@ defmodule Amnesia.Access do
       @spec transaction(function, list, integer) :: { :aborted, any } | { :atomic, any }
       def transaction(fun, args, retries) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, unquote(target)) }
+          { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
         end
@@ -211,23 +208,19 @@ defmodule Amnesia.Access do
       """
       @spec transaction!([] | function) :: { :aborted, any } | { :atomic, any }
       defmacro transaction!(do: block) do
-        target = unquote(Macro.escape(target))
-
         quote do
           try do
-            { :atomic, :mnesia.activity(:sync_transaction, function(do: (() -> unquote(block))), [], unquote(target)) }
+            { :atomic, :mnesia.activity(:sync_transaction, function(do: (() -> unquote(block))), [], unquote(@target)) }
           catch
             :exit, error -> error
           end
         end
       end
 
-      defmacro transaction!(fun) when is_function fun, 0 do
-        target = unquote(Macro.escape(target))
-
+      defmacro transaction!(term) do
         quote do
           try do
-            { :atomic, :mnesia.activity(:sync_transaction, unquote(fun), [], unquote(target)) }
+            { :atomic, :mnesia.activity(:sync_transaction, unquote(term), [], unquote(@target)) }
           catch
             :exit, error -> error
           end
@@ -241,7 +234,7 @@ defmodule Amnesia.Access do
       @spec transaction!(function, list) :: { :aborted, any} | { :atomic, any }
       def transaction!(fun, args) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity(:sync_transaction, fun, args, unquote(target)) }
+          { :atomic, :mnesia.activity(:sync_transaction, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
         end
@@ -255,7 +248,7 @@ defmodule Amnesia.Access do
       @spec transaction!(function, list, integer) :: { :aborted, any } | { :atomic, any }
       def transaction!(fun, args, retries) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, unquote(target)) }
+          { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
         end
@@ -266,18 +259,14 @@ defmodule Amnesia.Access do
       """
       @spec ets([] | function) :: any
       defmacro ets(do: block) do
-        target = unquote(Macro.escape(target))
-
         quote do
-          :mnesia.activity(:ets, function(do: (() -> unquote(block))), [], unquote(target))
+          :mnesia.activity(:ets, function(do: (() -> unquote(block))), [], unquote(@target))
         end
       end
 
-      defmacro ets(fun) when is_function fun, 0 do
-        target = unquote(Macro.escape(target))
-
+      defmacro ets(term) do
         quote do
-          :mnesia.activity(:ets, unquote(fun), [], unquote(target))
+          :mnesia.activity(:ets, unquote(term), [], unquote(@target))
         end
       end
 
@@ -287,7 +276,7 @@ defmodule Amnesia.Access do
       """
       @spec ets(function, list) :: any
       def ets(fun, args) when is_function fun, length args do
-        :mnesia.activity(:ets, fun, args, unquote(target))
+        :mnesia.activity(:ets, fun, args, unquote(@target))
       end
 
       @doc """
@@ -296,18 +285,14 @@ defmodule Amnesia.Access do
       """
       @spec async([] | function) :: any
       defmacro async(do: block) do
-        target = unquote(Macro.escape(target))
-
         quote do
-          :mnesia.activity(:async_dirty, function(do: (() -> unquote(block))), [], unquote(target))
+          :mnesia.activity(:async_dirty, function(do: (() -> unquote(block))), [], unquote(@target))
         end
       end
 
-      defmacro async(fun) when is_function fun, 0 do
-        target = unquote(Macro.escape(target))
-
+      defmacro async(term) do
         quote do
-          :mnesia.activity(:async_dirty, unquote(fun), [], unquote(target))
+          :mnesia.activity(:async_dirty, unquote(term), [], unquote(@target))
         end
       end
 
@@ -317,7 +302,7 @@ defmodule Amnesia.Access do
       """
       @spec async(function, list) :: any
       def async(fun, args) when is_function fun, length args do
-        :mnesia.activity(:async_dirty, fun, args, unquote(target))
+        :mnesia.activity(:async_dirty, fun, args, unquote(@target))
       end
 
       @doc """
@@ -326,18 +311,14 @@ defmodule Amnesia.Access do
       """
       @spec sync([] | function) :: any
       defmacro sync(do: block) do
-        target = unquote(Macro.escape(target))
-
         quote do
-          :mnesia.activity(:sync_dirty, function(do: (() -> unquote(block))), [], unquote(target))
+          :mnesia.activity(:sync_dirty, function(do: (() -> unquote(block))), [], unquote(@target))
         end
       end
 
-      defmacro sync(fun) when is_function fun, 0 do
-        target = unquote(Macro.escape(target))
-
+      defmacro sync(term) do
         quote do
-          :mnesia.activity(:sync_dirty, unquote(fun), [], unquote(target))
+          :mnesia.activity(:sync_dirty, unquote(term), [], unquote(@target))
         end
       end
 
@@ -347,7 +328,7 @@ defmodule Amnesia.Access do
       """
       @spec sync(function, list) :: any
       def sync(fun, args) when is_function fun, length args do
-        :mnesia.activity(:sync_dirty, fun, args, unquote(target))
+        :mnesia.activity(:sync_dirty, fun, args, unquote(@target))
       end
     end
   end

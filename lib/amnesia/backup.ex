@@ -121,7 +121,7 @@ defmodule Amnesia.Backup do
   @doc """
   Restore a backup, see `mnesia:restore`.
   """
-  @spec restore(any, r) :: { :atomic, [atom] } | { :aborted, any }
+  @spec restore(any, r) :: [atom] | { :error, any }
   def restore(data, options) do
     args = Keyword.new
 

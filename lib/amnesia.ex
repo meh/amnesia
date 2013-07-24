@@ -120,7 +120,7 @@ defmodule Amnesia do
   @doc """
   Start a transaction with the given block or function, see `mnesia:transaction`.
   """
-  @spec transaction([do: term] | term) :: { :aborted, any } | { :atomic, any }
+  @spec transaction([do: term] | term) :: any | no_return
   defmacro transaction(do: block) do
     quote do
       :mnesia.transaction(function(do: (() -> unquote(block)))) |> Amnesia.result
@@ -137,7 +137,7 @@ defmodule Amnesia do
   Start a transaction with the given function passing the passed arguments to
   it, see `mnesia:transaction`.
   """
-  @spec transaction(function, list) :: { :aborted, any } | { :atomic, any }
+  @spec transaction(function, list) :: any | no_return
   def transaction(fun, args) when is_function fun, length args do
     :mnesia.transaction(fun, args) |> Amnesia.result
   end
@@ -146,7 +146,7 @@ defmodule Amnesia do
   Start a transaction with the given function passing the passed arguments to it,
   trying to take a lock maximum *retries* times, see `mnesia:transaction`.
   """
-  @spec transaction(function, list, integer) :: { :aborted, any } | { :atomic, any }
+  @spec transaction(function, list, integer) :: any | no_return
   def transaction(fun, args, retries) when is_function fun, length args do
     :mnesia.transaction(fun, args, retries) |> Amnesia.result
   end
@@ -155,7 +155,7 @@ defmodule Amnesia do
   Start a synchronous transaction with the given block or function, see
   `mnesia:sync_transaction`.
   """
-  @spec transaction!([do: term] | term) :: { :aborted, any } | { :atomic, any }
+  @spec transaction!([do: term] | term) :: any | no_return
   defmacro transaction!(do: block) do
     quote do
       :mnesia.sync_transaction(function(do: (() -> unquote(block)))) |> Amnesia.result
@@ -172,7 +172,7 @@ defmodule Amnesia do
   Start a synchronous transaction with the given function passing the passed
   arguments to it, see `mnesia:sync_transaction`.
   """
-  @spec transaction!(function, list) :: { :aborted, any} | { :atomic, any }
+  @spec transaction!(function, list) :: any | no_return
   def transaction!(fun, args) when is_function fun, length args do
     :mnesia.sync_transaction(fun, args) |> Amnesia.result
   end
@@ -182,7 +182,7 @@ defmodule Amnesia do
   arguments to it, trying to take a lock maximum *retries* times, see
   `mnesia:sync_transaction`.
   """
-  @spec transaction!(function, list, integer) :: { :aborted, any } | { :atomic, any }
+  @spec transaction!(function, list, integer) :: any | no_return
   def transaction!(fun, args, retries) when is_function fun, length args do
     :mnesia.sync_transaction(fun, args, retries) |> Amnesia.result
   end

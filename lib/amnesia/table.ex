@@ -9,7 +9,7 @@
 defmodule Amnesia.Table do
   @type cv :: :disk | :disk! | :memory
   @type c  :: [{ cv, [node] }]
-  @type o  :: :ok | { :aborted, any }
+  @type o  :: :ok | { :error, any }
 
   @doc """
   Wait for the passed tables for the given timeout, see `mnesia:wait_for_tables`.
@@ -34,13 +34,7 @@ defmodule Amnesia.Table do
   @spec create(atom) :: o
   @spec create(atom, c) :: o
   def create(name, definition // []) do
-    case :mnesia.create_table(name, definition) do
-      { :atomic, :ok } ->
-        :ok
-
-      { :aborted, _ } = e ->
-        e
-    end
+    :mnesia.create_table(name, definition) |> result
   end
 
   @doc """
@@ -65,7 +59,7 @@ defmodule Amnesia.Table do
   """
   @spec transform(atom, [atom], (record -> record)) :: o
   def transform(name, attributes, fun) do
-    :mnesia.transform_table(name, fun, attributes)
+    :mnesia.transform_table(name, fun, attributes) |> result
   end
 
   @doc """
@@ -74,7 +68,7 @@ defmodule Amnesia.Table do
   """
   @spec transform(atom, atom, [atom], (record -> record)) :: o
   def transform(name, new_name, attributes, fun) do
-    :mnesia.transform_table(name, fun, attributes, new_name)
+    :mnesia.transform_table(name, fun, attributes, new_name) |> result
   end
 
   @doc """
@@ -177,7 +171,7 @@ defmodule Amnesia.Table do
     :mnesia.change_table_access_mode(name, case value do
       :both  -> :read_write
       :read! -> :read_only
-    end)
+    end) |> result
   end
 
   @doc """
@@ -196,7 +190,7 @@ defmodule Amnesia.Table do
       :disk   -> :disc_copies
       :disk!  -> :disc_only_copies
       :memory -> :ram_copies
-    end)
+    end) |> result
   end
 
   @doc """
@@ -204,7 +198,7 @@ defmodule Amnesia.Table do
   """
   @spec priority(atom, integer) :: o
   def priority(name, value) do
-    :mnesia.change_table_load_order(name, value)
+    :mnesia.change_table_load_order(name, value) |> result
   end
 
   @doc """
@@ -212,7 +206,7 @@ defmodule Amnesia.Table do
   """
   @spec majority(atom, boolean) :: o
   def majority(name, value) do
-    :mnesia.change_table_majority(name, value)
+    :mnesia.change_table_majority(name, value) |> result
   end
 
   @doc """
@@ -230,7 +224,7 @@ defmodule Amnesia.Table do
       :disk   -> :disc_copies
       :disk!  -> :disc_only_copies
       :memory -> :ram_copies
-    end)
+    end) |> result
   end
 
   @doc """
@@ -239,7 +233,7 @@ defmodule Amnesia.Table do
   """
   @spec move_copy(atom, node, node) :: o
   def move_copy(name, from, to) do
-    :mnesia.move_copy(name, from, to)
+    :mnesia.move_copy(name, from, to) |> result
   end
 
   @doc """
@@ -247,7 +241,7 @@ defmodule Amnesia.Table do
   """
   @spec delete_copy(atom, node) :: o
   def delete_copy(name, node) do
-    :mnesia.del_table_copy(name, node)
+    :mnesia.del_table_copy(name, node) |> result
   end
 
   @doc """
@@ -256,7 +250,7 @@ defmodule Amnesia.Table do
   """
   @spec add_index(atom, atom) :: o
   def add_index(name, attribute) do
-    :mnesia.add_table_index(name, attribute)
+    :mnesia.add_table_index(name, attribute) |> result
   end
 
   @doc """
@@ -265,7 +259,7 @@ defmodule Amnesia.Table do
   """
   @spec delete_index(atom, atom) :: o
   def delete_index(name, attribute) do
-    :mnesia.del_table_index(name, attribute)
+    :mnesia.del_table_index(name, attribute) |> result
   end
 
   @doc """
@@ -299,7 +293,7 @@ defmodule Amnesia.Table do
   """
   @spec destroy(atom) :: o
   def destroy(name) do
-    :mnesia.delete_table(name)
+    :mnesia.delete_table(name) |> result
   end
 
   @doc """
@@ -307,7 +301,7 @@ defmodule Amnesia.Table do
   """
   @spec clear(atom) :: o
   def clear(name) do
-    :mnesia.clear_table(name)
+    :mnesia.clear_table(name) |> result
   end
 
   @doc """
@@ -732,6 +726,15 @@ defmodule Amnesia.Table do
   end
 
   @doc false
+  def result({ :atomic, :ok }) do
+    :ok
+  end
+
+  def result({ :aborted, reason }) do
+    { :error, reason }
+  end
+
+  @doc false
   def deftable!(name, attributes, opts // []) do
     if length(attributes) <= 1 do
       raise ArgumentError, message: "the table attributes must be more than 1"
@@ -856,8 +859,8 @@ defmodule Amnesia.Table do
         @doc """
         Create the table with the given copying mode.
         """
-        @spec create :: :ok | { :aborted, any }
-        @spec create(Amnesia.Table.c) :: :ok | { :aborted, any }
+        @spec create :: Amnesia.o
+        @spec create(Amnesia.Table.c) :: Amnesia.o
         def create(copying // []) do
           Amnesia.Table.create(__MODULE__, attributes(copying))
         end
@@ -886,7 +889,7 @@ defmodule Amnesia.Table do
             definition = Keyword.put(definition, :disc_only_copies, copying[:disk!])
           end
 
-
+          definition
         end
 
         @doc """

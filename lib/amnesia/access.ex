@@ -154,7 +154,7 @@ defmodule Amnesia.Access do
       @doc """
       Start a transaction with the given block or function, see `mnesia:transaction`.
       """
-      @spec transaction([do: term] | term) :: { :aborted, any } | { :atomic, any }
+      @spec transaction([do: term] | term) :: any | no_return
       defmacro transaction(do: block) do
         quote do
           try do
@@ -180,7 +180,7 @@ defmodule Amnesia.Access do
       Start a transaction with the given function passing the passed arguments to
       it, see `mnesia:transaction`.
       """
-      @spec transaction(function, list) :: { :aborted, any } | { :atomic, any }
+      @spec transaction(function, list) :: any | no_return
       def transaction(fun, args) when is_function fun, length args do
         try do
           { :atomic, :mnesia.activity(:transaction, fun, args, unquote(@target)) }
@@ -193,7 +193,7 @@ defmodule Amnesia.Access do
       Start a transaction with the given function passing the passed arguments to it,
       trying to take a lock maximum *retries* times, see `mnesia:transaction`.
       """
-      @spec transaction(function, list, integer) :: { :aborted, any } | { :atomic, any }
+      @spec transaction(function, list, integer) :: any | no_return
       def transaction(fun, args, retries) when is_function fun, length args do
         try do
           { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, unquote(@target)) }
@@ -206,7 +206,7 @@ defmodule Amnesia.Access do
       Start a synchronous transaction with the given block or function, see
       `mnesia:sync_transaction`.
       """
-      @spec transaction!([] | function) :: { :aborted, any } | { :atomic, any }
+      @spec transaction!([] | function) :: any | no_return
       defmacro transaction!(do: block) do
         quote do
           try do
@@ -231,7 +231,7 @@ defmodule Amnesia.Access do
       Start a synchronous transaction with the given function passing the passed
       arguments to it, see `mnesia:sync_transaction`.
       """
-      @spec transaction!(function, list) :: { :aborted, any} | { :atomic, any }
+      @spec transaction!(function, list) :: any | no_return
       def transaction!(fun, args) when is_function fun, length args do
         try do
           { :atomic, :mnesia.activity(:sync_transaction, fun, args, unquote(@target)) }
@@ -245,7 +245,7 @@ defmodule Amnesia.Access do
       arguments to it, trying to take a lock maximum *retries* times, see
       `mnesia:sync_transaction`.
       """
-      @spec transaction!(function, list, integer) :: { :aborted, any } | { :atomic, any }
+      @spec transaction!(function, list, integer) :: any | no_return
       def transaction!(fun, args, retries) when is_function fun, length args do
         try do
           { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, unquote(@target)) }
@@ -257,7 +257,7 @@ defmodule Amnesia.Access do
       @doc """
       Run the passed function or block in the ETS context, see `mnesia:ets`.
       """
-      @spec ets([] | function) :: any
+      @spec ets([] | function) :: any | no_return
       defmacro ets(do: block) do
         quote do
           :mnesia.activity(:ets, function(do: (() -> unquote(block))), [], unquote(@target))
@@ -274,7 +274,7 @@ defmodule Amnesia.Access do
       Run the passed function in the ETS context passing over the passed arguments,
       see `mnesia:ets`.
       """
-      @spec ets(function, list) :: any
+      @spec ets(function, list) :: any | no_return
       def ets(fun, args) when is_function fun, length args do
         :mnesia.activity(:ets, fun, args, unquote(@target))
       end
@@ -283,7 +283,7 @@ defmodule Amnesia.Access do
       Run the passed function or block in a dirty asynchronous context, see
       `mnesia:async_dirty`.
       """
-      @spec async([] | function) :: any
+      @spec async([] | function) :: any | no_return
       defmacro async(do: block) do
         quote do
           :mnesia.activity(:async_dirty, function(do: (() -> unquote(block))), [], unquote(@target))
@@ -300,7 +300,7 @@ defmodule Amnesia.Access do
       Run the passed function in a dirty asynchronous context passing over the
       passed arguments, see `mnesia:async_dirty`.
       """
-      @spec async(function, list) :: any
+      @spec async(function, list) :: any | no_return
       def async(fun, args) when is_function fun, length args do
         :mnesia.activity(:async_dirty, fun, args, unquote(@target))
       end
@@ -309,7 +309,7 @@ defmodule Amnesia.Access do
       Run the passed function or block in a dirty synchronous context, see
       `mnesia:sync_dirty`.
       """
-      @spec sync([] | function) :: any
+      @spec sync([] | function) :: any | no_return
       defmacro sync(do: block) do
         quote do
           :mnesia.activity(:sync_dirty, function(do: (() -> unquote(block))), [], unquote(@target))

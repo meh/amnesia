@@ -268,9 +268,9 @@ defmodule DatabaseTest do
   end
 
   setup do
-    Enum.all?(Test.Database.create, fn(result) ->
-      result == :ok
-    end) && :ok
+    Test.Database.create!
+
+    :ok
   end
 
   teardown do

@@ -57,6 +57,18 @@ defmodule Amnesia.Database do
         end
 
         @doc """
+        Create the database, it calls `.create` on every defined table, raises
+        in case of error.
+        """
+        @spec create! :: [Amnesia.Table.o]
+        @spec create!(Amnesia.Table.c) :: [Amnesia.Table.o]
+        def create!(copying // []) do
+          Enum.map @tables, fn(table) ->
+            table.create!(copying)
+          end
+        end
+
+        @doc """
         Destroy the database, it calls `.destroy` on every defined table.
         """
         @spec destroy :: [Amnesia.Table.o]

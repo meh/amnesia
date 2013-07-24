@@ -269,7 +269,7 @@ defmodule DatabaseTest do
 
   setup do
     Enum.all?(Test.Database.create, fn(result) ->
-      result == { :atomic, :ok }
+      result == :ok
     end) && :ok
   end
 

@@ -9,7 +9,7 @@
 defmodule Amnesia.Table do
   @type cv :: :disk | :disk! | :memory
   @type c  :: [{ cv, [node] }]
-  @type o  :: { :atomic, :ok } | { :aborted, any }
+  @type o  :: :ok | { :aborted, any }
 
   @doc """
   Wait for the passed tables for the given timeout, see `mnesia:wait_for_tables`.
@@ -34,7 +34,29 @@ defmodule Amnesia.Table do
   @spec create(atom) :: o
   @spec create(atom, c) :: o
   def create(name, definition // []) do
-    :mnesia.create_table(name, definition)
+    case :mnesia.create_table(name, definition) do
+      { :atomic, :ok } ->
+        :ok
+
+      { :aborted, _ } = e ->
+        e
+    end
+  end
+
+  @doc """
+  Create a table with the given name and definition, see `mnesia:create_table`,
+  raises in case of error.
+  """
+  @spec create!(atom) :: :ok | no_return
+  @spec create!(atom, c) :: :ok | no_return
+  def create!(name, definition // []) do
+    case :mnesia.create_table(name, definition) do
+      { :atomic, :ok } ->
+        :ok
+
+      { :aborted, { :already_exists, _ } } ->
+        raise Amnesia.TableExistsError, name: name
+    end
   end
 
   @doc """
@@ -834,9 +856,19 @@ defmodule Amnesia.Table do
         @doc """
         Create the table with the given copying mode.
         """
-        @spec create :: { :atomic, :ok } | { :aborted, any }
-        @spec create(Amnesia.Table.c) :: { :atomic, :ok } | { :aborted, any }
+        @spec create :: :ok | { :aborted, any }
+        @spec create(Amnesia.Table.c) :: :ok | { :aborted, any }
         def create(copying // []) do
+          Amnesia.Table.create(__MODULE__, attributes(copying))
+        end
+
+        @spec create! :: :ok | no_return
+        @spec create!(Amnesia.Table.c) :: :ok | no_return
+        def create!(copying // []) do
+          Amnesia.Table.create!(__MODULE__, attributes(copying))
+        end
+
+        defp attributes(copying) do
           definition = Keyword.merge(unquote(definition), [
             record_name: __MODULE__,
             attributes:  Keyword.keys(@record_fields)
@@ -854,7 +886,7 @@ defmodule Amnesia.Table do
             definition = Keyword.put(definition, :disc_only_copies, copying[:disk!])
           end
 
-          Amnesia.Table.create(__MODULE__, definition)
+
         end
 
         @doc """

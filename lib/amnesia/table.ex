@@ -297,6 +297,20 @@ defmodule Amnesia.Table do
   end
 
   @doc """
+  Destroy the given table, see `mnesia:delete_table`, raising in case of error.
+  """
+  @spec destroy!(atom) :: :ok | no_return
+  def destroy!(name) do
+    case :mnesia.delete_table(name) do
+      { :atomic, :ok } ->
+        :ok
+
+      { :aborted, { :no_exists, _ } } ->
+        raise Amnesia.TableMissingError, name: name
+    end
+  end
+
+  @doc """
   Clear the given table, see `mnesia:clear_table`.
   """
   @spec clear(atom) :: o
@@ -1061,6 +1075,14 @@ defmodule Amnesia.Table do
         @spec destroy :: Amnesia.Table.o
         def destroy do
           Amnesia.Table.destroy(__MODULE__)
+        end
+
+        @doc """
+        Destroy the table, raising if an error occurs.
+        """
+        @spec destroy! :: :ok | no_return
+        def destroy! do
+          Amnesia.Table.destroy!(__MODULE__)
         end
 
         @doc """

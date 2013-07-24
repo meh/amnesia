@@ -11,3 +11,9 @@ defexception Amnesia.TableExistsError, name: nil do
     "Table #{inspect exception.name} already exists"
   end
 end
+
+defexception Amnesia.TableMissingError, name: nil do
+  def message(exception) do
+    "Table #{inspect exception.name} doesn't exists"
+  end
+end

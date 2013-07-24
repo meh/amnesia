@@ -79,6 +79,17 @@ defmodule Amnesia.Database do
         end
 
         @doc """
+        Destroy the database, it calls `.destroy` on every defined table,
+        raises in case of error.
+        """
+        @spec destroy! :: [Amnesia.Table.o]
+        def destroy! do
+          Enum.map @tables, fn(table) ->
+            table.destroy!
+          end
+        end
+
+        @doc """
         Wait for the database to be loaded.
         """
         @spec wait :: :ok | { :timeout, [atom] } | { :error, atom }

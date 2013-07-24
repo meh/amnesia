@@ -5,11 +5,15 @@ defmodule FragmentTest do
   test "transaction returns proper values" do
     assert(Amnesia.Fragment.transaction do
       42
-    end == { :atomic, 42 })
+    end == 42)
+  end
 
-    assert(Amnesia.Fragment.transaction do
-      exit :doo
-    end == { :aborted, :doo })
+  test "transaction raises" do
+    assert_raise RuntimeError, fn ->
+      Amnesia.Fragment.transaction do
+        raise "herp"
+      end
+    end
   end
 
   setup_all do

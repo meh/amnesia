@@ -162,7 +162,7 @@ defmodule Amnesia.Access do
               function(do: (() -> unquote(block))), [], unquote(@target)) }
           catch
             :exit, error -> error
-          end
+          end |> Amnesia.result
         end
       end
 
@@ -172,7 +172,7 @@ defmodule Amnesia.Access do
             { :atomic, :mnesia.activity(:transaction, unquote(term), [], unquote(@target)) }
           catch
             :exit, error -> error
-          end
+          end |> Amnesia.result
         end
       end
 
@@ -186,7 +186,7 @@ defmodule Amnesia.Access do
           { :atomic, :mnesia.activity(:transaction, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
-        end
+        end |> Amnesia.result
       end
 
       @doc """
@@ -199,7 +199,7 @@ defmodule Amnesia.Access do
           { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
-        end
+        end |> Amnesia.result
       end
 
       @doc """
@@ -213,7 +213,7 @@ defmodule Amnesia.Access do
             { :atomic, :mnesia.activity(:sync_transaction, function(do: (() -> unquote(block))), [], unquote(@target)) }
           catch
             :exit, error -> error
-          end
+          end |> Amnesia.result
         end
       end
 
@@ -223,7 +223,7 @@ defmodule Amnesia.Access do
             { :atomic, :mnesia.activity(:sync_transaction, unquote(term), [], unquote(@target)) }
           catch
             :exit, error -> error
-          end
+          end |> Amnesia.result
         end
       end
 
@@ -237,7 +237,7 @@ defmodule Amnesia.Access do
           { :atomic, :mnesia.activity(:sync_transaction, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
-        end
+        end |> Amnesia.result
       end
 
       @doc """
@@ -251,7 +251,7 @@ defmodule Amnesia.Access do
           { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, unquote(@target)) }
         catch
           :exit, error -> error
-        end
+        end |> Amnesia.result
       end
 
       @doc """

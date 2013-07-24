@@ -60,14 +60,14 @@ defmodule DatabaseTest do
       assert User.read(23) == User[id: 23]
       assert User.read(23).messages == [Message[user_id: 23, content: "yo dawg"]]
       assert Enum.first(User.read(23).messages).user == User[id: 23]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "read returns nil when empty" do
     assert(Amnesia.transaction! do
       assert User.read(23) == nil
       assert Message.read(23) == nil
-    end == { :atomic, true })
+    end == true)
   end
 
   test "first fetches a key" do
@@ -79,7 +79,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.first(true) == 1
-    end == { :atomic, true })
+    end == true)
   end
 
   test "first fetches the record" do
@@ -91,7 +91,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.first == User[id: 1, name: "John"]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "next fetches the next key" do
@@ -103,7 +103,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.next(User.first(true)) == 2
-    end == { :atomic, true })
+    end == true)
   end
 
   test "next fetches the next record" do
@@ -115,7 +115,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.first.next == User[id: 2, name: "Lucas"]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "prev fetches the prev key" do
@@ -127,7 +127,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.prev(User.last(true)) == 2
-    end == { :atomic, true })
+    end == true)
   end
 
   test "prev fetches the prev record" do
@@ -139,7 +139,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.last.prev == User[id: 2, name: "Lucas"]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "last fetches a key" do
@@ -151,7 +151,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.last(true) == 3
-    end == { :atomic, true })
+    end == true)
   end
 
   test "last fetches the record" do
@@ -163,7 +163,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.last == User[id: 3, name: "David"]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "delete deletes the record" do
@@ -176,11 +176,11 @@ defmodule DatabaseTest do
     assert(Amnesia.transaction! do
       assert User.last == User[id: 3, name: "David"]
       assert User.last.delete == :ok
-    end == { :atomic, true })
+    end == true)
 
     assert(Amnesia.transaction! do
       assert User.last == User[id: 2, name: "Lucas"]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "match matches records" do
@@ -193,7 +193,7 @@ defmodule DatabaseTest do
     assert(Amnesia.transaction! do
       assert User.match(User[name: "Lucas", _: :_]).values ==
         [User[id: 2, name: "Lucas"]]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "select works" do
@@ -206,7 +206,7 @@ defmodule DatabaseTest do
     assert(Amnesia.transaction! do
       assert User.select([{ User[id: :'$1', name: :'$2', _: :_],
         [{ :'==', "John", :'$2' }], [:'$1'] }]).values == [1]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "select works with limit" do
@@ -227,7 +227,7 @@ defmodule DatabaseTest do
       assert selection.values == [3]
 
       assert selection.next == nil
-    end == { :atomic, true })
+    end == true)
   end
 
 
@@ -242,7 +242,7 @@ defmodule DatabaseTest do
       assert Enum.map(User.to_sequence, fn(user) ->
         user.id
       end) == [1, 2, 3]
-    end == { :atomic, true })
+    end == true)
   end
 
   test "reverse enumerator works" do
@@ -256,7 +256,7 @@ defmodule DatabaseTest do
       assert Enum.map(User.to_sequence.reverse, fn(user) ->
         user.id
       end) == [3, 2, 1]
-    end == { :atomic, true })
+    end == true)
   end
 
   setup_all do

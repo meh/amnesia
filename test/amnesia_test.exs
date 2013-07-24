@@ -5,24 +5,19 @@ defmodule AmnesiaTest do
   use Amnesia
 
   test "transaction returns proper values" do
-    assert(Amnesia.transaction do
-      42
-    end == { :atomic, 42 })
-
-    assert(Amnesia.transaction do
-      exit :doo
-    end == { :aborted, :doo })
+    assert Amnesia.transaction(do: 42) == 42
   end
 
   test "transaction works with funs" do
-    assert(Amnesia.transaction fn ->
-      42
-    end == { :atomic, 42 })
+    assert Amnesia.transaction(fn -> 42 end) == 42
+  end
 
-    assert(Amnesia.transaction fn ->
-      exit :doo
-    end == { :aborted, :doo })
-
+  test "transaction raises" do
+    assert_raise RuntimeError, fn ->
+      Amnesia.transaction do
+        raise "herp"
+      end
+    end
   end
 
   setup_all do

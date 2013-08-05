@@ -159,7 +159,7 @@ defmodule Amnesia.Access do
         quote do
           try do
             { :atomic, :mnesia.activity(:transaction,
-              function(do: (() -> unquote(block))), [], unquote(@target)) }
+              fn -> unquote(block) end, [], unquote(@target)) }
           catch
             :exit, error -> error
           end |> Amnesia.result
@@ -210,7 +210,8 @@ defmodule Amnesia.Access do
       defmacro transaction!(do: block) do
         quote do
           try do
-            { :atomic, :mnesia.activity(:sync_transaction, function(do: (() -> unquote(block))), [], unquote(@target)) }
+            { :atomic, :mnesia.activity(:sync_transaction,
+              fn -> unquote(block) end, [], unquote(@target)) }
           catch
             :exit, error -> error
           end |> Amnesia.result
@@ -260,7 +261,7 @@ defmodule Amnesia.Access do
       @spec ets([] | function) :: any | no_return
       defmacro ets(do: block) do
         quote do
-          :mnesia.activity(:ets, function(do: (() -> unquote(block))), [], unquote(@target))
+          :mnesia.activity(:ets, fn -> unquote(block) end, [], unquote(@target))
         end
       end
 
@@ -286,7 +287,7 @@ defmodule Amnesia.Access do
       @spec async([] | function) :: any | no_return
       defmacro async(do: block) do
         quote do
-          :mnesia.activity(:async_dirty, function(do: (() -> unquote(block))), [], unquote(@target))
+          :mnesia.activity(:async_dirty, fn -> unquote(block) end, [], unquote(@target))
         end
       end
 
@@ -312,7 +313,7 @@ defmodule Amnesia.Access do
       @spec sync([] | function) :: any | no_return
       defmacro sync(do: block) do
         quote do
-          :mnesia.activity(:sync_dirty, function(do: (() -> unquote(block))), [], unquote(@target))
+          :mnesia.activity(:sync_dirty, fn -> unquote(block) end, [], unquote(@target))
         end
       end
 

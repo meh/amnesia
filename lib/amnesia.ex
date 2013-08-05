@@ -123,7 +123,7 @@ defmodule Amnesia do
   @spec transaction([do: term] | term) :: any | no_return
   defmacro transaction(do: block) do
     quote do
-      :mnesia.transaction(function(do: (() -> unquote(block)))) |> Amnesia.result
+      :mnesia.transaction(fn -> unquote(block) end) |> Amnesia.result
     end
   end
 
@@ -158,7 +158,7 @@ defmodule Amnesia do
   @spec transaction!([do: term] | term) :: any | no_return
   defmacro transaction!(do: block) do
     quote do
-      :mnesia.sync_transaction(function(do: (() -> unquote(block)))) |> Amnesia.result
+      :mnesia.sync_transaction(fn -> unquote(block) end) |> Amnesia.result
     end
   end
 
@@ -193,7 +193,7 @@ defmodule Amnesia do
   @spec ets([do: term] | term) :: any
   defmacro ets(do: block) do
     quote do
-      :mnesia.ets(function(do: (() -> unquote(block)))) |> Amnesia.result
+      :mnesia.ets(fn -> unquote(block) end) |> Amnesia.result
     end
   end
 
@@ -219,7 +219,7 @@ defmodule Amnesia do
   @spec async([do: term] | term) :: any
   defmacro async(do: block) do
     quote do
-      :mnesia.async_dirty(function(do: (() -> unquote(block)))) |> Amnesia.result
+      :mnesia.async_dirty(fn -> unquote(block) end) |> Amnesia.result
     end
   end
 
@@ -245,7 +245,7 @@ defmodule Amnesia do
   @spec sync([do: term] | term) :: any
   defmacro sync(do: block) do
     quote do
-      :mnesia.sync_dirty(function(do: (() -> unquote(block)))) |> Amnesia.result
+      :mnesia.sync_dirty(fn -> unquote(block) end) |> Amnesia.result
     end
   end
 

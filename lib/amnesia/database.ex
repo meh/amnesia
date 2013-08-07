@@ -33,10 +33,13 @@ defmodule Amnesia.Database do
         defmacro __using__(_opts) do
           [ quote(do: require Amnesia),
             quote(do: require Amnesia.Fragment),
-            quote(do: alias unquote(__MODULE__)) ]
-          ++ Enum.map @tables, fn module ->
-            quote do: alias unquote(module)
-          end
+            quote(do: require Exquisite),
+            quote(do: alias unquote(__MODULE__)),
+
+            Enum.map(@tables, fn module ->
+              [ quote(do: alias unquote(module)),
+                quote(do: require unquote(module)) ]
+            end) ] |> List.flatten
         end
 
         @doc false

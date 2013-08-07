@@ -1404,6 +1404,85 @@ defmodule Amnesia.Table do
         end
 
         @doc """
+        Select records in the table using an Exquisite query, see
+        `Exquisite.match/2` and `mnesia:select`.
+        """
+        @spec where(term) :: Selection.t | nil | no_return
+        defmacro where(spec) do
+          quote do
+            Amnesia.Table.select(unquote(__MODULE__),
+              Exquisite.match(unquote(__MODULE__),
+                where: unquote(spec)))
+          end
+        end
+
+        @doc """
+        Select records in the table using an Exquisite query, see
+        `Exquisite.match/2` and `mnesia:select`.
+
+        ## Options
+
+          * `limit` - sets the count of elements to select in every continuation
+          * `lock` - sets the kind of lock to use
+          * `select` - Exquisite selector spec
+
+        """
+        defmacro where(spec, options) do
+          quote do
+            lock  = unquote(options[:lock])
+            limit = unquote(options[:limit])
+            spec  = if unquote(Keyword.has_key?(options, :select)) do
+              Exquisite.match(unquote(__MODULE__),
+                where: unquote(spec),
+                select: unquote(options[:select]))
+            else
+              Exquisite.match(unquote(__MODULE__), where: unquote(spec))
+            end
+
+            cond do
+              lock || limit ->
+                Amnesia.Table.select(unquote(__MODULE__), lock || limit, spec)
+
+              lock && limit ->
+                Amnesia.Table.select(unquote(__MODULE__), lock, limit, spec)
+
+              true ->
+                Amnesia.Table.select(unquote(__MODULE__), spec)
+            end
+          end
+        end
+
+        @doc """
+        Select records in the table using an Exquisite query, see
+        `Exquisite.match/2` and `mnesia:dirty_select`.
+        """
+        defmacro where!(spec) do
+          quote do
+            Amnesia.Table.select!(unquote(__MODULE__),
+              Exquisite.match(unquote(__MODULE__),
+                where: unquote(spec)))
+          end
+        end
+
+        @doc """
+        Select records in the table using an Exquisite query, see
+        `Exquisite.match/2` and `mnesia:dirty_select`.
+
+        ## Options
+
+          * `select` - Exquisite selector spec
+
+        """
+        defmacro where!(spec, select: selector) do
+          quote do
+            Amnesia.Table.select!(unquote(__MODULE__),
+              Exquisite.match(unquote(__MODULE__),
+                where: unquote(spec),
+                select: unquote(selector)))
+          end
+        end
+
+        @doc """
         Select records in the table using simple don't care values, see
         `mnesia:match_object`.
         """

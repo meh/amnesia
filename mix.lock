@@ -1,1 +1,3 @@
-[ "datastructures": {:git, "git://github.com/meh/elixir-datastructures.git", "930186828cd4ff7a1f3a4eef4f6212717f314ce0", []} ]
+[ "continuum": {:git, "git://github.com/meh/continuum.git", "138be7fb33cc080390a0f43fab65204fd3aa572b", []},
+  "datastructures": {:git, "git://github.com/meh/elixir-datastructures.git", "f13adde9e7c1d1a5471316f7b35fe9f15de150cf", []},
+  "exquisite": {:git, "git://github.com/meh/exquisite.git", "9b468a3d279ebd413908d66a45545c294de41423", []} ]

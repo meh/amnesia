@@ -16,6 +16,8 @@ defmodule Amnesia.Mixfile do
   # Returns the list of dependencies in the format:
   # { :foobar, "0.1", git: "https://github.com/elixir-lang/foobar.git" }
   defp deps do
-    [ { :datastructures, github: "meh/elixir-datastructures" } ]
+    [ { :datastructures, github: "meh/elixir-datastructures" },
+      { :exquisite, github: "meh/exquisite" },
+      { :continuum, github: "meh/continuum" } ]
   end
 end

@@ -230,6 +230,38 @@ defmodule DatabaseTest do
     end == true)
   end
 
+  test "where works" do
+    Amnesia.transaction! do
+      User[id: 1, name: "John"].write
+      User[id: 2, name: "Lucas"].write
+      User[id: 3, name: "David"].write
+    end
+
+    assert(Amnesia.transaction! do
+      assert User.where(name == "John", select: id).values == [1]
+    end == true)
+  end
+
+  test "where works with limit" do
+    Amnesia.transaction! do
+      User[id: 1, name: "John"].write
+      User[id: 2, name: "Lucas"].write
+      User[id: 3, name: "David"].write
+    end
+
+    assert(Amnesia.transaction! do
+      selection = User.where(true, select: id, limit: 1)
+      assert selection.values == [1]
+
+      selection = selection.next
+      assert selection.values == [2]
+
+      selection = selection.next
+      assert selection.values == [3]
+
+      assert selection.next == nil
+    end == true)
+  end
 
   test "enumerator works" do
     Amnesia.transaction! do

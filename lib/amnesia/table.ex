@@ -29,6 +29,14 @@ defmodule Amnesia.Table do
   end
 
   @doc """
+  Checks if a table exists or not.
+  """
+  @spec exists?(atom) :: boolean
+  def exists?(name) do
+    :mnesia.system_info(:tables) |> Enum.member?(name)
+  end
+
+  @doc """
   Create a table with the given name and definition, see `mnesia:create_table`.
   """
   @spec create(atom) :: o

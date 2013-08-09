@@ -65,9 +65,22 @@ defmodule Amnesia.Table do
   Transform a table, useful to change tables in a running instance, see
   `mnesia:transform_table`.
   """
-  @spec transform(atom, [atom], (record -> record)) :: o
-  def transform(name, attributes, fun) do
+  @spec transform(atom, [atom]) :: o
+  def transform(name, attributes) do
+    :mnesia.transform_table(name, :ignore, attributes) |> result
+  end
+
+  @doc """
+  Transform a table, useful to change tables in a running instance, see
+  `mnesia:transform_table`.
+  """
+  @spec transform(atom, [atom] | atom, (record -> record) | [atom]) :: o
+  def transform(name, attributes, fun) when is_function(fun) do
     :mnesia.transform_table(name, fun, attributes) |> result
+  end
+
+  def transform(name, new_name, attributes) do
+    :mnesia.transform_table(name, :ignore, attributes, new_name) |> result
   end
 
   @doc """

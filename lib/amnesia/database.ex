@@ -66,7 +66,7 @@ defmodule Amnesia.Database do
         @spec create! :: [Amnesia.Table.o]
         @spec create!(Amnesia.Table.c) :: [Amnesia.Table.o]
         def create!(copying // []) do
-          Enum.map @tables, fn(table) ->
+          Enum.each @tables, fn(table) ->
             table.create!(copying)
           end
         end
@@ -87,7 +87,7 @@ defmodule Amnesia.Database do
         """
         @spec destroy! :: [Amnesia.Table.o]
         def destroy! do
-          Enum.map @tables, fn(table) ->
+          Enum.each @tables, fn(table) ->
             table.destroy!
           end
         end

@@ -42,7 +42,93 @@ defmodule Amnesia.Table do
   @spec create(atom) :: o
   @spec create(atom, c) :: o
   def create(name, definition // []) do
-    :mnesia.create_table(name, definition) |> result
+    args = Keyword.new
+
+    args = Keyword.put(args, :record_name, name)
+    args = Keyword.put(args, :attributes, Keyword.fetch!(definition, :attributes))
+
+    if mode = definition[:mode] || :both do
+      args = Keyword.put(args, :access_mode, case mode do
+        :both  -> :read_write
+        :read! -> :read_only
+      end)
+    end
+
+    if type = definition[:type] do
+      args = Keyword.put(args, :type, type)
+    end
+
+    if majority = definition[:majority] do
+      args = Keyword.put(args, :majority, majority)
+    end
+
+    if priority = definition[:priority] do
+      args = Keyword.put(args, :load_order, priority)
+    end
+
+    if local = definition[:local] do
+      args = Keyword.put(args, :local_content, local)
+    end
+
+    if copying = definition[:copying] do
+      if memory = copying[:memory] do
+        args = Keyword.put(args, :ram_copies, memory)
+      end
+
+      if disk = copying[:disk] do
+        args = Keyword.put(args, :disc_copies, disk)
+      end
+
+      if disk = copying[:disk!] do
+        args = Keyword.put(args, :disc_only_copies, disk)
+      end
+    end
+
+    if fragmentation = definition[:fragmentation] do
+      properties = []
+
+      if number = fragmentation[:number] do
+        properties = Keyword.put(properties, :n_fragments, number)
+      end
+
+      if copying = fragmentation[:copying] do
+        if memory = copying[:memory] do
+          properties = Keyword.put(properties, :n_ram_copies, memory)
+        end
+
+        if disk = copying[:disk] do
+          properties = Keyword.put(properties, :n_disc_copies, disk)
+        end
+
+        if disk = copying[:disk!] do
+          properties = Keyword.put(properties, :n_disc_only_copies, disk)
+        end
+      end
+
+      if nodes = fragmentation[:nodes] do
+        properties = Keyword.put(properties, :node_pool, nodes)
+      end
+
+      if foreign = fragmentation[:foreign] do
+        if key = foreign[:key] do
+          properties = Keyword.put(properties, :foreign_key, key)
+        end
+      end
+
+      if hash = fragmentation[:hash] do
+        if module = hash[:module] do
+          properties = Keyword.put(properties, :hash_module, module)
+        end
+
+        if state = hash[:state] do
+          properties = Keyword.put(properties, :hash_state, state)
+        end
+      end
+
+      args = Keyword.put(args, :frag_properties, properties)
+    end
+
+    :mnesia.create_table(name, args) |> result
   end
 
   @doc """
@@ -52,11 +138,11 @@ defmodule Amnesia.Table do
   @spec create!(atom) :: :ok | no_return
   @spec create!(atom, c) :: :ok | no_return
   def create!(name, definition // []) do
-    case :mnesia.create_table(name, definition) do
-      { :atomic, :ok } ->
+    case create(name, definition) do
+      :ok ->
         :ok
 
-      { :aborted, { :already_exists, _ } } ->
+      { :error, { :already_exists, _ } } ->
         raise Amnesia.TableExistsError, name: name
     end
   end
@@ -775,9 +861,8 @@ defmodule Amnesia.Table do
       raise ArgumentError, message: "the table attributes must be more than 1"
     end
 
-    block      = Keyword.get(opts, :do, nil)
-    opts       = Keyword.delete(opts, :do)
-    definition = []
+    block = Keyword.get(opts, :do, nil)
+    opts  = Keyword.delete(opts, :do)
 
     index = Keyword.get(opts, :index, [])
 
@@ -786,7 +871,9 @@ defmodule Amnesia.Table do
     end
 
     index = Enum.map(index, fn
-      a when is_integer a -> a + 1
+      a when is_integer a ->
+        a + 1
+
       a ->
         Enum.find_index(attributes, fn(i) ->
           case i do
@@ -796,81 +883,14 @@ defmodule Amnesia.Table do
         end) + 1
     end)
 
-    definition = Keyword.put(definition, :index, if(index == [1], do: [], else: index))
-
-    definition = Keyword.put(definition, :access_mode, if opts[:mode] do
-      case opts[:mode] do
-        :both  -> :read_write
-        :read! -> :read_only
-      end
-    else
-      :read_write
-    end)
-
-    if opts[:type] do
-      definition = Keyword.put(definition, :type, opts[:type])
-    end
-
-    if opts[:majority] do
-      definition = Keyword.put(definition, :majority, opts[:majority])
-    end
-
-    if opts[:priority] do
-      definition = Keyword.put(definition, :load_order, opts[:priority])
-    end
-
-    if opts[:local] do
-      definition = Keyword.put(definition, :local_content, opts[:local])
-    end
-
-    if opts[:fragmentation] do
-      properties = []
-
-      if number = opts[:fragmentation][:number] do
-        properties = Keyword.put(properties, :n_fragments, number)
-      end
-
-      if copying = opts[:fragmentation][:copying] do
-        if copying[:memory] do
-          properties = Keyword.put(properties, :n_ram_copies, copying[:memory])
-        end
-
-        if copying[:disk] do
-          properties = Keyword.put(properties, :n_disc_copies, copying[:disk])
-        end
-
-        if copying[:disk!] do
-          properties = Keyword.put(properties, :n_disc_only_copies, copying[:disk!])
-        end
-      end
-
-      if nodes = opts[:fragmentation][:nodes] do
-        properties = Keyword.put(properties, :node_pool, nodes)
-      end
-
-      if foreign = opts[:fragmentation][:foreign] do
-        if foreign[:key] do
-          properties = Keyword.put(properties, :foreign_key, foreign[:key])
-        end
-      end
-
-      if hash = opts[:hash] do
-        if hash[:module] do
-          properties = Keyword.put(properties, :hash_module, hash[:module])
-        end
-
-        if hash[:state] do
-          properties = Keyword.put(properties, :hash_state, hash[:state])
-        end
-      end
-
-      definition = Keyword.put(definition, :frag_properties, properties)
-    end
+    index = if index == [1], do: [], else: index
 
     quote do
       defrecord unquote(name), unquote(attributes) do
-        @doc false
-        def __options__ do
+        @doc """
+        The options passed when the table was defined.
+        """
+        def options do
           unquote(opts)
         end
 
@@ -907,24 +927,11 @@ defmodule Amnesia.Table do
         end
 
         defp attributes(copying) do
-          definition = Keyword.merge(unquote(definition), [
-            record_name: __MODULE__,
-            attributes:  Keyword.keys(@record_fields)
+          Keyword.merge(unquote(opts), [
+            attributes: Keyword.keys(@record_fields),
+            copying:    copying,
+            index:      unquote(index)
           ])
-
-          if copying[:memory] do
-            definition = Keyword.put(definition, :ram_copies, copying[:memory])
-          end
-
-          if copying[:disk] do
-            definition = Keyword.put(definition, :disc_copies, copying[:disk])
-          end
-
-          if copying[:disk!] do
-            definition = Keyword.put(definition, :disc_only_copies, copying[:disk!])
-          end
-
-          definition
         end
 
         @doc """

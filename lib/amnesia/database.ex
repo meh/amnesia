@@ -42,9 +42,11 @@ defmodule Amnesia.Database do
             end) ] |> List.flatten
         end
 
-        @doc false
-        @spec __tables__ :: [atom]
-        def __tables__ do
+        @doc """
+        List of atoms of the defined tables in the database.
+        """
+        @spec tables :: [atom]
+        def tables do
           @tables
         end
 

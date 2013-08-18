@@ -71,3 +71,11 @@ defdatabase Database do
   end
 end
 ```
+
+Documentation
+-------------
+All the code has `@spec` and `@doc`, so you can either go around the source and
+read the `@docs`, use the REPL and `h/1` or generate the documentation with
+`ex_doc`.
+
+There also some pages on the wiki from the gentleman @jschoch.

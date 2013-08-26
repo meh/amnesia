@@ -63,7 +63,7 @@ defmodule Amnesia do
   """
   @spec error(atom) :: String.t
   def error(code) do
-    to_binary :mnesia.error_description(code)
+    :mnesia.error_description(code) |> to_string
   end
 
   @doc """

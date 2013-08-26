@@ -263,6 +263,18 @@ defmodule DatabaseTest do
     end == true)
   end
 
+  test "qualified where works" do
+    Amnesia.transaction! do
+      User[id: 1, name: "John"].write
+      User[id: 2, name: "Lucas"].write
+      User[id: 3, name: "David"].write
+    end
+
+    assert(Amnesia.transaction! do
+      assert User.where(user.name == "John", select: user.id, qualified: true).values == [1]
+    end == true)
+  end
+
   test "enumerator works" do
     Amnesia.transaction! do
       User[id: 1, name: "John"].write

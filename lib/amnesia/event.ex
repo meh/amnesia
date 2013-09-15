@@ -40,7 +40,7 @@ defmodule Amnesia.Event do
   end
 
   def handle(categories, fun) do
-    Enum.each categories, subscribe(&1)
+    Enum.each categories, &subscribe(&1)
 
     handle([], fun)
   end

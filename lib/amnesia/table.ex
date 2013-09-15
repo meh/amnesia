@@ -888,6 +888,16 @@ defmodule Amnesia.Table do
     quote do
       defrecord unquote(name), unquote(attributes) do
         @doc """
+        Require the needed modules to use the table effectively.
+        """
+        defmacro __using__(_opts) do
+          quote do
+            require Exquisite
+            require unquote(__MODULE__)
+          end
+        end
+
+        @doc """
         The options passed when the table was defined.
         """
         def options do

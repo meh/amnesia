@@ -437,6 +437,14 @@ defmodule Amnesia.Table do
   end
 
   @doc """
+  Get the number of records in the given table.
+  """
+  @spec count(atom) :: non_neg_integer
+  def count(name) do
+    info(name, :size)
+  end
+
+  @doc """
   Read records from the given table with the given key, locking in the given
   mode, see `mnesia:read`.
 
@@ -1137,6 +1145,14 @@ defmodule Amnesia.Table do
         @spec member?(any) :: boolean
         def member?(key) do
           Amnesia.Table.member?(__MODULE__, key)
+        end
+
+        @doc """
+        Get the number of records in the table.
+        """
+        @spec count :: non_neg_integer
+        def count do
+          Amnesia.Table.count(__MODULE__)
         end
 
         if unquote(opts[:type]) == :bag do

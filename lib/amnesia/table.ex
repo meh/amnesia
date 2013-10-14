@@ -1519,10 +1519,13 @@ defmodule Amnesia.Table do
         Select records in the table using simple don't care values, see
         `mnesia:match_object`.
         """
-        @spec match(any) :: [t] | nil | no_return
-        @spec match(any, :read | :write) :: [t] | no_return
-        def match(pattern, lock // :read) do
-          Amnesia.Table.match(__MODULE__, pattern, lock)
+        @spec match(any)                 :: [t] | nil | no_return
+        @spec match(:read | :write, any) :: [t] | nil | no_return
+        defmacro match(lock // :read, pattern) do
+          quote do
+            Amnesia.Table.match(unquote(__MODULE__),
+              unquote(__MODULE__)[[unquote_splicing(pattern), { :_, :_ }]], unquote(lock))
+          end
         end
 
         @doc """
@@ -1530,8 +1533,11 @@ defmodule Amnesia.Table do
         `mnesia:dirty_match_object`.
         """
         @spec match!(any) :: [t] | nil | no_return
-        def match!(pattern) do
-          Amnesia.Table.match!(__MODULE__, pattern)
+        defmacro match!(pattern) do
+          quote do
+            Amnesia.Table.match!(unquote(__MODULE__),
+              unquote(__MODULE__)[[unquote_splicing(pattern), { :_, :_ }]])
+          end
         end
 
         @doc """

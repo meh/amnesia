@@ -17,7 +17,7 @@ defdatabase Test.Database do
     end
   end
 
-  deftable User, [:id, :name, :email], type: :ordered_set, index: [:email] do
+  deftable User, [{ :id, autoincrement }, :name, :email], type: :ordered_set, index: [:email] do
     @type t :: User[id: integer, name: String.t, email: String.t]
 
     def add_message(content, self) do
@@ -191,7 +191,7 @@ defmodule DatabaseTest do
     end
 
     assert(Amnesia.transaction! do
-      assert User.match(User[name: "Lucas", _: :_]).values ==
+      assert User.match(name: "Lucas").values ==
         [User[id: 2, name: "Lucas"]]
     end == true)
   end
@@ -300,6 +300,20 @@ defmodule DatabaseTest do
       assert Enum.map(User.to_sequence.reverse, fn(user) ->
         user.id
       end) == [3, 2, 1]
+    end == true)
+  end
+
+  test "autoincrement works" do
+    Amnesia.transaction! do
+      User[name: "John"].write
+      User[name: "Lucas"].write
+      User[name: "David"].write
+    end
+
+    assert(Amnesia.transaction! do
+      assert User.read(1).name == "John"
+      assert User.read(2).name == "Lucas"
+      assert User.read(3).name == "David"
     end == true)
   end
 

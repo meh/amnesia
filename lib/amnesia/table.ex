@@ -44,8 +44,11 @@ defmodule Amnesia.Table do
   def create(name, definition // []) do
     args = Keyword.new
 
-    args = Keyword.put(args, :record_name, name)
-    args = Keyword.put(args, :attributes, Keyword.fetch!(definition, :attributes))
+    args = Keyword.put(args, :record_name, Keyword.get(definition, :record, name))
+
+    if attributes = definition[:attributes] do
+      args = Keyword.put(args, :attributes, attributes)
+    end
 
     if mode = definition[:mode] || :both do
       args = Keyword.put(args, :access_mode, case mode do
@@ -864,7 +867,7 @@ defmodule Amnesia.Table do
   end
 
   @doc false
-  def deftable!(name, attributes, opts // []) do
+  def deftable!(database, name, attributes, opts // []) do
     if length(attributes) <= 1 do
       raise ArgumentError, message: "the table attributes must be more than 1"
     end
@@ -893,8 +896,20 @@ defmodule Amnesia.Table do
 
     index = if index == [1], do: [], else: index
 
+    { autoincrement, attributes } = Enum.reduce attributes, { [], [] }, fn
+      { name, { :autoincrement, _, _ } }, { autoincrement, attributes } ->
+        { [name | autoincrement], attributes ++ [name] }
+
+      field, { autoincrement, attributes } ->
+        { autoincrement, attributes ++ [field] }
+    end
+
     quote do
       defrecord unquote(name), unquote(attributes) do
+        @database unquote(database)
+        @options unquote(opts)
+        @autoincrement unquote(autoincrement)
+
         @doc """
         Require the needed modules to use the table effectively.
         """
@@ -906,10 +921,19 @@ defmodule Amnesia.Table do
         end
 
         @doc """
+        Return the database the table belongs to.
+        """
+        @spec database :: module
+        def database do
+          @database
+        end
+
+        @doc """
         The options passed when the table was defined.
         """
+        @spec options :: Keyword.t
         def options do
-          unquote(opts)
+          @options
         end
 
         @doc """
@@ -1640,20 +1664,62 @@ defmodule Amnesia.Table do
           Amnesia.Table.delete!(__MODULE__, key)
         end
 
-        @doc """
-        Write the record to the table, see `mnesia:write`.
-        """
-        @spec write(t) :: :ok | no_return
-        def write(self) do
-          :mnesia.write(self)
-        end
+        if Enum.empty? @autoincrement do
+          @doc """
+          Write the record to the table, see `mnesia:write`.
+          """
+          @spec write(t) :: t | no_return
+          def write(lock // :write, self) do
+            Amnesia.Table.write(__MODULE__, self, lock)
 
-        @doc """
-        Write the record to the table, see `mnesia:dirty_write`.
-        """
-        @spec write!(t) :: :ok | no_return
-        def write!(self) do
-          :mnesia.dirty_write(self)
+            self
+          end
+
+          @doc """
+          Write the record to the table, see `mnesia:dirty_write`.
+          """
+          @spec write!(t) :: t | no_return
+          def write!(self) do
+            Amnesia.Table.write!(__MODULE__, self)
+
+            self
+          end
+        else
+          @doc """
+          Write the record to the table, see `mnesia:write`.
+
+          Missing fields tagged as autoincrement will be incremented with the
+          counter if `nil`.
+          """
+          @spec write(t) :: t | no_return
+          def write(lock // :write, self) do
+            self = autoincrement(self)
+            Amnesia.Table.write(__MODULE__, self, lock)
+            self
+          end
+
+          @doc """
+          Write the record to the table, see `mnesia:dirty_write`.
+
+          Missing fields tagged as autoincrement will be incremented with the
+          counter if `nil`.
+          """
+          @spec write!(t) :: t | no_return
+          def write!(self) do
+            self = autoincrement(self)
+            Amnesia.Table.write!(__MODULE__, self)
+            self
+          end
+
+          defp autoincrement(record) do
+            Enum.reduce(@autoincrement, record.to_keywords, fn field, fields ->
+              if fields[field] |> nil? do
+                fields |> Keyword.put(field, @database.metadata.counter(__MODULE__, field, +1))
+              else
+                fields
+              end
+            end) |> __MODULE__.new
+          end
         end
 
         unquote(block)

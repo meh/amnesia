@@ -22,7 +22,8 @@ defmodule Amnesia.Database do
   def defdatabase!(name, do: block) do
     quote do
       defmodule unquote(name) do
-        use Amnesia.Database
+        use   Amnesia.Database
+        alias Amnesia.Metadata
 
         unquote(block)
 
@@ -34,8 +35,8 @@ defmodule Amnesia.Database do
           [ quote(do: require Amnesia),
             quote(do: require Amnesia.Fragment),
             quote(do: require Exquisite),
-            quote(do: alias unquote(__MODULE__)),
 
+            quote(do: alias unquote(__MODULE__)),
             Enum.map(@tables, fn module ->
               [ quote(do: alias unquote(module)),
                 quote(do: require unquote(module)) ]
@@ -56,9 +57,11 @@ defmodule Amnesia.Database do
         @spec create :: [Amnesia.Table.o]
         @spec create(Amnesia.Table.c) :: [Amnesia.Table.o]
         def create(copying // []) do
-          Enum.map @tables, fn(table) ->
-            table.create(copying)
-          end
+          [ metadata.create!(copying: copying) |
+
+            Enum.map @tables, fn(table) ->
+              table.create(copying)
+            end ]
         end
 
         @doc """
@@ -68,6 +71,8 @@ defmodule Amnesia.Database do
         @spec create! :: [Amnesia.Table.o]
         @spec create!(Amnesia.Table.c) :: [Amnesia.Table.o]
         def create!(copying // []) do
+          metadata.create!(copying: copying)
+
           Enum.each @tables, fn(table) ->
             table.create!(copying)
           end
@@ -78,9 +83,11 @@ defmodule Amnesia.Database do
         """
         @spec destroy :: [Amnesia.Table.o]
         def destroy do
-          Enum.map @tables, fn(table) ->
-            table.destroy
-          end
+          [ metadata.destroy |
+
+            Enum.map @tables, fn(table) ->
+              table.destroy
+            end ]
         end
 
         @doc """
@@ -89,9 +96,16 @@ defmodule Amnesia.Database do
         """
         @spec destroy! :: [Amnesia.Table.o]
         def destroy! do
+          metadata.destroy!
+
           Enum.each @tables, fn(table) ->
             table.destroy!
           end
+        end
+
+        @spec metadata :: Metadata.t
+        def metadata do
+          Metadata.for(__MODULE__)
         end
 
         @doc """
@@ -148,12 +162,10 @@ defmodule Amnesia.Database do
   @spec deftable(atom, [atom | { atom, any }], Keyword.t, Keyword.t) :: none
   defmacro deftable(name, attributes // nil, opts // [], do_block // []) do
     if attributes do
-      quote do
-        unquote Amnesia.Table.deftable!(name, attributes, Keyword.merge(opts, do_block))
+      [ Amnesia.Table.deftable!(__CALLER__.module, name, attributes, Keyword.merge(opts, do_block)),
 
         # add the defined table to the list
-        @tables unquote(name)
-      end
+        quote do: @tables unquote(name) ]
     else
       quote do
         alias __MODULE__.unquote(name)

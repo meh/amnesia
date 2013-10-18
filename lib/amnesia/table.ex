@@ -906,6 +906,8 @@ defmodule Amnesia.Table do
 
     quote do
       defrecord unquote(name), unquote(attributes) do
+        @type autoincrement :: non_neg_integer
+
         @database unquote(database)
         @options unquote(opts)
         @autoincrement unquote(autoincrement)

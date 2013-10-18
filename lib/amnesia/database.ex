@@ -57,7 +57,7 @@ defmodule Amnesia.Database do
         @spec create :: [Amnesia.Table.o]
         @spec create(Amnesia.Table.c) :: [Amnesia.Table.o]
         def create(copying // []) do
-          [ metadata.create!(copying: copying) |
+          [ metadata.create(copying: copying) |
 
             Enum.map @tables, fn(table) ->
               table.create(copying)

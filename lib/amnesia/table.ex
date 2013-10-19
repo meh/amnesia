@@ -1566,7 +1566,7 @@ defmodule Amnesia.Table do
         defmacro match(lock // :read, pattern) do
           quote do
             Amnesia.Table.match(unquote(__MODULE__),
-              unquote(__MODULE__)[[unquote_splicing(pattern), { :_, :_ }]], unquote(lock))
+              unquote(__MODULE__)[unquote_splicing(pattern), { :_, :_ }], unquote(lock))
           end
         end
 
@@ -1578,7 +1578,7 @@ defmodule Amnesia.Table do
         defmacro match!(pattern) do
           quote do
             Amnesia.Table.match!(unquote(__MODULE__),
-              unquote(__MODULE__)[[unquote_splicing(pattern), { :_, :_ }]])
+              unquote(__MODULE__)[unquote_splicing(pattern), { :_, :_ }])
           end
         end
 

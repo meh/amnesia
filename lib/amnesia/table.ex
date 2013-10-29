@@ -906,6 +906,8 @@ defmodule Amnesia.Table do
 
     quote do
       defrecord unquote(name), unquote(attributes) do
+        use Amnesia.Hooks, write: 1, read: 2
+
         @type autoincrement :: non_neg_integer
 
         @database unquote(database)
@@ -1195,7 +1197,15 @@ defmodule Amnesia.Table do
           @spec read(any) :: [t] | nil | no_return
           @spec read(any, :read | :write | :write!) :: [t] | nil | no_return
           def read(key, lock // :read) do
-            Amnesia.Table.read(__MODULE__, key, lock)
+            records = Amnesia.Table.read(__MODULE__, key, lock)
+
+            case hook_read(key, records) do
+              :undefined ->
+                records
+
+              updated ->
+                updated
+            end
           end
 
           @doc """
@@ -1203,7 +1213,15 @@ defmodule Amnesia.Table do
           """
           @spec read!(any) :: [t] | nil | no_return
           def read!(key) do
-            Amnesia.Table.read!(__MODULE__, key)
+            records = Amnesia.Table.read!(__MODULE__, key)
+
+            case hook_read(key, records) do
+              :undefined ->
+                records
+
+              updated ->
+                updated
+            end
           end
         else
           @doc """
@@ -1220,9 +1238,17 @@ defmodule Amnesia.Table do
           @spec read(any) :: t | nil | no_return
           @spec read(any, :read | :write | :write!) :: t | nil | no_return
           def read(key, lock // :read) do
-            case Amnesia.Table.read(__MODULE__, key, lock) do
+            record = case Amnesia.Table.read(__MODULE__, key, lock) do
               [r] -> r
               _   -> nil
+            end
+
+            case hook_read(key, record) do
+              :undefined ->
+                record
+
+              updated ->
+                updated
             end
           end
 
@@ -1233,9 +1259,17 @@ defmodule Amnesia.Table do
           """
           @spec read!(any) :: t | nil | no_return
           def read!(key) do
-            case Amnesia.Table.read!(__MODULE__, key) do
+            record = case Amnesia.Table.read!(__MODULE__, key) do
               [r] -> r
               _   -> nil
+            end
+
+            case hook_read(key, record) do
+              :undefined ->
+                record
+
+              updated ->
+                updated
             end
           end
         end
@@ -1672,9 +1706,15 @@ defmodule Amnesia.Table do
           """
           @spec write(t) :: t | no_return
           def write(lock // :write, self) do
-            Amnesia.Table.write(__MODULE__, self, lock)
+            case hook_write(self) do
+              :undefined ->
+                Amnesia.Table.write(__MODULE__, self, lock)
+                self
 
-            self
+              updated ->
+                Amnesia.Table.write(__MODULE__, updated, lock)
+                updated
+            end
           end
 
           @doc """
@@ -1682,9 +1722,15 @@ defmodule Amnesia.Table do
           """
           @spec write!(t) :: t | no_return
           def write!(self) do
-            Amnesia.Table.write!(__MODULE__, self)
+            case hook_write(self) do
+              :undefined ->
+                Amnesia.Table.write!(__MODULE__, self)
+                self
 
-            self
+              updated ->
+                Amnesia.Table.write!(__MODULE__, updated)
+                updated
+            end
           end
         else
           @doc """
@@ -1696,8 +1742,16 @@ defmodule Amnesia.Table do
           @spec write(t) :: t | no_return
           def write(lock // :write, self) do
             self = autoincrement(self)
-            Amnesia.Table.write(__MODULE__, self, lock)
-            self
+
+            case hook_write(self) do
+              :undefined ->
+                Amnesia.Table.write(__MODULE__, self, lock)
+                self
+
+              updated ->
+                Amnesia.Table.write(__MODULE__, updated, lock)
+                updated
+            end
           end
 
           @doc """
@@ -1709,8 +1763,16 @@ defmodule Amnesia.Table do
           @spec write!(t) :: t | no_return
           def write!(self) do
             self = autoincrement(self)
-            Amnesia.Table.write!(__MODULE__, self)
-            self
+
+            case hook_write(self) do
+              :undefined ->
+                Amnesia.Table.write!(__MODULE__, self)
+                self
+
+              updated ->
+                Amnesia.Table.write!(__MODULE__, updated)
+                updated
+            end
           end
 
           defp autoincrement(record) do

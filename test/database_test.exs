@@ -275,6 +275,18 @@ defmodule DatabaseTest do
     end == true)
   end
 
+  test "specced where works" do
+    Amnesia.transaction! do
+      User[id: { 1, 1 }, name: "John"].write
+      User[id: { 2, 1 }, name: "Lucas"].write
+      User[id: { 3, 1 }, name: "David"].write
+    end
+
+    assert(Amnesia.transaction! do
+      assert User.where(id.first == 1, in: [id: { first, second }], select: id.first).values == [1]
+    end == true)
+  end
+
   test "enumerator works" do
     Amnesia.transaction! do
       User[id: 1, name: "John"].write

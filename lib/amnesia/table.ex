@@ -1534,11 +1534,20 @@ defmodule Amnesia.Table do
 
           quote do
             spec = unquote(
-              if options[:qualified] do
-                quote do: Exquisite.match(unquote(qualifier_for(__MODULE__)) in unquote(__MODULE__),
-                  unquote(options))
-              else
-                quote do: Exquisite.match(unquote(__MODULE__), unquote(options))
+              cond do
+                options[:qualified] && options[:in] ->
+                  quote do: Exquisite.match(unquote(qualifier_for(__MODULE__)) in unquote(__MODULE__)[unquote_splicing(options[:in])],
+                    unquote(options))
+
+                options[:qualified] ->
+                  quote do: Exquisite.match(unquote(qualifier_for(__MODULE__)) in unquote(__MODULE__),
+                    unquote(options))
+
+                options[:in] ->
+                  quote do: Exquisite.match(unquote(__MODULE__)[unquote_splicing(options[:in])], unquote(options))
+
+                true ->
+                  quote do: Exquisite.match(unquote(__MODULE__), unquote(options))
               end)
 
             lock  = unquote(options[:lock])
@@ -1572,11 +1581,20 @@ defmodule Amnesia.Table do
 
           quote do
             spec = unquote(
-              if options[:qualified] do
-                quote do: Exquisite.match(unquote(qualifier_for(__MODULE__)) in unquote(__MODULE__),
-                  unquote(options))
-              else
-                quote do: Exquisite.match(unquote(__MODULE__), unquote(options))
+              cond do
+                options[:qualified] && options[:in] ->
+                  quote do: Exquisite.match(unquote(qualifier_for(__MODULE__)) in unquote(__MODULE__)[unquote_splicing(options[:in])],
+                    unquote(options))
+
+                options[:qualified] ->
+                  quote do: Exquisite.match(unquote(qualifier_for(__MODULE__)) in unquote(__MODULE__),
+                    unquote(options))
+
+                options[:in] ->
+                  quote do: Exquisite.match(unquote(__MODULE__)[unquote_splicing(options[:in])], unquote(options))
+
+                true ->
+                  quote do: Exquisite.match(unquote(__MODULE__), unquote(options))
               end)
 
             Amnesia.Table.select!(unquote(__MODULE__), spec)

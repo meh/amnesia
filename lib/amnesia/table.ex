@@ -61,6 +61,10 @@ defmodule Amnesia.Table do
       args = Keyword.put(args, :type, type)
     end
 
+    if index = definition[:index] do
+      args = Keyword.put(args, :index, index)
+    end
+
     if majority = definition[:majority] do
       args = Keyword.put(args, :majority, majority)
     end
@@ -883,18 +887,18 @@ defmodule Amnesia.Table do
 
     index = Enum.map(index, fn
       a when is_integer a ->
-        a + 1
+        a + 2
 
       a ->
-        Enum.find_index(attributes, fn(i) ->
+        Enum.find_index(attributes, fn i ->
           case i do
             { name, _ } -> a == name
             name        -> a == name
           end
-        end) + 1
+        end) + 2
     end)
 
-    index = if index == [1], do: [], else: index
+    index = if index == [2], do: [], else: index
 
     { autoincrement, attributes } = Enum.reduce attributes, { [], [] }, fn
       { name, { :autoincrement, _, _ } }, { autoincrement, attributes } ->
@@ -1279,12 +1283,8 @@ defmodule Amnesia.Table do
         see `mnesia:index_read`.
         """
         @spec read_at(any, integer | atom) :: [t] | nil | no_return
-        def read_at(key, position) when is_integer position do
+        def read_at(key, position) do
           Amnesia.Table.read_at(__MODULE__, key, position)
-        end
-
-        def read_at(key, position) when is_atom position do
-          Amnesia.Table.read_at(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &(&1 == position)))
         end
 
         @doc """
@@ -1292,12 +1292,8 @@ defmodule Amnesia.Table do
         see `mnesia:dirty_index_read`.
         """
         @spec read_at!(any, integer | atom) :: [t] | nil | no_return
-        def read_at!(key, position) when is_integer position do
+        def read_at!(key, position) do
           Amnesia.Table.read_at!(__MODULE__, key, position)
-        end
-
-        def read_at!(key, position) when is_atom position do
-          Amnesia.Table.read_at!(__MODULE__, key, 1 + Enum.find_index(Keyword.keys(@record_fields), &(&1 == position)))
         end
 
         @doc """

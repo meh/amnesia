@@ -287,6 +287,18 @@ defmodule DatabaseTest do
     end == true)
   end
 
+  test "read_at works" do
+    Amnesia.transaction! do
+      User[id: 1, name: "John", email: "john@email.com"].write
+      User[id: 2, name: "Lucas", email: "lucas@email.com"].write
+      User[id: 3, name: "David", email: "david@email.com"].write
+    end
+
+    assert(Amnesia.transaction! do
+      assert User.read_at("john@email.com", :email) == [User[id: 1, name: "John", email: "john@email.com"]]
+    end == true)
+  end
+
   test "enumerator works" do
     Amnesia.transaction! do
       User[id: 1, name: "John"].write

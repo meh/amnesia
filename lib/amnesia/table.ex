@@ -878,27 +878,7 @@ defmodule Amnesia.Table do
 
     block = Keyword.get(opts, :do, nil)
     opts  = Keyword.delete(opts, :do)
-
     index = Keyword.get(opts, :index, [])
-
-    unless is_list index do
-      index = [index]
-    end
-
-    index = Enum.map(index, fn
-      a when is_integer a ->
-        a + 2
-
-      a ->
-        Enum.find_index(attributes, fn i ->
-          case i do
-            { name, _ } -> a == name
-            name        -> a == name
-          end
-        end) + 2
-    end)
-
-    index = if index == [2], do: [], else: index
 
     { autoincrement, attributes } = Enum.reduce attributes, { [], [] }, fn
       { name, { :autoincrement, _, _ } }, { autoincrement, attributes } ->

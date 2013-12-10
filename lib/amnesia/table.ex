@@ -890,7 +890,7 @@ defmodule Amnesia.Table do
 
     quote do
       defrecord unquote(name), unquote(attributes) do
-        use Amnesia.Hooks, write: 1, read: 2
+        use Amnesia.Hooks, write: 1, write!: 1, read: 2, read!: 2
 
         @type autoincrement :: non_neg_integer
 
@@ -1199,7 +1199,7 @@ defmodule Amnesia.Table do
           def read!(key) do
             records = Amnesia.Table.read!(__MODULE__, key)
 
-            case hook_read(key, records) do
+            case hook_read!(key, records) do
               :undefined ->
                 records
 
@@ -1248,7 +1248,7 @@ defmodule Amnesia.Table do
               _   -> nil
             end
 
-            case hook_read(key, record) do
+            case hook_read!(key, record) do
               :undefined ->
                 record
 
@@ -1716,7 +1716,7 @@ defmodule Amnesia.Table do
           """
           @spec write!(t) :: t | no_return
           def write!(self) do
-            case hook_write(self) do
+            case hook_write!(self) do
               :undefined ->
                 Amnesia.Table.write!(__MODULE__, self)
                 self
@@ -1758,7 +1758,7 @@ defmodule Amnesia.Table do
           def write!(self) do
             self = autoincrement(self)
 
-            case hook_write(self) do
+            case hook_write!(self) do
               :undefined ->
                 Amnesia.Table.write!(__MODULE__, self)
                 self

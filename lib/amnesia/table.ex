@@ -671,6 +671,12 @@ defmodule Amnesia.Table do
     def next(selection(continuation: c)) do
       new(:mnesia.select(c))
     end
+
+    defimpl Data.Sequenceable do
+      def to_sequence(self) do
+        self.values
+      end
+    end
   end
 
   @doc """
@@ -755,6 +761,12 @@ defmodule Amnesia.Table do
     @spec next(t) :: nil
     def next(match()) do
       nil
+    end
+
+    defimpl Data.Sequenceable do
+      def to_sequence(self) do
+        self.values
+      end
     end
   end
 

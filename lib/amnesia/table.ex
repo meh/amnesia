@@ -908,8 +908,8 @@ defmodule Amnesia.Table do
 
         @type autoincrement :: non_neg_integer
 
-        @database unquote(database)
-        @options unquote(opts)
+        @database      unquote(database)
+        @options       unquote(opts)
         @autoincrement unquote(autoincrement)
 
         @doc """

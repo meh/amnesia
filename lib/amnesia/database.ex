@@ -38,7 +38,16 @@ defmodule Amnesia.Database do
 
             quote(do: alias unquote(__MODULE__)),
             Enum.map(@tables, fn module ->
-              [ quote(do: alias unquote(module)),
+              to = Module.split(module)
+                |> Enum.drop(Module.split(__MODULE__) |> length)
+
+              if length(to) > 1 do
+                to = Module.concat(__MODULE__, to |> hd)
+              else
+                to = module
+              end
+
+              [ quote(do: alias unquote(to)),
                 quote(do: require unquote(module)) ]
             end) ] |> List.flatten
         end

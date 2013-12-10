@@ -183,7 +183,7 @@ defmodule Amnesia.Access do
       @spec transaction(function, list) :: any | no_return
       def transaction(fun, args) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity(:transaction, fun, args, unquote(@target)) }
+          { :atomic, :mnesia.activity(:transaction, fun, args, @target) }
         catch
           :exit, error -> error
         end |> Amnesia.result
@@ -196,7 +196,7 @@ defmodule Amnesia.Access do
       @spec transaction(function, list, integer) :: any | no_return
       def transaction(fun, args, retries) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, unquote(@target)) }
+          { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, @target) }
         catch
           :exit, error -> error
         end |> Amnesia.result
@@ -235,7 +235,7 @@ defmodule Amnesia.Access do
       @spec transaction!(function, list) :: any | no_return
       def transaction!(fun, args) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity(:sync_transaction, fun, args, unquote(@target)) }
+          { :atomic, :mnesia.activity(:sync_transaction, fun, args, @target) }
         catch
           :exit, error -> error
         end |> Amnesia.result
@@ -249,7 +249,7 @@ defmodule Amnesia.Access do
       @spec transaction!(function, list, integer) :: any | no_return
       def transaction!(fun, args, retries) when is_function fun, length args do
         try do
-          { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, unquote(@target)) }
+          { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, @target) }
         catch
           :exit, error -> error
         end |> Amnesia.result
@@ -277,7 +277,7 @@ defmodule Amnesia.Access do
       """
       @spec ets(function, list) :: any | no_return
       def ets(fun, args) when is_function fun, length args do
-        :mnesia.activity(:ets, fun, args, unquote(@target))
+        :mnesia.activity(:ets, fun, args, @target)
       end
 
       @doc """
@@ -303,7 +303,7 @@ defmodule Amnesia.Access do
       """
       @spec async(function, list) :: any | no_return
       def async(fun, args) when is_function fun, length args do
-        :mnesia.activity(:async_dirty, fun, args, unquote(@target))
+        :mnesia.activity(:async_dirty, fun, args, @target)
       end
 
       @doc """
@@ -329,7 +329,7 @@ defmodule Amnesia.Access do
       """
       @spec sync(function, list) :: any
       def sync(fun, args) when is_function fun, length args do
-        :mnesia.activity(:sync_dirty, fun, args, unquote(@target))
+        :mnesia.activity(:sync_dirty, fun, args, @target)
       end
     end
   end

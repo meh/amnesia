@@ -902,6 +902,8 @@ defmodule Amnesia.Table do
 
     quote do
       defrecord unquote(name), unquote(attributes) do
+        require Exquisite
+
         use Amnesia.Hooks, write: 1, write!: 1, read: 2, read!: 2
 
         @type autoincrement :: non_neg_integer

@@ -292,8 +292,8 @@ defmodule Amnesia do
     result
   end
 
-  def result({ :aborted, { exception, stacktrace } }) when is_record(exception) do
-    raise exception, [], stacktrace
+  def result({ :aborted, { exception, stacktrace } }) when exception |> is_record do
+    raise Exception.normalize(exception), [], stacktrace
   end
 
   def result({ :aborted, error }) do

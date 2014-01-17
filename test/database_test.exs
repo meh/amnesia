@@ -1,4 +1,4 @@
-Code.require_file "../test_helper.exs", __FILE__
+Code.require_file "test_helper.exs", __DIR__
 
 use Amnesia
 
@@ -41,6 +41,7 @@ end
 defmodule DatabaseTest do
   use ExUnit.Case
   use Test.Database
+  alias Data.Seq
 
   test "type checking works" do
     assert User.ordered_set?
@@ -54,12 +55,12 @@ defmodule DatabaseTest do
       user.write
     end
 
-    Enum.first(User.read!(23).messages!).user!
+    Seq.first(User.read!(23).messages!).user!
 
     assert(Amnesia.transaction! do
       assert User.read(23) == User[id: 23]
       assert User.read(23).messages == [Message[user_id: 23, content: "yo dawg"]]
-      assert Enum.first(User.read(23).messages).user == User[id: 23]
+      assert Seq.first(User.read(23).messages).user == User[id: 23]
     end == true)
   end
 

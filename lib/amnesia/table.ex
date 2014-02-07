@@ -16,7 +16,7 @@ defmodule Amnesia.Table do
   """
   @spec wait([atom]) :: :ok | { :timeout, [atom] } | { :error, atom }
   @spec wait([atom], integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
-  def wait(names, timeout // :infinity) do
+  def wait(names, timeout \\ :infinity) do
     :mnesia.wait_for_tables(names, timeout)
   end
 
@@ -41,7 +41,7 @@ defmodule Amnesia.Table do
   """
   @spec create(atom) :: o
   @spec create(atom, c) :: o
-  def create(name, definition // []) do
+  def create(name, definition \\ []) do
     args = Keyword.new
 
     args = Keyword.put(args, :record_name, Keyword.get(definition, :record, name))
@@ -144,7 +144,7 @@ defmodule Amnesia.Table do
   """
   @spec create!(atom) :: :ok | no_return
   @spec create!(atom, c) :: :ok | no_return
-  def create!(name, definition // []) do
+  def create!(name, definition \\ []) do
     case create(name, definition) do
       :ok ->
         :ok
@@ -333,7 +333,7 @@ defmodule Amnesia.Table do
   """
   @spec add_copy(atom, node) :: o
   @spec add_copy(atom, node, cv) :: o
-  def add_copy(name, node, type // :disk) do
+  def add_copy(name, node, type \\ :disk) do
     :mnesia.add_table_copy(name, node, case type do
       :disk   -> :disc_copies
       :disk!  -> :disc_only_copies
@@ -461,7 +461,7 @@ defmodule Amnesia.Table do
   """
   @spec read(atom, any) :: [record] | no_return
   @spec read(atom, any, :read | :write | :write!) :: [record] | nil | no_return
-  def read(name, key, lock // :read) do
+  def read(name, key, lock \\ :read) do
     case :mnesia.read(name, key, case lock do
       :read   -> :read
       :write  -> :write
@@ -775,7 +775,7 @@ defmodule Amnesia.Table do
   `mnesia:match_object`.
   """
   @spec match(atom, any, :read | :write) :: [record] | nil | no_return
-  def match(name, pattern, lock // :read) do
+  def match(name, pattern, lock \\ :read) do
     Match.new(:mnesia.match_object(name, pattern, lock))
   end
 
@@ -809,7 +809,7 @@ defmodule Amnesia.Table do
   """
   @spec to_sequence(atom) :: Amnesia.Table.Sequence.t
   @spec to_sequence(atom, :read | :write | :write!) :: Amnesia.Table.Sequence.t
-  def to_sequence(name, lock // :read) do
+  def to_sequence(name, lock \\ :read) do
     Amnesia.Table.Sequence.new(name, type(name), lock: lock)
   end
 
@@ -832,7 +832,7 @@ defmodule Amnesia.Table do
   """
   @spec delete(atom, any) :: :ok | no_return
   @spec delete(atom, any, :write | :write!) :: :ok | no_return
-  def delete(name, key, lock // :write) do
+  def delete(name, key, lock \\ :write) do
     :mnesia.delete(name, key, case lock do
       :write  -> :write
       :write! -> :sticky_write
@@ -858,7 +858,7 @@ defmodule Amnesia.Table do
   """
   @spec write(atom, record) :: :ok | no_return
   @spec write(atom, record, :write | :write!) :: :ok | no_return
-  def write(name, data, lock // :write) do
+  def write(name, data, lock \\ :write) do
     :mnesia.write(name, data, case lock do
       :write  -> :write
       :write! -> :sticky_write
@@ -883,7 +883,7 @@ defmodule Amnesia.Table do
   end
 
   @doc false
-  def deftable!(database, name, attributes, opts // []) do
+  def deftable!(database, name, attributes, opts \\ []) do
     if length(attributes) <= 1 do
       raise ArgumentError, message: "the table attributes must be more than 1"
     end
@@ -943,7 +943,7 @@ defmodule Amnesia.Table do
         """
         @spec wait :: :ok | { :timeout, [atom] } | { :error, atom }
         @spec wait(integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
-        def wait(timeout // :infinity) do
+        def wait(timeout \\ :infinity) do
           Amnesia.Table.wait([__MODULE__], timeout)
         end
 
@@ -960,13 +960,13 @@ defmodule Amnesia.Table do
         """
         @spec create :: Amnesia.o
         @spec create(Amnesia.Table.c) :: Amnesia.o
-        def create(copying // []) do
+        def create(copying \\ []) do
           Amnesia.Table.create(__MODULE__, attributes(copying))
         end
 
         @spec create! :: :ok | no_return
         @spec create!(Amnesia.Table.c) :: :ok | no_return
-        def create!(copying // []) do
+        def create!(copying \\ []) do
           Amnesia.Table.create!(__MODULE__, attributes(copying))
         end
 
@@ -1083,7 +1083,7 @@ defmodule Amnesia.Table do
         """
         @spec add_copy(node) :: Amnesia.Table.o
         @spec add_copy(node, Amnesia.Table.cv) :: Amnesia.Table.o
-        def add_copy(node, type // :disk) do
+        def add_copy(node, type \\ :disk) do
           Amnesia.Table.add_copy(__MODULE__, node, type)
         end
 
@@ -1194,7 +1194,7 @@ defmodule Amnesia.Table do
           """
           @spec read(any) :: [t] | nil | no_return
           @spec read(any, :read | :write | :write!) :: [t] | nil | no_return
-          def read(key, lock // :read) do
+          def read(key, lock \\ :read) do
             records = Amnesia.Table.read(__MODULE__, key, lock)
 
             case hook_read(key, records) do
@@ -1235,7 +1235,7 @@ defmodule Amnesia.Table do
           """
           @spec read(any) :: t | nil | no_return
           @spec read(any, :read | :write | :write!) :: t | nil | no_return
-          def read(key, lock // :read) do
+          def read(key, lock \\ :read) do
             record = case Amnesia.Table.read(__MODULE__, key, lock) do
               [r] -> r
               _   -> nil
@@ -1333,7 +1333,7 @@ defmodule Amnesia.Table do
         @spec first                :: t | nil | no_return
         @spec first(boolean)       :: any | t | nil | no_return
         @spec first(boolean, atom) :: any | t | nil | no_return
-        def first(key // false, lock // :read)
+        def first(key \\ false, lock \\ :read)
 
         def first(true, lock) do
           Amnesia.Table.first(__MODULE__)
@@ -1353,7 +1353,7 @@ defmodule Amnesia.Table do
         """
         @spec first!          :: any | t | nil | no_return
         @spec first!(boolean) :: any | t | nil | no_return
-        def first!(key // false)
+        def first!(key \\ false)
 
         def first!(false) do
           read!(Amnesia.Table.first!(__MODULE__))
@@ -1442,7 +1442,7 @@ defmodule Amnesia.Table do
         @spec last                :: t | nil | no_return
         @spec last(boolean)       :: any | t | nil | no_return
         @spec last(boolean, atom) :: any | t | nil | no_return
-        def last(key // false, lock // :read)
+        def last(key \\ false, lock \\ :read)
 
         def last(true, lock) do
           Amnesia.Table.last(__MODULE__)
@@ -1462,7 +1462,7 @@ defmodule Amnesia.Table do
         """
         @spec last!          :: any | t | nil | no_return
         @spec last!(boolean) :: any | t | nil | no_return
-        def last!(key // false)
+        def last!(key \\ false)
 
         def last!(false) do
           read!(Amnesia.Table.last!(__MODULE__))
@@ -1519,7 +1519,7 @@ defmodule Amnesia.Table do
           * `qualified' - whether to set a name for the record or not
 
         """
-        defmacro where(spec, options // []) do
+        defmacro where(spec, options \\ []) do
           options = Keyword.put(options, :where, spec)
 
           quote do
@@ -1566,7 +1566,7 @@ defmodule Amnesia.Table do
           * `qualified' - whether to set a name for the record or not
 
         """
-        defmacro where!(spec, options // []) do
+        defmacro where!(spec, options \\ []) do
           options = Keyword.put(options, :where, spec)
 
           quote do
@@ -1605,7 +1605,7 @@ defmodule Amnesia.Table do
         """
         @spec match(any)                 :: [t] | nil | no_return
         @spec match(:read | :write, any) :: [t] | nil | no_return
-        defmacro match(lock // :read, pattern) do
+        defmacro match(lock \\ :read, pattern) do
           quote do
             Amnesia.Table.match(unquote(__MODULE__),
               unquote(__MODULE__)[unquote_splicing(pattern), { :_, :_ }], unquote(lock))
@@ -1645,7 +1645,7 @@ defmodule Amnesia.Table do
         """
         @spec to_sequence :: Amnesia.Table.Sequence.t
         @spec to_sequence(:read | :write | :write!) :: Amnesia.Table.Sequence.t
-        def to_sequence(lock // :read) do
+        def to_sequence(lock \\ :read) do
           Amnesia.Table.to_sequence(__MODULE__, lock)
         end
 
@@ -1713,7 +1713,7 @@ defmodule Amnesia.Table do
           Write the record to the table, see `mnesia:write`.
           """
           @spec write(t) :: t | no_return
-          def write(lock // :write, self) do
+          def write(lock \\ :write, self) do
             case hook_write(self) do
               :undefined ->
                 Amnesia.Table.write(__MODULE__, self, lock)
@@ -1748,7 +1748,7 @@ defmodule Amnesia.Table do
           counter if `nil`.
           """
           @spec write(t) :: t | no_return
-          def write(lock // :write, self) do
+          def write(lock \\ :write, self) do
             self = autoincrement(self)
 
             case hook_write(self) do

@@ -65,7 +65,7 @@ defmodule Amnesia.Database do
         """
         @spec create :: [Amnesia.Table.o]
         @spec create(Amnesia.Table.c) :: [Amnesia.Table.o]
-        def create(copying // []) do
+        def create(copying \\ []) do
           [ metadata.create(copying: copying) |
 
             Enum.map @tables, fn(table) ->
@@ -79,7 +79,7 @@ defmodule Amnesia.Database do
         """
         @spec create! :: [Amnesia.Table.o]
         @spec create!(Amnesia.Table.c) :: [Amnesia.Table.o]
-        def create!(copying // []) do
+        def create!(copying \\ []) do
           metadata.create!(copying: copying)
 
           Enum.each @tables, fn(table) ->
@@ -122,7 +122,7 @@ defmodule Amnesia.Database do
         """
         @spec wait :: :ok | { :timeout, [atom] } | { :error, atom }
         @spec wait(integer | :infinity) :: :ok | { :timeout, [atom] } | { :error, atom }
-        def wait(timeout // :infinity) do
+        def wait(timeout \\ :infinity) do
           Amnesia.Table.wait(@tables, timeout)
         end
       end
@@ -169,7 +169,7 @@ defmodule Amnesia.Database do
   @spec deftable(atom, [atom | { atom, any }]) :: none
   @spec deftable(atom, [atom | { atom, any }], Keyword.t) :: none
   @spec deftable(atom, [atom | { atom, any }], Keyword.t, Keyword.t) :: none
-  defmacro deftable(name, attributes // nil, opts // [], do_block // []) do
+  defmacro deftable(name, attributes \\ nil, opts \\ [], do_block \\ []) do
     if attributes do
       [ Amnesia.Table.deftable!(__CALLER__.module, name, attributes, Keyword.merge(opts, do_block)),
 

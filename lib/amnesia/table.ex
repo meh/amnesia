@@ -1593,7 +1593,7 @@ defmodule Amnesia.Table do
 
         defp qualifier_for(module) do
           name = module |> to_string |> String.split(".") |> List.last
-            |> String.replace(%r/[A-Z]/, "_&") |> String.slice(1, 255)
+            |> String.replace(~r/[A-Z]/, "_&") |> String.slice(1, 255)
             |> String.downcase |> binary_to_atom
 
           { name, [], [] }

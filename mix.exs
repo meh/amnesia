@@ -4,7 +4,7 @@ defmodule Amnesia.Mixfile do
   def project do
     [ app: :amnesia,
       version: "0.1.1",
-      elixir: "~> 0.12.3",
+      elixir: "~> 0.12.4",
       deps: deps ]
   end
 

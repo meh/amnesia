@@ -246,6 +246,9 @@ Amnesia.transaction do
 
   # Get the values in the selector and print them.
   selector.values |> Enum.each &IO.puts(&1.content)
+  
+  # Just for fun, let's read *all* Users
+  users = User.where(true).values
 end
 ```
 

@@ -71,6 +71,35 @@ defmodule DatabaseTest do
     end == true)
   end
 
+  test "async dirty functionality works" do
+    Amnesia.async do
+      user = User[id: 23]
+      user.add_message("yo dawg")
+      user.write
+    end
+
+    assert(Amnesia.async do
+      assert User.read(23) == User[id: 23]
+      assert User.read(23).messages == [Message[user_id: 23, content: "yo dawg"]]
+      assert Seq.first(User.read(23).messages).user == User[id: 23]
+    end == true)
+  end
+
+  
+  test "sync dirty functionality works" do
+    Amnesia.sync do
+      user = User[id: 23]
+      user.add_message("yo dawg")
+      user.write
+    end
+
+    assert(Amnesia.sync do
+      assert User.read(23) == User[id: 23]
+      assert User.read(23).messages == [Message[user_id: 23, content: "yo dawg"]]
+      assert Seq.first(User.read(23).messages).user == User[id: 23]
+    end == true)
+  end
+
   test "first fetches a key" do
     Amnesia.transaction! do
       User[id: 1, name: "John"].write

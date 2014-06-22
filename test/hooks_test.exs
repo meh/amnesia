@@ -4,12 +4,12 @@ use Amnesia
 
 defdatabase Test.Hooks.Database do
   deftable Foo, [:key, :value] do
-    defhook write(Foo[key: key]) when key == :wut do
-      Foo[key: :wut, value: 42]
+    defhook write(%Foo{key: key}) when key == :wut do
+      %Foo{key: :wut, value: 42}
     end
 
-    defhook write(Foo[key: key, value: value]) do
-      Foo[key: key, value: value * 2]
+    defhook write(%Foo{key: key, value: value}) do
+      %Foo{key: key, value: value * 2}
     end
   end
 end
@@ -20,7 +20,7 @@ defmodule HooksTest do
 
   test "hooks work" do
     Amnesia.transaction! do
-      assert Foo[key: :lol, value: 2].write
+      assert %Foo{key: :lol, value: 2} |> Foo.write
     end
 
     assert(Amnesia.transaction do
@@ -30,7 +30,7 @@ defmodule HooksTest do
 
   test "when works in hooks" do
     Amnesia.transaction! do
-      assert Foo[key: :wut, value: 2].write
+      assert %Foo{key: :wut, value: 2} |> Foo.write
     end
 
     assert(Amnesia.transaction do

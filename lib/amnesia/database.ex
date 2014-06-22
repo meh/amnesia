@@ -66,7 +66,7 @@ defmodule Amnesia.Database do
         @spec create :: [Amnesia.Table.o]
         @spec create(Amnesia.Table.c) :: [Amnesia.Table.o]
         def create(copying \\ []) do
-          [ metadata.create(copying: copying) |
+          [ metadata |> Metadata.create(copying: copying) |
 
             Enum.map @tables, fn(table) ->
               table.create(copying)
@@ -80,7 +80,7 @@ defmodule Amnesia.Database do
         @spec create! :: [Amnesia.Table.o]
         @spec create!(Amnesia.Table.c) :: [Amnesia.Table.o]
         def create!(copying \\ []) do
-          metadata.create!(copying: copying)
+          metadata |> Metadata.create!(copying: copying)
 
           Enum.each @tables, fn(table) ->
             table.create!(copying)
@@ -92,7 +92,7 @@ defmodule Amnesia.Database do
         """
         @spec destroy :: [Amnesia.Table.o]
         def destroy do
-          [ metadata.destroy |
+          [ metadata |> Metadata.destroy |
 
             Enum.map @tables, fn(table) ->
               table.destroy
@@ -105,7 +105,7 @@ defmodule Amnesia.Database do
         """
         @spec destroy! :: [Amnesia.Table.o]
         def destroy! do
-          metadata.destroy!
+          metadata |> Metadata.destroy!
 
           Enum.each @tables, fn(table) ->
             table.destroy!
@@ -171,7 +171,7 @@ defmodule Amnesia.Database do
   @spec deftable(atom, [atom | { atom, any }], Keyword.t, Keyword.t) :: none
   defmacro deftable(name, attributes \\ nil, opts \\ [], do_block \\ []) do
     if attributes do
-      [ Amnesia.Table.deftable!(__CALLER__.module, name, attributes, Keyword.merge(opts, do_block)),
+      [ Amnesia.Table.Definition.define(__CALLER__.module, name, attributes, Keyword.merge(opts, do_block)),
 
         # add the defined table to the list
         quote do: @tables unquote(name) ]

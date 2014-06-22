@@ -6,14 +6,18 @@
 #
 #  0. You just DO WHAT THE FUCK YOU WANT TO.
 
-defexception Amnesia.TableExistsError, name: nil do
-  def message(exception) do
-    "Table #{inspect exception.name} already exists"
+defmodule Amnesia.TableExistsError do
+  defexception message: nil
+
+  def exception(name: name) do
+    %__MODULE__{message: "Table #{inspect name} already exists"}
   end
 end
 
-defexception Amnesia.TableMissingError, name: nil do
-  def message(exception) do
-    "Table #{inspect exception.name} doesn't exists"
+defmodule Amnesia.TableMissingError do
+  defexception message: nil
+
+  def exception(name: name) do
+    %__MODULE__{message: "Table #{inspect name} doesn't exists"}
   end
 end

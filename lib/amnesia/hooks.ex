@@ -7,11 +7,11 @@ defmodule Amnesia.Hooks do
         args = Enum.map 1 .. arity, fn _ -> { :_, [], nil } end
 
         quote do
-          def unquote("hook_#{name}" |> binary_to_atom)(unquote_splicing(args)) do
+          def unquote("hook_#{name}" |> String.to_atom)(unquote_splicing(args)) do
             :undefined
           end
 
-          defoverridable [{ unquote("hook_#{name}" |> binary_to_atom), unquote(arity) }]
+          defoverridable [{ unquote("hook_#{name}" |> String.to_atom), unquote(arity) }]
         end
       end) ]
   end
@@ -24,7 +24,7 @@ defmodule Amnesia.Hooks do
         raise ArgumentError, message: "unknown #{unquote(name)} hook with #{unquote(length(args))} arity"
       end
 
-      def unquote("hook_#{name}" |> binary_to_atom)(unquote_splicing(args)) when unquote(guard) do
+      def unquote("hook_#{name}" |> String.to_atom)(unquote_splicing(args)) when unquote(guard) do
         unquote(body)
       end
     end
@@ -38,7 +38,7 @@ defmodule Amnesia.Hooks do
         raise ArgumentError, message: "unknown #{unquote(name)} hook with #{unquote(length(args))} arity"
       end
 
-      def unquote("hook_#{name}" |> binary_to_atom)(unquote_splicing(args)) do
+      def unquote("hook_#{name}" |> String.to_atom)(unquote_splicing(args)) do
         unquote(body)
       end
     end

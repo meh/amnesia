@@ -123,13 +123,13 @@ defmodule Amnesia do
   @spec transaction([do: term] | term) :: any | no_return
   defmacro transaction(do: block) do
     quote do
-      :mnesia.transaction(fn -> unquote(block) end) |> Amnesia.result
+      Amnesia.result(:mnesia.transaction(fn -> unquote(block) end))
     end
   end
 
   defmacro transaction(term) do
     quote do
-      :mnesia.transaction(unquote(term)) |> Amnesia.result
+      Amnesia.result(:mnesia.transaction(unquote(term)))
     end
   end
 
@@ -139,7 +139,7 @@ defmodule Amnesia do
   """
   @spec transaction(function, list) :: any | no_return
   def transaction(fun, args) when is_function fun, length args do
-    :mnesia.transaction(fun, args) |> Amnesia.result
+    Amnesia.result(:mnesia.transaction(fun, args))
   end
 
   @doc """
@@ -148,7 +148,7 @@ defmodule Amnesia do
   """
   @spec transaction(function, list, integer) :: any | no_return
   def transaction(fun, args, retries) when is_function fun, length args do
-    :mnesia.transaction(fun, args, retries) |> Amnesia.result
+    Amnesia.result(:mnesia.transaction(fun, args, retries))
   end
 
   @doc """
@@ -158,13 +158,13 @@ defmodule Amnesia do
   @spec transaction!([do: term] | term) :: any | no_return
   defmacro transaction!(do: block) do
     quote do
-      :mnesia.sync_transaction(fn -> unquote(block) end) |> Amnesia.result
+      Amnesia.result(:mnesia.sync_transaction(fn -> unquote(block) end))
     end
   end
 
   defmacro transaction!(term) do
     quote do
-      :mnesia.sync_transaction(unquote(term)) |> Amnesia.result
+      Amnesia.result(:mnesia.sync_transaction(unquote(term)))
     end
   end
 
@@ -174,7 +174,7 @@ defmodule Amnesia do
   """
   @spec transaction!(function, list) :: any | no_return
   def transaction!(fun, args) when is_function fun, length args do
-    :mnesia.sync_transaction(fun, args) |> Amnesia.result
+    Amnesia.result(:mnesia.sync_transaction(fun, args))
   end
 
   @doc """
@@ -184,7 +184,7 @@ defmodule Amnesia do
   """
   @spec transaction!(function, list, integer) :: any | no_return
   def transaction!(fun, args, retries) when is_function fun, length args do
-    :mnesia.sync_transaction(fun, args, retries) |> Amnesia.result
+    Amnesia.result(:mnesia.sync_transaction(fun, args, retries))
   end
 
   @doc """
@@ -193,13 +193,13 @@ defmodule Amnesia do
   @spec ets([do: term] | term) :: any
   defmacro ets(do: block) do
     quote do
-      :mnesia.ets(fn -> unquote(block) end) |> Amnesia.result
+      Amnesia.result(:mnesia.ets(fn -> unquote(block) end))
     end
   end
 
   defmacro ets(term) do
     quote do
-      :mnesia.ets(unquote(term)) |> Amnesia.result
+      Amnesia.result(:mnesia.ets(unquote(term)))
     end
   end
 
@@ -209,7 +209,7 @@ defmodule Amnesia do
   """
   @spec ets(function, list) :: any
   def ets(fun, args) when is_function fun, length args do
-    :mnesia.ets(fun, args) |> Amnesia.result
+    Amnesia.result(:mnesia.ets(fun, args))
   end
 
   @doc """
@@ -219,13 +219,13 @@ defmodule Amnesia do
   @spec async([do: term] | term) :: any
   defmacro async(do: block) do
     quote do
-      :mnesia.async_dirty(fn -> unquote(block) end) |> Amnesia.result
+      Amnesia.result(:mnesia.async_dirty(fn -> unquote(block) end))
     end
   end
 
   defmacro async(term) do
     quote do
-      :mnesia.async_dirty(unquote(term)) |> Amnesia.result
+      Amnesia.result(:mnesia.async_dirty(unquote(term)))
     end
   end
 
@@ -235,7 +235,7 @@ defmodule Amnesia do
   """
   @spec async(function, list) :: any
   def async(fun, args) when is_function fun, length args do
-    :mnesia.async_dirty(fun, args) |> Amnesia.result
+    Amnesia.result(:mnesia.async_dirty(fun, args))
   end
 
   @doc """
@@ -245,13 +245,13 @@ defmodule Amnesia do
   @spec sync([do: term] | term) :: any
   defmacro sync(do: block) do
     quote do
-      :mnesia.sync_dirty(fn -> unquote(block) end) |> Amnesia.result
+      Amnesia.result(:mnesia.sync_dirty(fn -> unquote(block) end))
     end
   end
 
   defmacro sync(term) do
     quote do
-      :mnesia.sync_dirty(unquote(term)) |> Amnesia.result
+      Amnesia.result(:mnesia.sync_dirty(unquote(term)))
     end
   end
 
@@ -261,7 +261,7 @@ defmodule Amnesia do
   """
   @spec sync(function, list) :: any
   def sync(fun, args) when is_function fun, length args do
-    :mnesia.sync_dirty(fun, args) |> Amnesia.result
+    Amnesia.result(:mnesia.sync_dirty(fun, args))
   end
 
   @doc """
@@ -288,15 +288,28 @@ defmodule Amnesia do
   end
 
   @doc false
-  def result({ :atomic, result }) do
-    result
-  end
+  defmacro result(result) do
+    quote do
+      result = try do
+        unquote(result)
+      catch
+        :exit, error ->
+          error
+      end
 
-  def result({ :aborted, { exception, stacktrace } }) do
-    reraise Exception.normalize(:error, exception), stacktrace
-  end
+      case result do
+        { :atomic, result } ->
+          result
 
-  def result({ :aborted, error }) do
-    throw error
+        { :aborted, { exception, stacktrace } } ->
+          reraise Exception.normalize(:error, exception), stacktrace
+
+        { :aborted, error } ->
+          throw error
+
+        result ->
+          result
+      end
+    end
   end
 end

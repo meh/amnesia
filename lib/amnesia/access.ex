@@ -151,28 +151,23 @@ defmodule Amnesia.Access do
         @behaviour Amnesia.Access
       end
 
+      require Amnesia
+
       @doc """
       Start a transaction with the given block or function, see `mnesia:transaction`.
       """
       @spec transaction([do: term] | term) :: any | no_return
       defmacro transaction(do: block) do
         quote do
-          try do
-            { :atomic, :mnesia.activity(:transaction,
-              fn -> unquote(block) end, [], unquote(@target)) }
-          catch
-            :exit, error -> error
-          end |> Amnesia.result
+          Amnesia.result(:mnesia.activity(:transaction,
+            fn -> unquote(block) end, [], unquote(@target)))
         end
       end
 
       defmacro transaction(term) do
         quote do
-          try do
-            { :atomic, :mnesia.activity(:transaction, unquote(term), [], unquote(@target)) }
-          catch
-            :exit, error -> error
-          end |> Amnesia.result
+          Amnesia.result(:mnesia.activity(:transaction,
+            unquote(term), [], unquote(@target)))
         end
       end
 
@@ -182,11 +177,7 @@ defmodule Amnesia.Access do
       """
       @spec transaction(function, list) :: any | no_return
       def transaction(fun, args) when is_function fun, length args do
-        try do
-          { :atomic, :mnesia.activity(:transaction, fun, args, @target) }
-        catch
-          :exit, error -> error
-        end |> Amnesia.result
+        Amnesia.result(:mnesia.activity(:transaction, fun, args, @target))
       end
 
       @doc """
@@ -195,11 +186,8 @@ defmodule Amnesia.Access do
       """
       @spec transaction(function, list, integer) :: any | no_return
       def transaction(fun, args, retries) when is_function fun, length args do
-        try do
-          { :atomic, :mnesia.activity({ :transaction, retries }, fun, args, @target) }
-        catch
-          :exit, error -> error
-        end |> Amnesia.result
+        Amnesia.result(:mnesia.activity({ :transaction, retries },
+          fun, args, @target))
       end
 
       @doc """
@@ -209,22 +197,15 @@ defmodule Amnesia.Access do
       @spec transaction!([] | function) :: any | no_return
       defmacro transaction!(do: block) do
         quote do
-          try do
-            { :atomic, :mnesia.activity(:sync_transaction,
-              fn -> unquote(block) end, [], unquote(@target)) }
-          catch
-            :exit, error -> error
-          end |> Amnesia.result
+          Amnesia.result(:mnesia.activity(:sync_transaction,
+            fn -> unquote(block) end, [], unquote(@target)))
         end
       end
 
       defmacro transaction!(term) do
         quote do
-          try do
-            { :atomic, :mnesia.activity(:sync_transaction, unquote(term), [], unquote(@target)) }
-          catch
-            :exit, error -> error
-          end |> Amnesia.result
+          Amnesia.result(:mnesia.activity(:sync_transaction,
+            unquote(term), [], unquote(@target)))
         end
       end
 
@@ -234,11 +215,7 @@ defmodule Amnesia.Access do
       """
       @spec transaction!(function, list) :: any | no_return
       def transaction!(fun, args) when is_function fun, length args do
-        try do
-          { :atomic, :mnesia.activity(:sync_transaction, fun, args, @target) }
-        catch
-          :exit, error -> error
-        end |> Amnesia.result
+        Amnesia.result(:mnesia.activity(:sync_transaction, fun, args, @target))
       end
 
       @doc """
@@ -248,11 +225,8 @@ defmodule Amnesia.Access do
       """
       @spec transaction!(function, list, integer) :: any | no_return
       def transaction!(fun, args, retries) when is_function fun, length args do
-        try do
-          { :atomic, :mnesia.activity({ :sync_transaction, retries }, fun, args, @target) }
-        catch
-          :exit, error -> error
-        end |> Amnesia.result
+        Amnesia.result(:mnesia.activity({ :sync_transaction, retries },
+          fun, args, @target))
       end
 
       @doc """

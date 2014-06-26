@@ -64,6 +64,7 @@ defmodule Amnesia.Table.Definition do
         defstruct unquote(attributes)
 
         use Amnesia.Hooks, write: 1, write!: 1, read: 2, read!: 2
+        require Exquisite
 
         alias Amnesia.Table, as: T
         alias Amnesia.Table.Definition, as: D
@@ -717,8 +718,6 @@ defmodule Amnesia.Table.Definition do
 
         """
         defmacro where(spec, options \\ []) do
-          require Exquisite
-
           options = Keyword.put(options, :where, spec)
 
           quote do
@@ -752,8 +751,6 @@ defmodule Amnesia.Table.Definition do
 
         """
         defmacro where!(spec, options \\ []) do
-          require Exquisite
-
           options = Keyword.put(options, :where, spec)
 
           quote do

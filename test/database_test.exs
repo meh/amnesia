@@ -31,6 +31,11 @@ defdatabase Test.Database do
     def messages!(self) do
       Message.read!(self.id)
     end
+
+    def odd do
+      where rem(id, 2) == 1,
+        select: name
+    end
   end
 end
 
@@ -280,6 +285,18 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert User.where(id.first == 1, in: [id: { first, second }], select: id.first).values == [1]
+    end == true)
+  end
+
+  test "where works inside the module itself" do
+    Amnesia.transaction! do
+      %User{id: 1, name: "John"} |> User.write
+      %User{id: 2, name: "Lucas"} |> User.write
+      %User{id: 3, name: "David"} |> User.write
+    end
+
+    assert(Amnesia.transaction! do
+      assert Selection.values(User.odd) == ["John", "David"]
     end == true)
   end
 

@@ -35,7 +35,7 @@ defdatabase Database do
   # makes the table a bag; tables are basically records with a bunch of helpers
   deftable Message, [:user_id, :content], type: :bag do
     # this isn't required, but it's always nice to spec things
-    @type t :: Message[user_id: integer, content: String.t]
+    @type t :: %Message{user_id: integer, content: String.t}
 
     # this defines a helper function to fetch the user from a Message record
     def user(self) do
@@ -52,18 +52,18 @@ defdatabase Database do
   # additional index as email, this improves lookup operations
   deftable User, [{ :id, autoincrement }, :name, :email], type: :ordered_set, index: [:email] do
     # again not needed, but nice to have
-    @type t :: User[id: non_neg_integer, name: String.t, email: String.t]
+    @type t :: %User{id: non_neg_integer, name: String.t, email: String.t}
 
     # this is a helper function to add a message to the user, using write
     # on the created records makes it write to the mnesia table
-    def add_message(content, self) do
-      Message[user_id: self.id, content: content].write
+    def add_message(self, content) do
+      %Message{user_id: self.id, content: content} |> Message.write
     end
 
     # like above, but again with dirty operations, the bang methods are used
     # thorough amnesia to be the dirty counterparts of the bang-less functions
-    def add_message!(content, self) do
-      Message[user_id: self.id, content: content].write!
+    def add_message!(self, content) do
+      %Message{user_id: self.id, content: content} |> Message.write!
     end
 
     # this is a helper to fetch all messages for the user
@@ -166,15 +166,15 @@ Amnesia.transaction do
   #
   # If you want to know the values of the autoincrement fields, `.write` always
   # returns the updated record.
-  john = User[name: "John", email: "john@example.com"].write
+  john = %User{name: "John", email: "john@example.com"} |> User.write
 
   # Let's create more users.
-  richard = User[name: "Richard", email: "richard@example.com"].write
-  linus   = User[name: "Linus", email: "linus@example.com"].write
+  richard = %User{name: "Richard", email: "richard@example.com"} |> User.write
+  linus   = %User{name: "Linus", email: "linus@example.com"} |> User.write
 
   # Now let's add some messages.
 
-  john.add_message %S"""
+  john |> User.add_message %S"""
   When we program a computer to make choices intelligently after determining
   its options, examining their consequences, and deciding which is most
   favorable or most moral or whatever, we must program it to take an attitude
@@ -182,40 +182,40 @@ Amnesia.transaction do
   must take to his own.
   """
 
-  john.add_message %S"""
+  john |> User.add_message %S"""
   He who refuses to do arithmetic is doomed to talk nonsense."
   """
 
-  john.add_message %S"""
+  john |> User.add_message %S"""
   It's difficult to be rigorous about whether a machine really 'knows',
   'thinks', etc., because we're hard put to define these things. We understand
   human mental processes only slightly better than a fish understands swimming.
   """
 
-  richard.add_message %S"""
+  richard |> User.add_message %S"""
   For personal reasons, I do not browse the web from my computer. (I also have
   no net connection much of the time.) To look at page I send mail to a daemon
   which runs wget and mails the page back to me. It is very efficient use of my
   time, but it is slow in real time.
   """
 
-  richard.add_message %S"""
+  richard |> User.add_message %S"""
   I am skeptical of the claim that voluntarily pedophilia harms children. The
   arguments that it causes harm seem to be based on cases which aren't
   voluntary, which are then stretched by parents who are horrified by the idea
   that their little baby is maturing.
   """
 
-  linus.add_message %S"""
+  linus |> User.add_message %S"""
   Portability is for people who cannot write new programs.
   """
 
-  linus.add_message %S"""
+  linus |> User.add_message %S"""
   Really, I'm not out to destroy Microsoft. That will just be a completely
   unintentional side effect.
   """
 
-  linus.add_message %S"""
+  linus |> User.add_message %S"""
   Modern PCs are horrible. ACPI is a complete design disaster in every way. But
   we're kind of stuck with it. If any Intel people are listening to this and
   you had anything to do with ACPI, shoot yourself now, before you reproduce.
@@ -238,14 +238,14 @@ Amnesia.transaction do
   john = User.read(1)
 
   # Now let's read his messages and print them all.
-  john.messages |> Enum.each &IO.puts(&1.content)
+  john |> User.messages |> Enum.each &IO.puts(&1.content)
 
   # You can also use an Exquisite selector to fetch records.
-  selector = Message.where user_id == 1 or user_id == 2,
+  selection = Message.where user_id == 1 or user_id == 2,
     select: content
 
   # Get the values in the selector and print them.
-  selector.values |> Enum.each &IO.puts(&1.content)
+  selection |> Amnesia.Selection.values |> Enum.each &IO.puts(&1.content)
 end
 ```
 

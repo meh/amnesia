@@ -40,21 +40,17 @@ defmodule HooksTest do
 
   setup_all do
     Amnesia.Test.start
-  end
 
-  teardown_all do
-    Amnesia.Test.stop
+    on_exit fn ->
+      Amnesia.Test.stop
+    end
   end
 
   setup do
     Test.Hooks.Database.create!
 
-    :ok
-  end
-
-  teardown do
-    Test.Hooks.Database.destroy
-
-    :ok
+    on_exit fn ->
+      Test.Hooks.Database.destroy
+    end
   end
 end

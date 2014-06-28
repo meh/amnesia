@@ -342,21 +342,17 @@ defmodule DatabaseTest do
 
   setup_all do
     Amnesia.Test.start
-  end
 
-  teardown_all do
-    Amnesia.Test.stop
+    on_exit fn ->
+      Amnesia.Test.stop
+    end
   end
 
   setup do
     Test.Database.create!
 
-    :ok
-  end
-
-  teardown do
-    Test.Database.destroy
-
-    :ok
+    on_exit fn ->
+      Test.Database.destroy
+    end
   end
 end

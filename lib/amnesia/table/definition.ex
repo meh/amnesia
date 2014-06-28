@@ -169,7 +169,7 @@ defmodule Amnesia.Table.Definition do
         end
 
         defp attributes(copying) do
-          Keyword.merge(unquote(opts), [
+          Keyword.merge(@options, [
             attributes: Keyword.keys(unquote(attributes)),
             copying:    copying,
             index:      unquote(index)
@@ -189,7 +189,7 @@ defmodule Amnesia.Table.Definition do
         """
         @spec type(t) :: :set | :ordered_set | :bag
         def type(self) do
-          unquote(opts[:type])
+          @options[:type]
         end
 
         @doc """
@@ -197,7 +197,7 @@ defmodule Amnesia.Table.Definition do
         """
         @spec bag? :: boolean
         def bag? do
-          unquote(opts[:type]) == :bag
+          @options[:type] == :bag
         end
 
         @doc """
@@ -205,7 +205,7 @@ defmodule Amnesia.Table.Definition do
         """
         @spec set? :: boolean
         def set? do
-          (unquote(opts[:type]) || :set) == :set
+          (@options[:type] || :set) == :set
         end
 
         @doc """
@@ -213,7 +213,7 @@ defmodule Amnesia.Table.Definition do
         """
         @spec ordered_set? :: boolean
         def ordered_set? do
-          unquote(opts[:type]) == :ordered_set
+          @options[:type] == :ordered_set
         end
 
         @doc """
@@ -379,7 +379,7 @@ defmodule Amnesia.Table.Definition do
           T.count(__MODULE__)
         end
 
-        if unquote(opts[:type]) == :bag do
+        if @options[:type] == :bag do
           @doc """
           Read records from the table with the given key and given lock, see
           `mnesia:read`.

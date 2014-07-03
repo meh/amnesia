@@ -815,7 +815,7 @@ defmodule Amnesia.Table.Definition do
         """
         @spec stream! :: T.Stream.t
         def stream! do
-          T.stream(__MODULE__)
+          T.stream!(__MODULE__)
         end
 
         @doc """

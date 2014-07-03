@@ -39,6 +39,28 @@ defmodule Amnesia.Table.Definition do
   end
 
   @doc false
+  def autoincrement(module, database, attributes, record) do
+    alias Amnesia.Metadata, as: M
+
+    Enum.reduce attributes, record, fn field, record ->
+      if record |> Map.get(field) |> nil? do
+        record |> Map.put(field, database.metadata |> M.counter(module, field, +1))
+      else
+        record
+      end
+    end
+  end
+
+  @doc false
+  def attributes(attributes, options, index, copying) do
+    Keyword.merge(options, [
+      attributes: Keyword.keys(attributes),
+      copying:    copying,
+      index:      index
+    ])
+  end
+
+  @doc false
   def define(database, name, attributes, opts \\ []) do
     if length(attributes) <= 1 do
       raise ArgumentError, message: "the table attributes must be more than 1"
@@ -76,6 +98,7 @@ defmodule Amnesia.Table.Definition do
         @options       unquote(opts)
         @autoincrement unquote(autoincrement)
         @attributes    unquote(attributes)
+        @index         unquote(index)
 
         @doc """
         Require the needed modules to use the table effectively.
@@ -159,29 +182,13 @@ defmodule Amnesia.Table.Definition do
         @spec create :: Amnesia.o
         @spec create(T.c) :: Amnesia.o
         def create(copying \\ []) do
-          T.create(__MODULE__, attributes(copying))
+          T.create(__MODULE__, D.attributes(@attributes, @options, @index, copying))
         end
 
         @spec create! :: :ok | no_return
         @spec create!(T.c) :: :ok | no_return
         def create!(copying \\ []) do
-          T.create!(__MODULE__, attributes(copying))
-        end
-
-        defp attributes(copying) do
-          Keyword.merge(@options, [
-            attributes: Keyword.keys(unquote(attributes)),
-            copying:    copying,
-            index:      unquote(index)
-          ])
-        end
-
-        @doc """
-        Get the table name from the record.
-        """
-        @spec table(t) :: atom
-        def table(self) do
-          elem self, 0
+          T.create!(__MODULE__, D.attributes(@attributes, @options, @index, copying))
         end
 
         @doc """
@@ -868,91 +875,45 @@ defmodule Amnesia.Table.Definition do
           T.delete!(__MODULE__, key)
         end
 
-        if Enum.empty? @autoincrement do
-          @doc """
-          Write the record to the table, see `mnesia:write`.
-          """
-          @spec write(t) :: t | no_return
-          def write(self, lock \\ :write) do
-            case hook_write(self) do
-              :undefined ->
-                T.write(__MODULE__, coerce(self), lock)
-                self
+        @doc """
+        Write the record to the table, see `mnesia:write`.
 
-              updated ->
-                T.write(__MODULE__, coerce(updated), lock)
-                updated
-            end
+        Missing fields tagged as autoincrement will be incremented with the
+        counter if `nil`.
+        """
+        @spec write(t) :: t | no_return
+        def write(self, lock \\ :write) do
+          self = D.autoincrement(__MODULE__, @database, @autoincrement, self)
+
+          case hook_write(self) do
+            :undefined ->
+              T.write(__MODULE__, coerce(self), lock)
+              self
+
+            updated ->
+              T.write(__MODULE__, coerce(updated), lock)
+              updated
           end
+        end
 
-          @doc """
-          Write the record to the table, see `mnesia:dirty_write`.
-          """
-          @spec write!(t) :: t | no_return
-          def write!(self) do
-            case hook_write!(self) do
-              :undefined ->
-                T.write!(__MODULE__, coerce(self))
-                self
+        @doc """
+        Write the record to the table, see `mnesia:dirty_write`.
 
-              updated ->
-                T.write!(__MODULE__, coerce(updated))
-                updated
-            end
-          end
-        else
-          @doc """
-          Write the record to the table, see `mnesia:write`.
+        Missing fields tagged as autoincrement will be incremented with the
+        counter if `nil`.
+        """
+        @spec write!(t) :: t | no_return
+        def write!(self) do
+          self = D.autoincrement(__MODULE__, @database, @autoincrement, self)
 
-          Missing fields tagged as autoincrement will be incremented with the
-          counter if `nil`.
-          """
-          @spec write(t) :: t | no_return
-          def write(self, lock \\ :write) do
-            self = autoincrement(self)
+          case hook_write!(self) do
+            :undefined ->
+              T.write!(__MODULE__, coerce(self))
+              self
 
-            case hook_write(self) do
-              :undefined ->
-                T.write(__MODULE__, coerce(self), lock)
-                self
-
-              updated ->
-                T.write(__MODULE__, coerce(updated), lock)
-                updated
-            end
-          end
-
-          @doc """
-          Write the record to the table, see `mnesia:dirty_write`.
-
-          Missing fields tagged as autoincrement will be incremented with the
-          counter if `nil`.
-          """
-          @spec write!(t) :: t | no_return
-          def write!(self) do
-            self = autoincrement(self)
-
-            case hook_write!(self) do
-              :undefined ->
-                T.write!(__MODULE__, coerce(self))
-                self
-
-              updated ->
-                T.write!(__MODULE__, coerce(updated))
-                updated
-            end
-          end
-
-          defp autoincrement(record) do
-            alias Amnesia.Metadata, as: M
-
-            Enum.reduce @autoincrement, record, fn field, record ->
-              if record |> Map.get(field) |> nil? do
-                record |> Map.put(field, @database.metadata |> M.counter(__MODULE__, field, +1))
-              else
-                record
-              end
-            end
+            updated ->
+              T.write!(__MODULE__, coerce(updated))
+              updated
           end
         end
 

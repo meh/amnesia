@@ -323,6 +323,9 @@ defmodule DatabaseTest do
       assert Enum.map(User.stream, fn(user) ->
         user.id
       end) == [1, 2, 3]
+
+      refute Enum.member?(User.stream, 4)
+      assert Enum.member?(User.stream, %User{id: 1, name: "John"})
     end == true)
   end
 

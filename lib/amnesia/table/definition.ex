@@ -126,6 +126,14 @@ defmodule Amnesia.Table.Definition do
           @options
         end
 
+        @doc """
+        Get the name of the id key.
+        """
+        @spec id :: atom
+        def id do
+          unquote(attributes |> Enum.at(0) |> elem(0))
+        end
+
         @doc false
         def coerce(unquote({ :%, [], [{ :__MODULE__, [], nil }, { :%{}, [],
           for { key, _ } <- attributes do

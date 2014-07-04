@@ -91,11 +91,12 @@ defmodule Amnesia.Table.Stream do
       Amnesia.Table.Stream.reduce(stream, acc, fun)
     end
 
-    def count(stream) do
-      reduce(stream, 0, fn _, total -> total + 1 end)
+    def count(_) do
+      { :error, __MODULE__ }
     end
 
-    def member?(stream, value) do
+    def member?(_, _) do
+      { :error, __MODULE__ }
     end
   end
 end

@@ -240,6 +240,7 @@ defmodule DatabaseTest do
 
     assert(Amnesia.transaction! do
       assert Selection.values(User.where(name == "John", select: id)) == [1]
+      assert User.where(name == "Richard") == nil
     end == true)
   end
 

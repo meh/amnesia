@@ -17,17 +17,15 @@ defmodule Amnesia.Table.Definition do
       end
     end] }
 
-    cond do
-      options[:qualified] ->
-        qualifier = module |> to_string |> String.split(".") |> List.last
-          |> String.replace(~r/([A-Z])/, "_\\1") |> String.slice(1, 255)
-          |> String.downcase |> String.to_atom
+    if options[:qualified] do
+      qualifier = module |> to_string |> String.split(".") |> List.last
+        |> String.replace(~r/([A-Z])/, "_\\1") |> String.slice(1, 255)
+        |> String.downcase |> String.to_atom
 
-        quote do: Exquisite.match(unquote({ qualifier, [], nil }) in unquote(spec),
-          unquote(options))
-
-      true ->
-        quote do: Exquisite.match(unquote(spec), unquote(options))
+      quote do: Exquisite.match(unquote({ qualifier, [], nil }) in unquote(spec),
+        unquote(options))
+    else
+      quote do: Exquisite.match(unquote(spec), unquote(options))
     end
   end
 

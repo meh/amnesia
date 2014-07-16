@@ -10,6 +10,7 @@ defmodule Amnesia.Metadata do
   alias __MODULE__, as: M
 
   defstruct [:database]
+  @opaque t :: %__MODULE__{}
 
   @doc """
   Get the metadata for the given database.

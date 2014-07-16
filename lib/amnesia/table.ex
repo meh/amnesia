@@ -12,6 +12,8 @@ defmodule Amnesia.Table do
   @type o  :: :ok | { :error, any }
 
   alias Amnesia.Selection
+  alias Amnesia.Table.Select
+  alias Amnesia.Table.Match
 
   @doc """
   Wait for the passed tables for the given timeout, see `mnesia:wait_for_tables`.
@@ -627,50 +629,6 @@ defmodule Amnesia.Table do
     end
   end
 
-  defmodule Select do
-    defstruct values: [], continuation: nil, coerce: nil
-
-    @doc """
-    Get a selection from the various select results.
-    """
-    @spec new(:'$end_of_table' | list | { list, any }) :: t | nil
-    def new(value) do
-      case value do
-        :'$end_of_table' -> nil
-        []               -> nil
-        { [], _ }        -> nil
-
-        { values, continuation } ->
-          %Select{values: values, continuation: continuation}
-
-        [_ | _] ->
-          %Select{values: value}
-      end
-    end
-
-    defimpl Selection do
-      def coerce(selection, module) do
-        %Select{selection | coerce: module}
-      end
-
-      def next(%Select{continuation: nil}) do
-        nil
-      end
-
-      def next(%Select{continuation: c}) do
-        Select.new(:mnesia.select(c))
-      end
-
-      def values(%Select{values: values, coerce: nil}) do
-        values
-      end
-
-      def values(%Select{values: values, coerce: module}) do
-        module.coerce(values)
-      end
-    end
-  end
-
   @doc """
   Select records in the given table using a match_spec, see `mnesia:select`.
   """
@@ -712,39 +670,6 @@ defmodule Amnesia.Table do
   @spec select!(atom, any) :: Selection.t | nil | no_return
   def select!(name, spec) do
     Select.new(:mnesia.dirty_select(name, spec))
-  end
-
-  defmodule Match do
-    defstruct values: [], coerce: nil
-
-    @doc """
-    Get a match from the various match results.
-    """
-    @spec new([record]) :: t | nil
-    def new(value) do
-      case value do
-        [] -> nil
-        r  -> %Match{values: r}
-      end
-    end
-
-    defimpl Selection do
-      def coerce(match, module) do
-        %Match{match | coerce: module}
-      end
-
-      def next(%Match{}) do
-        nil
-      end
-
-      def values(%Match{values: values, coerce: nil}) do
-        values
-      end
-
-      def values(%Match{values: values, coerce: module}) do
-        module.coerce(values)
-      end
-    end
   end
 
   @doc """

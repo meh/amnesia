@@ -82,7 +82,6 @@ defmodule Amnesia.Table.Definition do
     quote do
       defmodule unquote(name) do
         defstruct unquote(attributes)
-        @type t :: %__MODULE__{}
 
         use Amnesia.Hooks, write: 1, write!: 1, read: 2, read!: 2
         require Exquisite
@@ -925,6 +924,10 @@ defmodule Amnesia.Table.Definition do
         end
 
         unquote(block)
+
+        unless Kernel.Typespec.defines_type?(__MODULE__, :t, 0) do
+          @opaque t :: %__MODULE__{}
+        end
       end
     end
   end

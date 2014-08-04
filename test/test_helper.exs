@@ -1,6 +1,6 @@
 defmodule Amnesia.Test do
   def start do
-    :error_logger.tty(false)
+    Logger.remove_backend :console
 
     Amnesia.Schema.create
     Amnesia.start
@@ -12,7 +12,7 @@ defmodule Amnesia.Test do
     Amnesia.stop
     Amnesia.Schema.destroy
 
-    :error_logger.tty(true)
+    Logger.add_backend :console, flush: true
 
     :ok
   end

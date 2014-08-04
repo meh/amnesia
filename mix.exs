@@ -4,7 +4,7 @@ defmodule Amnesia.Mixfile do
   def project do
     [ app: :amnesia,
       version: "0.2.0",
-      elixir: "~> 0.14.4-dev",
+      elixir: "~> 0.15.0",
       deps: deps,
       package: package,
       description: "mnesia wrapper for Elixir" ]
@@ -22,6 +22,6 @@ defmodule Amnesia.Mixfile do
   defp package do
     [ contributors: ["meh"],
       licenses: ["WTFPL"],
-      links: [ { "GitHub", "https://github.com/meh/amnesia" } ] ]
+      links: %{"GitHub" => "https://github.com/meh/amnesia"} ]
   end
 end

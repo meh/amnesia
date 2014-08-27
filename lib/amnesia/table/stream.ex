@@ -65,6 +65,13 @@ defmodule Amnesia.Table.Stream do
     table.read!(key)
   end
 
+  @doc """
+  Reverse the stream.
+  """
+  def reverse(%S{reverse: reverse} = self) do
+    %S{self | reverse: not reverse}
+  end
+
   @doc false
   def reduce(stream, acc, fun) do
     reduce(stream, first(stream), acc, fun)

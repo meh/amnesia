@@ -44,6 +44,7 @@ defmodule DatabaseTest do
   use Test.Database
 
   alias Amnesia.Selection
+  alias Amnesia.Table.Stream
 
   test "type checking works" do
     assert User.ordered_set?
@@ -324,6 +325,23 @@ defmodule DatabaseTest do
       assert Enum.map(User.stream, fn(user) ->
         user.id
       end) == [1, 2, 3]
+
+      refute Enum.member?(User.stream, 4)
+      assert Enum.member?(User.stream, %User{id: 1, name: "John"})
+    end == true)
+  end
+
+  test "reverse enumerator works" do
+    Amnesia.transaction! do
+      %User{id: 1, name: "John"} |> User.write
+      %User{id: 2, name: "Lucas"} |> User.write
+      %User{id: 3, name: "David"} |> User.write
+    end
+
+    assert(Amnesia.transaction! do
+      assert Enum.map(User.stream |> Stream.reverse, fn(user) ->
+        user.id
+      end) == [3, 2, 1]
 
       refute Enum.member?(User.stream, 4)
       assert Enum.member?(User.stream, %User{id: 1, name: "John"})

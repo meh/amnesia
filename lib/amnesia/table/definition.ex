@@ -41,7 +41,7 @@ defmodule Amnesia.Table.Definition do
     alias Amnesia.Metadata, as: M
 
     Enum.reduce attributes, record, fn field, record ->
-      if record |> Map.get(field) |> nil? do
+      if record |> Map.get(field) |> is_nil do
         record |> Map.put(field, database.metadata |> M.counter(module, field, +1))
       else
         record

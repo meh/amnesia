@@ -30,8 +30,8 @@ defmodule Amnesia.Table.Definition do
   end
 
   @doc false
-  def mnesia_pattern(module, pattern) do
-    [module | for { key, _ } <- module.__attributes__ do
+  def match(module, pattern) do
+    [module | for { key, _ } <- module.attributes do
       pattern[key] || :_
     end] |> List.to_tuple
   end
@@ -60,7 +60,7 @@ defmodule Amnesia.Table.Definition do
 
   defmacro __before_compile__(_) do
     quote do
-      def __attributes__, do: @attributes
+      def attributes, do: @attributes
     end
   end
 
@@ -787,7 +787,7 @@ defmodule Amnesia.Table.Definition do
         @spec match(any)                 :: [t] | nil | no_return
         @spec match(:read | :write, any) :: [t] | nil | no_return
         def match(lock \\ :read, pattern) do
-          T.match(__MODULE__, lock, D.mnesia_pattern(__MODULE__, pattern))
+          T.match(__MODULE__, lock, D.match(__MODULE__, pattern))
             |> S.coerce(__MODULE__)
         end
 
@@ -797,7 +797,7 @@ defmodule Amnesia.Table.Definition do
         """
         @spec match!(any) :: [t] | nil | no_return
         def match!(pattern) do
-          T.match!(__MODULE__, D.mnesia_pattern(__MODULE__, pattern))
+          T.match!(__MODULE__, D.match(__MODULE__, pattern))
             |> S.coerce(__MODULE__)
         end
 

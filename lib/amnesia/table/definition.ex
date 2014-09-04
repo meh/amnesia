@@ -58,12 +58,6 @@ defmodule Amnesia.Table.Definition do
     ])
   end
 
-  defmacro __before_compile__(_) do
-    quote do
-      def attributes, do: @attributes
-    end
-  end
-
   @doc false
   def define(database, name, attributes, opts \\ []) do
     if length(attributes) <= 1 do
@@ -104,8 +98,6 @@ defmodule Amnesia.Table.Definition do
         @attributes    unquote(attributes)
         @index         unquote(index)
 
-        @before_compile unquote(__MODULE__)
-
         @doc """
         Require the needed modules to use the table effectively.
         """
@@ -130,6 +122,14 @@ defmodule Amnesia.Table.Definition do
         @spec options :: Keyword.t
         def options do
           @options
+        end
+
+        @doc """
+        The in order keyword list of attributes passed when the table was defined.
+        """
+        @spec attributes :: Keyword.t
+        def attributes do
+          @attributes
         end
 
         @doc """

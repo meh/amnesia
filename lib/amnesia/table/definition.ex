@@ -30,10 +30,10 @@ defmodule Amnesia.Table.Definition do
   end
 
   @doc false
-  def match(module, attributes, pattern) do
-    { :{}, [], [module | for { key, _ } <- attributes do
+  def mnesia_pattern(module, pattern) do
+    [module | for { key, _ } <- module.__attributes__ do
       pattern[key] || :_
-    end] }
+    end] |> List.to_tuple
   end
 
   @doc false
@@ -56,6 +56,12 @@ defmodule Amnesia.Table.Definition do
       copying:    copying,
       index:      index
     ])
+  end
+
+  defmacro __before_compile__(_) do
+    quote do
+      def __attributes__, do: @attributes
+    end
   end
 
   @doc false
@@ -97,6 +103,8 @@ defmodule Amnesia.Table.Definition do
         @autoincrement unquote(autoincrement)
         @attributes    unquote(attributes)
         @index         unquote(index)
+
+        @before_compile unquote(__MODULE__)
 
         @doc """
         Require the needed modules to use the table effectively.
@@ -778,11 +786,9 @@ defmodule Amnesia.Table.Definition do
         """
         @spec match(any)                 :: [t] | nil | no_return
         @spec match(:read | :write, any) :: [t] | nil | no_return
-        defmacro match(lock \\ :read, pattern) do
-          quote do
-            S.coerce(T.match(unquote(__MODULE__), unquote(lock),
-              unquote(D.match(__MODULE__, @attributes, pattern))), unquote(__MODULE__))
-          end
+        def match(lock \\ :read, pattern) do
+          T.match(__MODULE__, lock, D.mnesia_pattern(__MODULE__, pattern))
+            |> S.coerce(__MODULE__)
         end
 
         @doc """
@@ -790,11 +796,9 @@ defmodule Amnesia.Table.Definition do
         `mnesia:dirty_match_object`.
         """
         @spec match!(any) :: [t] | nil | no_return
-        defmacro match!(pattern) do
-          quote do
-            S.coerce(T.match!(unquote(__MODULE__),
-              unquote(D.match(__MODULE__, @attributes, pattern))), unquote(__MODULE__))
-          end
+        def match!(pattern) do
+          T.match!(__MODULE__, D.mnesia_pattern(__MODULE__, pattern))
+            |> S.coerce(__MODULE__)
         end
 
         @doc """

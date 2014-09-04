@@ -46,6 +46,16 @@ defmodule DatabaseTest do
   alias Amnesia.Selection
   alias Amnesia.Table.Stream
 
+  test "match can use variables" do
+    user = Amnesia.transaction! do
+      %User{id: 23} |> User.write
+      query = [id: 23]
+      User.match(query)
+    end
+
+    assert [%Test.Database.User{id: 23} | _] = user |> Amnesia.Selection.values
+  end
+
   test "type checking works" do
     assert User.ordered_set?
     assert Message.bag?

@@ -30,10 +30,10 @@ defmodule Amnesia.Table.Definition do
   end
 
   @doc false
-  def match(module, attributes, pattern) do
-    { :{}, [], [module | for { key, _ } <- attributes do
+  def match(module, pattern) do
+    [module | for { key, _ } <- module.attributes do
       pattern[key] || :_
-    end] }
+    end] |> List.to_tuple
   end
 
   @doc false
@@ -122,6 +122,14 @@ defmodule Amnesia.Table.Definition do
         @spec options :: Keyword.t
         def options do
           @options
+        end
+
+        @doc """
+        The in order keyword list of attributes passed when the table was defined.
+        """
+        @spec attributes :: Keyword.t
+        def attributes do
+          @attributes
         end
 
         @doc """
@@ -778,11 +786,9 @@ defmodule Amnesia.Table.Definition do
         """
         @spec match(any)                 :: [t] | nil | no_return
         @spec match(:read | :write, any) :: [t] | nil | no_return
-        defmacro match(lock \\ :read, pattern) do
-          quote do
-            S.coerce(T.match(unquote(__MODULE__), unquote(lock),
-              unquote(D.match(__MODULE__, @attributes, pattern))), unquote(__MODULE__))
-          end
+        def match(lock \\ :read, pattern) do
+          T.match(__MODULE__, lock, D.match(__MODULE__, pattern))
+            |> S.coerce(__MODULE__)
         end
 
         @doc """
@@ -790,11 +796,9 @@ defmodule Amnesia.Table.Definition do
         `mnesia:dirty_match_object`.
         """
         @spec match!(any) :: [t] | nil | no_return
-        defmacro match!(pattern) do
-          quote do
-            S.coerce(T.match!(unquote(__MODULE__),
-              unquote(D.match(__MODULE__, @attributes, pattern))), unquote(__MODULE__))
-          end
+        def match!(pattern) do
+          T.match!(__MODULE__, D.match(__MODULE__, pattern))
+            |> S.coerce(__MODULE__)
         end
 
         @doc """

@@ -21,7 +21,6 @@ defmodule Amnesia.Mixfile do
   end
 
   defp deps do
-    [ { :exquisite, "~> 0.1.2" },
-      { :continuum, github: "meh/continuum" } ]
+    [ { :exquisite, "~> 0.1.4" } ]
   end
 end

@@ -1,3 +1,3 @@
 %{"continuum": {:git, "git://github.com/meh/continuum.git", "4125f9d428971568f16da78cec24fddce18d6eca", []},
   "datastructures": {:git, "git://github.com/meh/elixir-datastructures.git", "28a7aee9addfe521ad0aa62f5e54f1ad597356cc", []},
-  "exquisite": {:package, "0.1.4"}}
+  "exquisite": {:hex, :exquisite, "0.1.4"}}

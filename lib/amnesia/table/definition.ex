@@ -740,24 +740,30 @@ defmodule Amnesia.Table.Definition do
         """
         defmacro where(spec, options \\ []) do
           options = Keyword.put(options, :where, spec)
+          lock = options[:lock]
+          limit = options[:limit]
 
-          quote do
-            lock  = unquote(options[:lock])
-            limit = unquote(options[:limit])
+          cond do
+            lock || limit ->
+              quote do: S.coerce(
+                T.select(unquote(__MODULE__),
+                         unquote(lock || limit),
+                         unquote(D.where(__MODULE__, @attributes, options))),
+                unquote(__MODULE__))
 
-            cond do
-              lock || limit ->
-                S.coerce(T.select(unquote(__MODULE__), lock || limit,
-                  unquote(D.where(__MODULE__, @attributes, options))), unquote(__MODULE__))
+            lock && limit ->
+              quote do: S.coerce(
+                T.select(unquote(__MODULE__),
+                         unquote(lock),
+                         unquote(limit),
+                         unquote(D.where(__MODULE__, @attributes, options))),
+                unquote(__MODULE__))
 
-              lock && limit ->
-                S.coerce(T.select(unquote(__MODULE__), lock, limit,
-                  unquote(D.where(__MODULE__, @attributes, options))), unquote(__MODULE__))
-
-              true ->
-                S.coerce(T.select(unquote(__MODULE__),
-                  unquote(D.where(__MODULE__, @attributes, options))), unquote(__MODULE__))
-            end
+            true ->
+              quote do: S.coerce(
+                T.select(unquote(__MODULE__),
+                         unquote(D.where(__MODULE__, @attributes, options))),
+                unquote(__MODULE__))
           end
         end
 

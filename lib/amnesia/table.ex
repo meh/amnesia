@@ -171,7 +171,7 @@ defmodule Amnesia.Table do
   Transform a table, useful to change tables in a running instance, see
   `mnesia:transform_table`.
   """
-  @spec transform(atom, [atom] | atom, (record -> record) | [atom]) :: o
+  @spec transform(atom, [atom] | atom, (tuple -> tuple) | [atom]) :: o
   def transform(name, attributes, fun) when is_function(fun) do
     :mnesia.transform_table(name, fun, attributes) |> result
   end
@@ -184,7 +184,7 @@ defmodule Amnesia.Table do
   Transform a table, renaming it, useful to change tables in a running
   instance, see `mnesia:transform_table`.
   """
-  @spec transform(atom, atom, [atom], (record -> record)) :: o
+  @spec transform(atom, atom, [atom], (tuple -> tuple)) :: o
   def transform(name, new_name, attributes, fun) do
     :mnesia.transform_table(name, fun, attributes, new_name) |> result
   end
@@ -463,8 +463,8 @@ defmodule Amnesia.Table do
   * `:write!` sets a `:sticky_write` lock
   * `:read` sets a `:read` lock
   """
-  @spec read(atom, any) :: [record] | no_return
-  @spec read(atom, any, :read | :write | :write!) :: [record] | nil | no_return
+  @spec read(atom, any) :: [tuple] | no_return
+  @spec read(atom, any, :read | :write | :write!) :: [tuple] | nil | no_return
   def read(name, key, lock \\ :read) do
     case :mnesia.read(name, key, case lock do
       :read   -> :read
@@ -479,7 +479,7 @@ defmodule Amnesia.Table do
   @doc """
   Read records from the given table with the given key, see `mnesia:dirty_read`.
   """
-  @spec read!(atom, any) :: [record] | nil | no_return
+  @spec read!(atom, any) :: [tuple] | nil | no_return
   def read!(name, key) do
     case :mnesia.dirty_read(name, key) do
       [] -> nil
@@ -491,7 +491,7 @@ defmodule Amnesia.Table do
   Read records on the given table based on a secondary index given as position,
   see `mnesia:index_read`.
   """
-  @spec read_at(atom, any, integer | atom) :: [record] | nil | no_return
+  @spec read_at(atom, any, integer | atom) :: [tuple] | nil | no_return
   def read_at(name, key, position) do
     case :mnesia.index_read(name, key, position) do
       [] -> nil
@@ -503,7 +503,7 @@ defmodule Amnesia.Table do
   Read records on the given table based on a secondary index given as position,
   see `mnesia:dirty_index_read`.
   """
-  @spec read_at!(atom, any, integer | atom) :: [record] | nil | no_return
+  @spec read_at!(atom, any, integer | atom) :: [tuple] | nil | no_return
   def read_at!(name, key, position) do
     case :mnesia.dirty_index_read(name, key, position) do
       [] -> nil
@@ -530,7 +530,7 @@ defmodule Amnesia.Table do
   @doc """
   Read a slot from the given table, see `mnesia:dirty_slot`.
   """
-  @spec at!(atom, integer) :: record | nil | no_return
+  @spec at!(atom, integer) :: tuple | nil | no_return
   def at!(name, position) do
     case :mnesia.dirty_slot(name, position) do
       :'$end_of_table' -> nil
@@ -676,7 +676,7 @@ defmodule Amnesia.Table do
   Select records in the given table using simple don't care values, see
   `mnesia:match_object`.
   """
-  @spec match(atom, :read | :write, any) :: [record] | nil | no_return
+  @spec match(atom, :read | :write, any) :: [tuple] | nil | no_return
   def match(name, lock \\ :read, pattern) do
     Match.new(:mnesia.match_object(name, pattern, lock))
   end
@@ -685,7 +685,7 @@ defmodule Amnesia.Table do
   Select records in the given table using simple don't care values, see
   `mnesia:dirty_match_object`.
   """
-  @spec match(atom, any) :: [record] | nil | no_return
+  @spec match(atom, any) :: [tuple] | nil | no_return
   def match!(name, pattern) do
     Match.new(:mnesia.dirty_match_object(name, pattern))
   end
@@ -693,7 +693,7 @@ defmodule Amnesia.Table do
   @doc """
   Fold the whole given table from the left, see `mnesia:foldl`.
   """
-  @spec foldl(atom, any, (record, any -> any)) :: any | no_return
+  @spec foldl(atom, any, (tuple, any -> any)) :: any | no_return
   def foldl(name, acc, fun) do
     :mnesia.foldl(fun, acc, name)
   end
@@ -701,7 +701,7 @@ defmodule Amnesia.Table do
   @doc """
   Fold the whole given table from the right, see `mnesia:foldr`.
   """
-  @spec foldl(atom, any, (record, any -> any)) :: any | no_return
+  @spec foldl(atom, any, (tuple, any -> any)) :: any | no_return
   def foldr(name, acc, fun) do
     :mnesia.foldr(fun, acc, name)
   end
@@ -748,8 +748,8 @@ defmodule Amnesia.Table do
   * `:write` sets a `:write` lock
   * `:write!` sets a `:sticky_write` lock
   """
-  @spec write(atom, record) :: :ok | no_return
-  @spec write(atom, record, :write | :write!) :: :ok | no_return
+  @spec write(atom, tuple) :: :ok | no_return
+  @spec write(atom, tuple, :write | :write!) :: :ok | no_return
   def write(name, data, lock \\ :write) do
     :mnesia.write(name, data, case lock do
       :write  -> :write
@@ -760,7 +760,7 @@ defmodule Amnesia.Table do
   @doc """
   Write the given record in the given table, see `mnesia:dirty_write`.
   """
-  @spec write!(atom, record) :: :ok | no_return
+  @spec write!(atom, tuple) :: :ok | no_return
   def write!(name, data) do
     :mnesia.dirty_write(name, data)
   end

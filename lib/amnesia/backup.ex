@@ -96,7 +96,7 @@ defmodule Amnesia.Backup do
   @doc """
   Traverse a backup, see `mnesia:traverse_backup`.
   """
-  @spec traverse(any, any, any, ([record], any -> any)) :: { :ok, any } | { :error, any }
+  @spec traverse(any, any, any, ([tuple], any -> any)) :: { :ok, any } | { :error, any }
   def traverse(source, target, acc, fun) do
     :mnesia.traverse_backup(source, target, fun, acc)
   end
@@ -104,7 +104,7 @@ defmodule Amnesia.Backup do
   @doc """
   Traverse a backup with custom backup modules, see `mnesia:traverse_backup`.
   """
-  @spec traverse(atom, any, atom, any, any, ([record], any -> any)) :: { :ok, any } | { :error, any }
+  @spec traverse(atom, any, atom, any, any, ([tuple], any -> any)) :: { :ok, any } | { :error, any }
   def traverse(source, source_data, target, target_data, acc, fun) do
     :mnesia.traverse_backup(source_data, source, target_data, target, fun, acc)
   end
@@ -261,7 +261,7 @@ defmodule Amnesia.Backup do
       @doc """
       Traverse a backup, see `mnesia:traverse_backup`.
       """
-      @spec traverse(any, any, any, ([record], any -> any)) :: { :ok, any } | { :error, any }
+      @spec traverse(any, any, any, ([tuple], any -> any)) :: { :ok, any } | { :error, any }
       def traverse(data, target, acc, fun) do
         :mnesia.traverse_backup(data, __MODULE__, target, fun, acc)
       end
@@ -270,7 +270,7 @@ defmodule Amnesia.Backup do
       Traverse a backup targeting a custom backup module, see
       `mnesia:traverse_backup`.
       """
-      @spec traverse(any, atom, any, any, ([record], any -> any)) :: { :ok, any } | { :error, any }
+      @spec traverse(any, atom, any, any, ([tuple], any -> any)) :: { :ok, any } | { :error, any }
       def traverse(data, target, target_data, acc, fun) do
         :mnesia.traverse_backup(data, target_data, target, fun, acc)
       end

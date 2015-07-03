@@ -22,11 +22,11 @@ defmodule Amnesia.Event do
 
   @type activity :: { :complete, Amnesia.Access.id }
 
-  @type table :: { :write, record, Amnesia.Access.id } |
-                 { :delete_object, record, Amnesia.Access.id } |
+  @type table :: { :write, tuple, Amnesia.Access.id } |
+                 { :delete_object, tuple, Amnesia.Access.id } |
                  { :delete, { atom, any }, Amnesia.Access.id } |
-                 { :write, atom, record, [record], Amnesia.Access.id } |
-                 { :delete, atom, any, [record], Amnesia.Access.id }
+                 { :write, atom, tuple, [tuple], Amnesia.Access.id } |
+                 { :delete, atom, any, [tuple], Amnesia.Access.id }
 
   @type category :: system | activity | table
 

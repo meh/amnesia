@@ -16,7 +16,7 @@ defmodule Amnesia.Table.Match do
   @doc """
   Get a match from the various match results.
   """
-  @spec new([record]) :: t | nil
+  @spec new([tuple]) :: t | nil
   def new(value) do
     case value do
       [] -> nil

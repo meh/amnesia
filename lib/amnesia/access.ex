@@ -23,19 +23,19 @@ defmodule Amnesia.Access do
   @type lock_kind :: :write | :read | :sticky_write
 
   defcallback lock(id, any, lock_item, lock_kind) :: [node] | :ok | no_return
-  defcallback write(id, any, atom, record, lock_kind) :: :ok | no_return
+  defcallback write(id, any, atom, tuple, lock_kind) :: :ok | no_return
   defcallback delete(id, any, atom, any, lock_kind) :: :ok | no_return
-  defcallback delete_object(id, any, atom, record, lock_kind) :: :ok | no_return
-  defcallback read(id, any, atom, any, lock_kind) :: [record] | no_return
+  defcallback delete_object(id, any, atom, tuple, lock_kind) :: :ok | no_return
+  defcallback read(id, any, atom, any, lock_kind) :: [tuple] | no_return
   defcallback match_object(id, any, atom, any, lock_kind) :: [any] | no_return
   defcallback all_keys(id, any, atom, lock_kind) :: [any] | no_return
   defcallback select(id, any, atom, any, lock_kind) :: [any]
   defcallback select(id, any, atom, any, integer, lock_kind) :: [any]
   defcallback select_cont(id, any, any) :: :'$end_of_table' | { [any], any }
   defcallback index_match_object(id, any, atom, any, atom | integer, lock_kind) :: [any] | no_return
-  defcallback index_read(id, any, atom, any, atom | integer, lock_kind) :: [record] | no_return
-  defcallback foldl(id, any, (record, any -> any), any, atom, lock_kind) :: any | no_return
-  defcallback foldr(id, any, (record, any -> any), any, atom, lock_kind) :: any | no_return
+  defcallback index_read(id, any, atom, any, atom | integer, lock_kind) :: [tuple] | no_return
+  defcallback foldl(id, any, (tuple, any -> any), any, atom, lock_kind) :: any | no_return
+  defcallback foldr(id, any, (tuple, any -> any), any, atom, lock_kind) :: any | no_return
   defcallback table_info(id, any, atom | { atom, atom }, atom) :: any
   defcallback first(id, any, atom) :: any
   defcallback next(id, any, atom, any) :: any
@@ -48,7 +48,7 @@ defmodule Amnesia.Access do
     :mnesia.lock(id, opaque, item, kind)
   end
 
-  @spec write(id, any, atom, record, lock_kind) :: :ok | no_return
+  @spec write(id, any, atom, tuple, lock_kind) :: :ok | no_return
   def write(id, opaque, table, record, lock) do
     :mnesia.write(id, opaque, table, record, lock)
   end
@@ -58,17 +58,17 @@ defmodule Amnesia.Access do
     :mnesia.delete(id, opaque, table, key, lock)
   end
 
-  @spec delete_object(id, any, atom, record, lock_kind) :: :ok | no_return
+  @spec delete_object(id, any, atom, tuple, lock_kind) :: :ok | no_return
   def delete_object(id, opaque, table, record, lock) do
     :mnesia.delete_object(id, opaque, table, record, lock)
   end
 
-  @spec read(id, any, atom, any, lock_kind) :: [record] | no_return
+  @spec read(id, any, atom, any, lock_kind) :: [tuple] | no_return
   def read(id, opaque, table, key, lock) do
     :mnesia.read(id, opaque, table, key, lock)
   end
 
-  @spec match_object(id, any, atom, any, lock_kind) :: [record] | no_return
+  @spec match_object(id, any, atom, any, lock_kind) :: [tuple] | no_return
   def match_object(id, opaque, table, pattern, lock) do
     :mnesia.match_object(id, opaque, table, pattern, lock)
   end
@@ -98,7 +98,7 @@ defmodule Amnesia.Access do
     :mnesia.index_match_object(id, opaque, table, pattern, attribute, lock)
   end
 
-  @spec index_read(id, any, atom, any, atom | integer, lock_kind) :: [record] | no_return
+  @spec index_read(id, any, atom, any, atom | integer, lock_kind) :: [tuple] | no_return
   def index_read(id, opaque, table, key, attribute, lock) do
     :mnesia.index_read(id, opaque, table, key, attribute, lock)
   end

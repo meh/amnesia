@@ -77,6 +77,10 @@ defmodule Amnesia.Table do
       args = Keyword.put(args, :load_order, priority)
     end
 
+    if user = definition[:user] do
+      args = Keyword.put(args, :user_properties, user)
+    end
+
     if local = definition[:local] do
       args = Keyword.put(args, :local_content, local)
     end

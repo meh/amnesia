@@ -17,7 +17,7 @@ defmodule Amnesia.Mixfile do
   end
 
   def application do
-    [ applications: [:mnesia, :logger] ]
+    [ applications: [:mnesia, :logger, :exquisite] ]
   end
 
   defp deps do

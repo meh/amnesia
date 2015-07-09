@@ -42,6 +42,42 @@ defmodule Amnesia.Table do
 
   @doc """
   Create a table with the given name and definition, see `mnesia:create_table`.
+
+  The definition is a keyword list of options which have a correspondence with
+  `mnesia` options, to know what they do check the `mnesia` documentation.
+
+  * `:record` => `:record_name`
+  * `:attributes`
+
+  * `:mode` => `:access_mode`
+    + `:both`  => `:read_write`
+    + `:read!` => `:read_only`
+
+  * `:type`
+  * `:index`
+  * `:majority`
+  * `:priority` => `:load_order`
+  * `:user`     => `:user_properties`
+  * `:local`    => `:local_content`
+
+  * `:copying` _(a keyword list composed of)_
+    + `:memory` => `:ram_copies`
+    + `:disk`   => `:disc_copies`
+    + `:disk!`  => `:disc_only_copies`
+
+  * `:fragmentation` => `:frag_properties` _(a keyword list composed of)_
+    + `:number`  => `:n_fragments`
+    + `:nodes`   => `:node_pool`
+    + `:foreign` => `:foreign_key`
+
+    + `:hash` _(a keyword list composed of)_
+      + `:module` => `:hash_module`
+      + `:state`  => `:hash_state`
+
+    + `:copying` _(a keyword list composed of)_
+      - `:memory` => `:n_ram_copies`
+      - `:disk`   => `:n_disc_copies`
+      - `:disk!`  => `:n_disc_only_copies`
   """
   @spec create(atom) :: o
   @spec create(atom, c) :: o

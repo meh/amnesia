@@ -191,7 +191,7 @@ defmodule Amnesia.Table.Definition do
         end
 
         @doc """
-        Create the table with the given copying mode.
+        Create the table with the given copying mode and inherent definition.
         """
         @spec create :: Amnesia.o
         @spec create(T.c) :: Amnesia.o

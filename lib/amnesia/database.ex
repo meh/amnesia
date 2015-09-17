@@ -68,9 +68,9 @@ defmodule Amnesia.Database do
         def create(copying \\ []) do
           [ metadata |> Metadata.create(copying: copying) |
 
-            Enum.map @tables, fn(table) ->
+            Enum.map(@tables, fn(table) ->
               table.create(copying)
-            end ]
+            end) ]
         end
 
         @doc """

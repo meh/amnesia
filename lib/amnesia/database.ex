@@ -94,9 +94,9 @@ defmodule Amnesia.Database do
         def destroy do
           [ metadata |> Metadata.destroy |
 
-            Enum.map @tables, fn(table) ->
+            Enum.map(@tables, fn(table) ->
               table.destroy
-            end ]
+            end) ]
         end
 
         @doc """

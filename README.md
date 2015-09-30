@@ -83,66 +83,34 @@ Creating the database
 ---------------------
 Before using a database you have to create it, and before it a schema.
 
-A good way to do this is having two mix tasks, one to install and one to
-uninstall the database.
+To do so, you can use the built-in mix task `amnesia.create` passing your
+database module via the `--database` or `-db` options.
 
-```elixir
-defmodule Mix.Tasks.Install do
-  use Mix.Task
-  use Database
-
-  def run(_) do
-    # This creates the mnesia schema, this has to be done on every node before
-    # starting mnesia itself, the schema gets stored on disk based on the
-    # `-mnesia` config, so you don't really need to create it every time.
-    Amnesia.Schema.create
-
-    # Once the schema has been created, you can start mnesia.
-    Amnesia.start
-
-    # When you call create/1 on the database, it creates a metadata table about
-    # the database for various things, then iterates over the tables and creates
-    # each one of them with the passed copying behaviour
-    #
-    # In this case it will keep a ram and disk copy on the current node.
-    Database.create(disk: [node])
-
-    # This waits for the database to be fully created.
-    Database.wait
-
-    Amnesia.transaction do
-      # ... initial data creation
-    end
-
-    # Stop mnesia so it can flush everything and keep the data sane.
-    Amnesia.stop
-  end
-end
+```sh
+mix amnesia.create -db Database --disk
 ```
 
-```elixir
-defmodule Mix.Tasks.Uninstall do
-  use Mix.Task
-  use Database
+The available options for creating the databases are:
 
-  def run(_) do
-    # Start mnesia, or we can't do much.
-    Amnesia.start
+- `--database` or `-db`: the database module to create
+- `--no-schema`: to avoid creating the schema
+- `--memory`: to create the tables with memory copying on the current node
+- `--disk`: to create the tables with disc_copies on the current node
+- `--disk!`: to create the tables with disc_only_copies on the current node
 
-    # Destroy the database.
-    Database.destroy
+By default it creates the schema and uses disc_copies.
 
-    # Stop mnesia, so it flushes everything.
-    Amnesia.stop
+If you want to drop the tables there is also a drop task you should use with
+__CAUTION__ as it will destroy all data. To use it just call:
 
-    # Destroy the schema for the node.
-    Amnesia.Schema.destroy
-  end
-end
+```sh
+mix amnesia.drop -db Database
 ```
 
-To know more about the possible attributes for database creation check out the
-`@doc`.
+The options accepted by this task are:
+
+- `--database` or `-db`: same as with create. A database module to drop tables
+- `--schema`: drops the schema too. Defaults to false
 
 Writing to the database
 -----------------------

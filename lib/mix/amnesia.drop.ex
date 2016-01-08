@@ -10,6 +10,7 @@ defmodule Mix.Tasks.Amnesia.Drop do
     db = ensure_database_module(options[:database])
 
     Amnesia.start
+    db.wait
     db.destroy
     Amnesia.stop
 

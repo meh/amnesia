@@ -21,6 +21,7 @@ defmodule Amnesia.Mixfile do
   end
 
   defp deps do
-    [ { :exquisite, "~> 0.1.6" } ]
+    [ { :exquisite, "~> 0.1.6" },
+      { :ex_doc, "~> 0.11", only: [:dev] } ]
   end
 end

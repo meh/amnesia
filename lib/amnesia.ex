@@ -118,6 +118,23 @@ defmodule Amnesia do
   end
 
   @doc """
+  Abort the current transaction.
+  """
+  @spec abort(any) :: no_return
+  def abort(reason) do
+    :mnesia.abort(reason)
+  end
+
+  @doc """
+  Cancel the current transaction.
+  """
+  @spec cancel()    :: no_return
+  @spec cancel(any) :: no_return
+  def cancel(value \\ nil) do
+    :mnesia.abort({ :amnesia, { :cancel, value } })
+  end
+
+  @doc """
   Start a transaction with the given block or function, see `mnesia:transaction`.
   """
   @spec transaction([do: term] | term) :: any | no_return
@@ -299,6 +316,9 @@ defmodule Amnesia do
 
       case result do
         { :atomic, result } ->
+          result
+
+        { :aborted, { :amnesia, { :cancel, result } } } ->
           result
 
         { :aborted, { exception, stacktrace } } ->

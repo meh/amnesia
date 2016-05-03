@@ -56,6 +56,17 @@ defmodule DatabaseTest do
     assert [%Test.Database.User{id: 23} | _] = user |> Amnesia.Selection.values
   end
 
+  test "match can match nil values" do
+    user = Amnesia.transaction! do
+      %User{id: 23, name: "test"} |> User.write
+      %User{id: 24} |> User.write
+      query = [name: nil]
+      User.match(query)
+    end
+
+    assert [%Test.Database.User{id: 24}] = user |> Amnesia.Selection.values
+  end
+
   test "type checking works" do
     assert User.ordered_set?
     assert Message.bag?

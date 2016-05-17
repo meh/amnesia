@@ -62,9 +62,12 @@ defmodule Amnesia.Backup do
   def checkpoint(options) do
     args = Keyword.new
 
-    if options[:remote] do
-      args = Keyword.put_new(args, :allow_remote, options[:remote])
-    end
+    args = 
+      if options[:remote] do
+        Keyword.put_new(args, :allow_remote, options[:remote])
+      else
+        args
+      end
 
     :mnesia.activate_checkpoint(args)
   end
@@ -109,50 +112,26 @@ defmodule Amnesia.Backup do
     :mnesia.traverse_backup(source_data, source, target_data, target, fun, acc)
   end
 
-  @doc false
-  defp normalize(data) when is_list data do
-    data
-  end
-
-  defp normalize(data) do
-    [data]
-  end
-
   @doc """
   Restore a backup, see `mnesia:restore`.
   """
   @spec restore(any, r) :: [atom] | { :error, any }
   def restore(data, options) do
     args = Keyword.new
+      |> Options.update(:module,          options[:module])
+      |> Options.update(:keep_tables,     options[:keep]     |> Options.normalize)
+      |> Options.update(:clear_tables,    options[:clear]    |> Options.normalize)
+      |> Options.update(:recreate_tables, options[:recreate] |> Options.normalize)
+      |> Options.update(:skip_tables,     options[:skip]     |> Options.normalize)
 
-    if options[:module] do
-      args = Keyword.put(args, :module, options[:module])
-    end
-
-    if options[:keep] do
-      args = Keyword.put(args, :keep_tables, normalize(options[:keep]))
-    end
-
-    if options[:skip] do
-      args = Keyword.put(args, :skip_tables, normalize(options[:keep]))
-    end
-
-    if options[:clear] do
-      args = Keyword.put(args, :clear_tables, normalize(options[:clear]))
-    end
-
-    if options[:recreate] do
-      args = Keyword.put(args, :recreate_tables, normalize(options[:recreate]))
-    end
-
-    if options[:default] do
-      args = Keyword.put(args, :default, case options[:default] do
+    args = Options.update(args, :default,
+      case options[:default] do
         :keep     -> :keep_tables
         :skip     -> :skip_tables
         :clear    -> :clear_tables
         :recreate -> :recreate_tables
+        nil       -> nil
       end)
-    end
 
     :mnesia.restore(data, args)
   end
@@ -187,14 +166,8 @@ defmodule Amnesia.Backup do
   @spec install(atom, any, i) :: :ok | { :error, any }
   def install(module, data, options) do
     args = [module: module]
-
-    if options[:scope] do
-      args = Keyword.put(args, :scope, options[:module])
-    end
-
-    if options[:directory] do
-      args = Keyword.put(args, :mnesia_dir, options[:directory])
-    end
+      |> Options.update(:scope,      options[:module])
+      |> Options.update(:mnesia_dir, options[:directory])
 
     :mnesia.install_fallback(data, args)
   end
@@ -213,18 +186,9 @@ defmodule Amnesia.Backup do
   @spec uninstall(i) :: :ok | { :error, any }
   def uninstall(options) do
     args = Keyword.new
-
-    if options[:module] do
-      args = Keyword.put(args, :module, options[:module])
-    end
-
-    if options[:scope] do
-      args = Keyword.put(args, :scope, options[:module])
-    end
-
-    if options[:directory] do
-      args = Keyword.put(args, :mnesia_dir, options[:directory])
-    end
+      |> Options.update(:module, options[:module])
+      |> Options.update(:scope, options[:module])
+      |> Options.update(:mnesia_dir, options[:directory])
 
     :mnesia.uninstall_fallback(args)
   end

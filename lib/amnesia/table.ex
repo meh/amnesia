@@ -83,101 +83,41 @@ defmodule Amnesia.Table do
   @spec create(atom, c) :: o
   def create(name, definition \\ []) do
     args = Keyword.new
+      |> Options.update(:record_name,      Keyword.get(definition, :record, name))
+      |> Options.update(:attributes,       definition[:attributes])
+      |> Options.update(:type,             definition[:type])
+      |> Options.update(:index,            definition[:index])
+      |> Options.update(:majority,         definition[:majority])
+      |> Options.update(:load_order,       definition[:priority])
+      |> Options.update(:user_properties,  definition[:user])
+      |> Options.update(:local_content,    definition[:local])
+      |> Options.update(:ram_copies,       definition[:copying][:memory])
+      |> Options.update(:disc_copies,      definition[:copying][:disk])
+      |> Options.update(:disc_only_copies, definition[:copying][:disk!])
 
-    args = Keyword.put(args, :record_name, Keyword.get(definition, :record, name))
+    args = if fragmentation = definition[:fragmentation] do
+      properties = Keyword.new
+        |> Options.update(:n_fragments,         fragmentation[:number])
+        |> Options.update(:node_pool,           fragmentation[:nodes])
+        |> Options.update(:n_ram_copies,        fragmentation[:copying][:memory])
+        |> Options.update(:n_disc_copies,       fragmentation[:copying][:disk])
+        |> Options.update(:n_disc_only_copies,  fragmentation[:copying][:disk!])
+        |> Options.update(:foreign_key,         fragmentation[:foreign][:key])
+        |> Options.update(:hash_module,         fragmentation[:hash][:module])
+        |> Options.update(:hash_state,          fragmentation[:hash][:state])
 
-    if attributes = definition[:attributes] do
-      args = Keyword.put(args, :attributes, attributes)
+      Keyword.put(args, :frag_properties, properties)
+    else
+      args
     end
 
-    if mode = definition[:mode] || :both do
-      args = Keyword.put(args, :access_mode, case mode do
-        :both  -> :read_write
-        :read! -> :read_only
+    args = Options.update(args, :access_mode,
+      if mode = definition[:mode] || :both do
+        case mode do
+          :both  -> :read_write
+          :read! -> :read_only
+        end
       end)
-    end
-
-    if type = definition[:type] do
-      args = Keyword.put(args, :type, type)
-    end
-
-    if index = definition[:index] do
-      args = Keyword.put(args, :index, index)
-    end
-
-    if majority = definition[:majority] do
-      args = Keyword.put(args, :majority, majority)
-    end
-
-    if priority = definition[:priority] do
-      args = Keyword.put(args, :load_order, priority)
-    end
-
-    if user = definition[:user] do
-      args = Keyword.put(args, :user_properties, user)
-    end
-
-    if local = definition[:local] do
-      args = Keyword.put(args, :local_content, local)
-    end
-
-    if copying = definition[:copying] do
-      if memory = copying[:memory] do
-        args = Keyword.put(args, :ram_copies, memory)
-      end
-
-      if disk = copying[:disk] do
-        args = Keyword.put(args, :disc_copies, disk)
-      end
-
-      if disk = copying[:disk!] do
-        args = Keyword.put(args, :disc_only_copies, disk)
-      end
-    end
-
-    if fragmentation = definition[:fragmentation] do
-      properties = []
-
-      if number = fragmentation[:number] do
-        properties = Keyword.put(properties, :n_fragments, number)
-      end
-
-      if copying = fragmentation[:copying] do
-        if memory = copying[:memory] do
-          properties = Keyword.put(properties, :n_ram_copies, memory)
-        end
-
-        if disk = copying[:disk] do
-          properties = Keyword.put(properties, :n_disc_copies, disk)
-        end
-
-        if disk = copying[:disk!] do
-          properties = Keyword.put(properties, :n_disc_only_copies, disk)
-        end
-      end
-
-      if nodes = fragmentation[:nodes] do
-        properties = Keyword.put(properties, :node_pool, nodes)
-      end
-
-      if foreign = fragmentation[:foreign] do
-        if key = foreign[:key] do
-          properties = Keyword.put(properties, :foreign_key, key)
-        end
-      end
-
-      if hash = fragmentation[:hash] do
-        if module = hash[:module] do
-          properties = Keyword.put(properties, :hash_module, module)
-        end
-
-        if state = hash[:state] do
-          properties = Keyword.put(properties, :hash_state, state)
-        end
-      end
-
-      args = Keyword.put(args, :frag_properties, properties)
-    end
 
     :mnesia.create_table(name, args) |> result
   end

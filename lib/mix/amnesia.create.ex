@@ -39,10 +39,10 @@ defmodule Mix.Tasks.Amnesia.Create do
 
     # defaults to disk
     if Enum.empty?(copying) do
-      copying = [disk: [node]]
+      [disk: [node]]
+    else
+      copying
     end
-    
-    copying
   end
   
   defp parse_args([]) do
@@ -67,9 +67,9 @@ defmodule Mix.Tasks.Amnesia.Create do
     end
 
     if is_nil(options[:schema]) do
-      options = Keyword.put(options, :schema, true)
+      Keyword.put(options, :schema, true)
+    else
+      options
     end
-
-    options
   end
 end

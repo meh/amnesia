@@ -112,25 +112,6 @@ defmodule Amnesia.Backup do
     :mnesia.traverse_backup(source_data, source, target_data, target, fun, acc)
   end
 
-  @doc false
-  defp normalize(data) when is_list data do
-    data
-  end
-
-  defp normalize(nil), do: nil
-
-  defp normalize(data) do
-    [data]
-  end
-
-  defp update_keyword(args, key, value) do
-    if value != nil do
-      Keyword.put(args, key, value)
-    else
-      args
-    end
-  end
-
   @doc """
   Restore a backup, see `mnesia:restore`.
   """
@@ -138,17 +119,13 @@ defmodule Amnesia.Backup do
   def restore(data, options) do
     args = 
       Keyword.new
-      |> update_keyword(:module,          options[:module])
-      |> update_keyword(:keep_tables,     normalize(options[:keep]))
-      |> update_keyword(:clear_tables,    normalize(options[:clear]))
-      |> update_keyword(:recreate_tables, normalize(options[:recreate]))
+      |> Options.update(:module,          options[:module])
+      |> Options.update(:keep_tables,     options[:keep]     |> Options.normalize)
+      |> Options.update(:clear_tables,    options[:clear]    |> Options.normalize)
+      |> Options.update(:recreate_tables, options[:recreate] |> Options.normalize)
+      |> Options.update(:skip_tables,     options[:skip]     |> Options.normalize)
 
-    args = update_keyword(args, :skip_tables, 
-      if options[:skip] do
-        normalize(options[:keep])
-      end)
-
-    args = update_keyword(args, :default, 
+    args = Options.update(args, :default, 
       case options[:default] do
           :keep     -> :keep_tables
           :skip     -> :skip_tables
@@ -191,8 +168,8 @@ defmodule Amnesia.Backup do
   def install(module, data, options) do
     args = 
       [module: module]
-      |> update_keyword(:scope,      options[:module])
-      |> update_keyword(:mnesia_dir, options[:directory])
+      |> Options.update(:scope,      options[:module])
+      |> Options.update(:mnesia_dir, options[:directory])
 
     :mnesia.install_fallback(data, args)
   end
@@ -212,9 +189,9 @@ defmodule Amnesia.Backup do
   def uninstall(options) do
     args = 
       Keyword.new
-      |> update_keyword(:module, options[:module])
-      |> update_keyword(:scope, options[:module])
-      |> update_keyword(:mnesia_dir, options[:directory])
+      |> Options.update(:module, options[:module])
+      |> Options.update(:scope, options[:module])
+      |> Options.update(:mnesia_dir, options[:directory])
 
     :mnesia.uninstall_fallback(args)
   end

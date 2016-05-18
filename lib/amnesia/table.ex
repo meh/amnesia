@@ -40,14 +40,6 @@ defmodule Amnesia.Table do
     :mnesia.system_info(:tables) |> Enum.member?(name)
   end
 
-  defp update_keyword(args, key, value) do
-    if value != nil do
-      Keyword.put(args, key, value)
-    else
-      args
-    end
-  end
-
   @doc """
   Create a table with the given name and definition, see `mnesia:create_table`.
 
@@ -92,37 +84,37 @@ defmodule Amnesia.Table do
   def create(name, definition \\ []) do
     args = 
       Keyword.new
-      |> update_keyword(:record_name,      Keyword.get(definition, :record, name))
-      |> update_keyword(:attributes,       definition[:attributes])
-      |> update_keyword(:type,             definition[:type])
-      |> update_keyword(:index,            definition[:index])
-      |> update_keyword(:majority,         definition[:majority])
-      |> update_keyword(:load_order,       definition[:priority])
-      |> update_keyword(:user_properties,  definition[:user])
-      |> update_keyword(:local_content,    definition[:local])
-      |> update_keyword(:ram_copies,       definition[:copying][:memory])
-      |> update_keyword(:disc_copies,      definition[:copying][:disk])
-      |> update_keyword(:disc_only_copies, definition[:copying][:disk!])
+      |> Options.update(:record_name,      Keyword.get(definition, :record, name))
+      |> Options.update(:attributes,       definition[:attributes])
+      |> Options.update(:type,             definition[:type])
+      |> Options.update(:index,            definition[:index])
+      |> Options.update(:majority,         definition[:majority])
+      |> Options.update(:load_order,       definition[:priority])
+      |> Options.update(:user_properties,  definition[:user])
+      |> Options.update(:local_content,    definition[:local])
+      |> Options.update(:ram_copies,       definition[:copying][:memory])
+      |> Options.update(:disc_copies,      definition[:copying][:disk])
+      |> Options.update(:disc_only_copies, definition[:copying][:disk!])
 
     args = 
       if fragmentation = definition[:fragmentation] do
         properties = 
           Keyword.new
-          |> update_keyword(:n_fragments,         fragmentation[:number])
-          |> update_keyword(:node_pool,           fragmentation[:nodes])
-          |> update_keyword(:n_ram_copies,        fragmentation[:copying][:memory])
-          |> update_keyword(:n_disc_copies,       fragmentation[:copying][:disk])
-          |> update_keyword(:n_disc_only_copies,  fragmentation[:copying][:disk!])
-          |> update_keyword(:foreign_key,         fragmentation[:foreign][:key])
-          |> update_keyword(:hash_module,         fragmentation[:hash][:module])
-          |> update_keyword(:hash_state,          fragmentation[:hash][:state])
+          |> Options.update(:n_fragments,         fragmentation[:number])
+          |> Options.update(:node_pool,           fragmentation[:nodes])
+          |> Options.update(:n_ram_copies,        fragmentation[:copying][:memory])
+          |> Options.update(:n_disc_copies,       fragmentation[:copying][:disk])
+          |> Options.update(:n_disc_only_copies,  fragmentation[:copying][:disk!])
+          |> Options.update(:foreign_key,         fragmentation[:foreign][:key])
+          |> Options.update(:hash_module,         fragmentation[:hash][:module])
+          |> Options.update(:hash_state,          fragmentation[:hash][:state])
 
         Keyword.put(args, :frag_properties, properties)
       else
         args
       end
 
-    args = update_keyword(args, :access_mode, 
+    args = Options.update(args, :access_mode, 
       if mode = definition[:mode] || :both do
         case mode do
           :both  -> :read_write

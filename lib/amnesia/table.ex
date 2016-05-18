@@ -100,43 +100,22 @@ defmodule Amnesia.Table do
       |> update_keyword(:load_order,       definition[:priority])
       |> update_keyword(:user_properties,  definition[:user])
       |> update_keyword(:local_content,    definition[:local])
-
-    args =
-      if copying = definition[:copying] do
-        args
-        |> update_keyword(:ram_copies,       copying[:memory])
-        |> update_keyword(:disc_copies,      copying[:disk])
-        |> update_keyword(:disc_only_copies, copying[:disk!])
-      end
+      |> update_keyword(:ram_copies,       definition[:copying][:memory])
+      |> update_keyword(:disc_copies,      definition[:copying][:disk])
+      |> update_keyword(:disc_only_copies, definition[:copying][:disk!])
 
     args = 
       if fragmentation = definition[:fragmentation] do
         properties = 
           Keyword.new
-          |> update_keyword(:n_fragments, fragmentation[:number])
-          |> update_keyword(:node_pool,   fragmentation[:nodes])
-          
-        properties = 
-          if copying = fragmentation[:copying] do
-            properties
-            |> update_keyword(:n_ram_copies,        copying[:memory])
-            |> update_keyword(:n_disc_copies,       copying[:disk])
-            |> update_keyword(:n_disc_only_copies,  copying[:disk!])
-          end
-
-        properties =         
-          if foreign = fragmentation[:foreign] do
-            if key = foreign[:key] do
-              update_keyword(properties, :foreign_key, key)
-            end
-          end
-
-        properties = 
-          if hash = fragmentation[:hash] do
-            properties 
-            |> update_keyword(:hash_module, hash[:module])
-            |> update_keyword(:hash_state,  hash[:state])
-          end
+          |> update_keyword(:n_fragments,         fragmentation[:number])
+          |> update_keyword(:node_pool,           fragmentation[:nodes])
+          |> update_keyword(:n_ram_copies,        fragmentation[:copying][:memory])
+          |> update_keyword(:n_disc_copies,       fragmentation[:copying][:disk])
+          |> update_keyword(:n_disc_only_copies,  fragmentation[:copying][:disk!])
+          |> update_keyword(:foreign_key,         fragmentation[:foreign][:key])
+          |> update_keyword(:hash_module,         fragmentation[:hash][:module])
+          |> update_keyword(:hash_state,          fragmentation[:hash][:state])
 
         Keyword.put(args, :frag_properties, properties)
       else

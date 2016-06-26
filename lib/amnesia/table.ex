@@ -331,7 +331,7 @@ defmodule Amnesia.Table do
   """
   @spec move_copy(atom, node, node) :: o
   def move_copy(name, from, to) do
-    :mnesia.move_copy(name, from, to) |> result
+    :mnesia.move_table_copy(name, from, to) |> result
   end
 
   @doc """

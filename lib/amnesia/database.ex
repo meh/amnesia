@@ -41,10 +41,10 @@ defmodule Amnesia.Database do
               to = Module.split(module)
                 |> Enum.drop(Module.split(__MODULE__) |> length)
 
-              if length(to) > 1 do
-                to = Module.concat(__MODULE__, to |> hd)
+              to = if length(to) > 1 do
+                Module.concat(__MODULE__, to |> hd)
               else
-                to = module
+                module
               end
 
               [ quote(do: alias unquote(to)),

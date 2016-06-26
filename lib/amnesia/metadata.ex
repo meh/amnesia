@@ -116,5 +116,5 @@ defmodule Amnesia.Metadata do
     :mnesia.dirty_update_counter(database, { table, field }, value)
   end
 
-  defdelegate counter(self, table, field, value), to: __MODULE__, as: :counter!
+  defdelegate counter!(self, table, field, value), to: __MODULE__, as: :counter
 end

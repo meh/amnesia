@@ -13,6 +13,7 @@ defmodule Amnesia.Backup do
   """
 
   use Behaviour
+  alias Amnesia.Helper.Options
 
   @type o :: { :ok, any } | { :error, any }
   @type i :: { :module, atom } | { :scope, :global | :local } | { :directory, String.t }

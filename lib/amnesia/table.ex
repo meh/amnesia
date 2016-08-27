@@ -14,6 +14,7 @@ defmodule Amnesia.Table do
   alias Amnesia.Selection
   alias Amnesia.Table.Select
   alias Amnesia.Table.Match
+  alias Amnesia.Helper.Options
 
   @doc """
   Wait for the passed tables for the given timeout, see `mnesia:wait_for_tables`.

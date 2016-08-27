@@ -151,7 +151,7 @@ defmodule Amnesia.Access do
         @behaviour Amnesia.Access
       end
 
-      require Amnesia
+      require Amnesia.Helper
 
       @doc """
       Start a transaction with the given block or function, see `mnesia:transaction`.
@@ -159,14 +159,14 @@ defmodule Amnesia.Access do
       @spec transaction([do: term] | term) :: any | no_return
       defmacro transaction(do: block) do
         quote do
-          Amnesia.result(:mnesia.activity(:transaction,
+          Amnesia.Helper.result(:mnesia.activity(:transaction,
             fn -> unquote(block) end, [], unquote(@target)))
         end
       end
 
       defmacro transaction(term) do
         quote do
-          Amnesia.result(:mnesia.activity(:transaction,
+          Amnesia.Helper.result(:mnesia.activity(:transaction,
             unquote(term), [], unquote(@target)))
         end
       end
@@ -177,7 +177,7 @@ defmodule Amnesia.Access do
       """
       @spec transaction(function, list) :: any | no_return
       def transaction(fun, args) when is_function fun, length args do
-        Amnesia.result(:mnesia.activity(:transaction, fun, args, @target))
+        Amnesia.Helper.result(:mnesia.activity(:transaction, fun, args, @target))
       end
 
       @doc """
@@ -186,7 +186,7 @@ defmodule Amnesia.Access do
       """
       @spec transaction(function, list, integer) :: any | no_return
       def transaction(fun, args, retries) when is_function fun, length args do
-        Amnesia.result(:mnesia.activity({ :transaction, retries },
+        Amnesia.Helper.result(:mnesia.activity({ :transaction, retries },
           fun, args, @target))
       end
 
@@ -197,14 +197,14 @@ defmodule Amnesia.Access do
       @spec transaction!([] | function) :: any | no_return
       defmacro transaction!(do: block) do
         quote do
-          Amnesia.result(:mnesia.activity(:sync_transaction,
+          Amnesia.Helper.result(:mnesia.activity(:sync_transaction,
             fn -> unquote(block) end, [], unquote(@target)))
         end
       end
 
       defmacro transaction!(term) do
         quote do
-          Amnesia.result(:mnesia.activity(:sync_transaction,
+          Amnesia.Helper.result(:mnesia.activity(:sync_transaction,
             unquote(term), [], unquote(@target)))
         end
       end
@@ -215,7 +215,7 @@ defmodule Amnesia.Access do
       """
       @spec transaction!(function, list) :: any | no_return
       def transaction!(fun, args) when is_function fun, length args do
-        Amnesia.result(:mnesia.activity(:sync_transaction, fun, args, @target))
+        Amnesia.Helper.result(:mnesia.activity(:sync_transaction, fun, args, @target))
       end
 
       @doc """
@@ -225,7 +225,7 @@ defmodule Amnesia.Access do
       """
       @spec transaction!(function, list, integer) :: any | no_return
       def transaction!(fun, args, retries) when is_function fun, length args do
-        Amnesia.result(:mnesia.activity({ :sync_transaction, retries },
+        Amnesia.Helper.result(:mnesia.activity({ :sync_transaction, retries },
           fun, args, @target))
       end
 

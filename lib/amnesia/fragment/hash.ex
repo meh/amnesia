@@ -12,30 +12,28 @@ defmodule Amnesia.Fragment.Hash do
   algorithm.
   """
 
-  use Behaviour
-
   @doc """
   Initialize the hash state.
   """
-  defcallback init_state(atom, any) :: any
+  @callback init_state(atom, any) :: any
 
   @doc """
   Add a fragment returning the new fragment numbers and state.
   """
-  defcallback add_frag(any) :: { any, [integer], [integer] }
+  @callback add_frag(any) :: { any, [integer], [integer] }
 
   @doc """
   Delete a fragment returning the new fragment numbers and state.
   """
-  defcallback del_frag(any) :: { any, [integer], [integer] }
+  @callback del_frag(any) :: { any, [integer], [integer] }
 
   @doc """
   Convert a key to a fragment number.
   """
-  defcallback key_to_frag_number(any, any) :: integer
+  @callback key_to_frag_number(any, any) :: integer
 
   @doc """
   Convert a match_spec to fragment numbers.
   """
-  defcallback match_spec_to_frag_numbers(any, any) :: [integer]
+  @callback match_spec_to_frag_numbers(any, any) :: [integer]
 end

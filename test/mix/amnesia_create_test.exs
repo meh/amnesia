@@ -40,7 +40,7 @@ defdatabase Create.Database do
 end
 
 defmodule Create.NotADatabase do
-  
+
 end
 
 # ordered_set cannot be used with disk! copying
@@ -60,7 +60,7 @@ defmodule Mix.Tasks.Amnesia.Create.Test do
     Amnesia.stop
     Amnesia.Schema.destroy
   end
-  
+
   test "creates schema and tables" do
     Create.run(["--database", "Create.Database"])
 
@@ -87,9 +87,9 @@ defmodule Mix.Tasks.Amnesia.Create.Test do
     assert User in tables
     assert Message in tables
     assert DB in tables
-    assert Amnesia.Table.info(User, :disc_copies) == [node]
-    assert Amnesia.Table.info(Message, :disc_copies) == [node]
-    assert Amnesia.Table.info(DB, :disc_copies) == [node]
+    assert Amnesia.Table.info(User, :disc_copies) == [node()]
+    assert Amnesia.Table.info(Message, :disc_copies) == [node()]
+    assert Amnesia.Table.info(DB, :disc_copies) == [node()]
   end
 
   test "creates database with disk! option" do
@@ -100,7 +100,7 @@ defmodule Mix.Tasks.Amnesia.Create.Test do
     assert :schema in tables
     assert DiscOnly.Database.Message in tables
     assert DiscOnly.Database in tables
-    assert Amnesia.Table.info(DiscOnly.Database.Message, :disc_only_copies) == [node]
+    assert Amnesia.Table.info(DiscOnly.Database.Message, :disc_only_copies) == [node()]
   end
-  
+
 end

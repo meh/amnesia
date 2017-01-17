@@ -12,7 +12,6 @@ defmodule Amnesia.Backup do
   use backups.
   """
 
-  use Behaviour
   alias Amnesia.Helper.Options
 
   @type o :: { :ok, any } | { :error, any }
@@ -24,37 +23,37 @@ defmodule Amnesia.Backup do
   @doc """
   Open the backup for writing.
   """
-  defcallback open_write(any) :: o
+  @callback open_write(any) :: o
 
   @doc """
   Write the given terms to the backup.
   """
-  defcallback write(any, [any]) :: o
+  @callback write(any, [any]) :: o
 
   @doc """
   Commit the write to the backup.
   """
-  defcallback commit_write(any) :: o
+  @callback commit_write(any) :: o
 
   @doc """
   Close the backup if the backup is interrupted.
   """
-  defcallback abort_write(any) :: o
+  @callback abort_write(any) :: o
 
   @doc """
   Open the backup for reading.
   """
-  defcallback open_read(any) :: o
+  @callback open_read(any) :: o
 
   @doc """
   Read terms from the backup.
   """
-  defcallback read(any) :: { :ok, any, [any] } | { :error, any }
+  @callback read(any) :: { :ok, any, [any] } | { :error, any }
 
   @doc """
   Close the backup.
   """
-  defcallback close_read(any) :: o
+  @callback close_read(any) :: o
 
   @doc """
   Create a checkpoint, see `mnesia:activate_checkpoint`.
@@ -63,7 +62,7 @@ defmodule Amnesia.Backup do
   def checkpoint(options) do
     args = Keyword.new
 
-    args = 
+    args =
       if options[:remote] do
         Keyword.put_new(args, :allow_remote, options[:remote])
       else

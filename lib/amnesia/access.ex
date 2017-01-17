@@ -15,33 +15,31 @@ defmodule Amnesia.Access do
   `mnesia:activity`.
   """
 
-  use Behaviour
-
   @opaque id :: { :tid, integer, pid } | { :async_dirty, pid } | { :sync_dirty, pid } | { :ets, pid }
 
   @type lock_item :: { :table, atom } | { :global, any, [node] }
   @type lock_kind :: :write | :read | :sticky_write
 
-  defcallback lock(id, any, lock_item, lock_kind) :: [node] | :ok | no_return
-  defcallback write(id, any, atom, tuple, lock_kind) :: :ok | no_return
-  defcallback delete(id, any, atom, any, lock_kind) :: :ok | no_return
-  defcallback delete_object(id, any, atom, tuple, lock_kind) :: :ok | no_return
-  defcallback read(id, any, atom, any, lock_kind) :: [tuple] | no_return
-  defcallback match_object(id, any, atom, any, lock_kind) :: [any] | no_return
-  defcallback all_keys(id, any, atom, lock_kind) :: [any] | no_return
-  defcallback select(id, any, atom, any, lock_kind) :: [any]
-  defcallback select(id, any, atom, any, integer, lock_kind) :: [any]
-  defcallback select_cont(id, any, any) :: :'$end_of_table' | { [any], any }
-  defcallback index_match_object(id, any, atom, any, atom | integer, lock_kind) :: [any] | no_return
-  defcallback index_read(id, any, atom, any, atom | integer, lock_kind) :: [tuple] | no_return
-  defcallback foldl(id, any, (tuple, any -> any), any, atom, lock_kind) :: any | no_return
-  defcallback foldr(id, any, (tuple, any -> any), any, atom, lock_kind) :: any | no_return
-  defcallback table_info(id, any, atom | { atom, atom }, atom) :: any
-  defcallback first(id, any, atom) :: any
-  defcallback next(id, any, atom, any) :: any
-  defcallback prev(id, any, atom, any) :: any
-  defcallback last(id, any, atom) :: any
-  defcallback clear_table(id, any, atom, any) :: { :atomic, :ok } | { :aborted, any }
+  @callback lock(id, any, lock_item, lock_kind) :: [node] | :ok | no_return
+  @callback write(id, any, atom, tuple, lock_kind) :: :ok | no_return
+  @callback delete(id, any, atom, any, lock_kind) :: :ok | no_return
+  @callback delete_object(id, any, atom, tuple, lock_kind) :: :ok | no_return
+  @callback read(id, any, atom, any, lock_kind) :: [tuple] | no_return
+  @callback match_object(id, any, atom, any, lock_kind) :: [any] | no_return
+  @callback all_keys(id, any, atom, lock_kind) :: [any] | no_return
+  @callback select(id, any, atom, any, lock_kind) :: [any]
+  @callback select(id, any, atom, any, integer, lock_kind) :: [any]
+  @callback select_cont(id, any, any) :: :'$end_of_table' | { [any], any }
+  @callback index_match_object(id, any, atom, any, atom | integer, lock_kind) :: [any] | no_return
+  @callback index_read(id, any, atom, any, atom | integer, lock_kind) :: [tuple] | no_return
+  @callback foldl(id, any, (tuple, any -> any), any, atom, lock_kind) :: any | no_return
+  @callback foldr(id, any, (tuple, any -> any), any, atom, lock_kind) :: any | no_return
+  @callback table_info(id, any, atom | { atom, atom }, atom) :: any
+  @callback first(id, any, atom) :: any
+  @callback next(id, any, atom, any) :: any
+  @callback prev(id, any, atom, any) :: any
+  @callback last(id, any, atom) :: any
+  @callback clear_table(id, any, atom, any) :: { :atomic, :ok } | { :aborted, any }
 
   @spec lock(id, any, lock_item, lock_kind) :: [node] | :ok | no_return
   def lock(id, opaque, item, kind) do

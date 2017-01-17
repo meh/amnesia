@@ -22,7 +22,7 @@ defmodule Mix.Tasks.Amnesia.Drop do
   defp parse_args(args) do
     {options, _, _} = OptionParser.parse(args, [
           aliases: [
-            db: :database
+            d: :database
           ],
           strict: [
             database: :string,
@@ -31,5 +31,5 @@ defmodule Mix.Tasks.Amnesia.Drop do
         ])
     options
   end
-  
+
 end

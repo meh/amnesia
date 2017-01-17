@@ -53,17 +53,17 @@ defmodule Mix.Tasks.Amnesia.Drop.Test do
     Amnesia.Schema.create
     Amnesia.start
 
-    DB.create(memory: [node])
+    DB.create(memory: [node()])
     :ok = DB.wait 15000
     Amnesia.stop
 
     on_exit fn -> Amnesia.stop end
-  end  
+  end
 
   test "drops tables and schema" do
     Drop.run(["-db", "Drop.Database", "--schema"])
     Amnesia.start
-    assert Amnesia.info(:tables) == [:schema] # this table exists 
+    assert Amnesia.info(:tables) == [:schema] # this table exists
   end
 
   test "detects module is not a database" do

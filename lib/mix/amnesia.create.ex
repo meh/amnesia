@@ -13,7 +13,7 @@ defmodule Mix.Tasks.Amnesia.Create do
     if options[:schema] do
       Amnesia.Schema.create
     end
-    
+
     Amnesia.start
     try do
       db.create!(copying)
@@ -27,11 +27,11 @@ defmodule Mix.Tasks.Amnesia.Create do
     copying = Enum.reduce options, [], fn({key, val}, acc) ->
       case {key, val} do
         {:disk, true} ->
-          Keyword.put acc, :disk, [node]
+          Keyword.put acc, :disk, [node()]
         {:disk!, true} ->
-          Keyword.put acc, :disk!, [node]
+          Keyword.put acc, :disk!, [node()]
         {:memory, true} ->
-          Keyword.put acc, :memory, [node]
+          Keyword.put acc, :memory, [node()]
         _ ->
           acc
       end
@@ -39,12 +39,12 @@ defmodule Mix.Tasks.Amnesia.Create do
 
     # defaults to disk
     if Enum.empty?(copying) do
-      [disk: [node]]
+      [disk: [node()]]
     else
       copying
     end
   end
-  
+
   defp parse_args([]) do
     Mix.raise "No database option. Please provide one."
   end

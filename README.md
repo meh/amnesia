@@ -84,15 +84,15 @@ Creating the database
 Before using a database you have to create it, and before it a schema.
 
 To do so, you can use the built-in mix task `amnesia.create` passing your
-database module via the `--database` or `-db` options.
+database module via the `--database` or `-d` options.
 
 ```sh
-mix amnesia.create -db Database --disk
+mix amnesia.create -d Database --disk
 ```
 
 The available options for creating the databases are:
 
-- `--database` or `-db`: the database module to create
+- `--database` or `-d`: the database module to create
 - `--no-schema`: to avoid creating the schema
 - `--memory`: to create the tables with memory copying on the current node
 - `--disk`: to create the tables with disc_copies on the current node
@@ -104,12 +104,12 @@ If you want to drop the tables there is also a drop task you should use with
 __CAUTION__ as it will destroy all data. To use it just call:
 
 ```sh
-mix amnesia.drop -db Database
+mix amnesia.drop -d Database
 ```
 
 The options accepted by this task are:
 
-- `--database` or `-db`: same as with create. A database module to drop tables
+- `--database` or `-d`: same as with create. A database module to drop tables
 - `--schema`: drops the schema too. Defaults to false
 
 Writing to the database

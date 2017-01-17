@@ -4,8 +4,8 @@ defmodule Amnesia.Mixfile do
   def project do
     [ app: :amnesia,
       version: "0.2.5",
-      deps: deps,
-      package: package,
+      deps: deps(),
+      package: package(),
       description: "mnesia wrapper for Elixir" ]
   end
 

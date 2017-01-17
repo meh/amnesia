@@ -28,7 +28,7 @@ defmodule Amnesia.Schema do
   """
   @spec create :: :ok | { :error, any }
   @spec create([node]) :: :ok | { :error, any }
-  def create(nodes \\ [node]) do
+  def create(nodes \\ [node()]) do
     :mnesia.create_schema(nodes)
   end
 
@@ -37,7 +37,7 @@ defmodule Amnesia.Schema do
   """
   @spec destroy :: :ok | { :error, any }
   @spec destroy([node]) :: :ok | { :error, any }
-  def destroy(nodes \\ [node]) do
+  def destroy(nodes \\ [node()]) do
     :mnesia.delete_schema(nodes)
   end
 end

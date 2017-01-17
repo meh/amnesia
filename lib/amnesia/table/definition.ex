@@ -32,7 +32,7 @@ defmodule Amnesia.Table.Definition do
   @doc false
   def match(module, pattern) do
     [module | for { key, _ } <- module.attributes do
-      if Dict.has_key?(pattern, key), do: pattern[key], else: :_
+      if Keyword.has_key?(pattern, key), do: pattern[key], else: :_
     end] |> List.to_tuple
   end
 

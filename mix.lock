@@ -1,5 +1,5 @@
 %{"continuum": {:git, "git://github.com/meh/continuum.git", "4125f9d428971568f16da78cec24fddce18d6eca", []},
   "datastructures": {:git, "git://github.com/meh/elixir-datastructures.git", "28a7aee9addfe521ad0aa62f5e54f1ad597356cc", []},
-  "earmark": {:hex, :earmark, "1.0.1", "2c2cd903bfdc3de3f189bd9a8d4569a075b88a8981ded9a0d95672f6e2b63141", [:mix], []},
-  "ex_doc": {:hex, :ex_doc, "0.13.0", "aa2f8fe4c6136a2f7cfc0a7e06805f82530e91df00e2bff4b4362002b43ada65", [:mix], [{:earmark, "~> 1.0", [hex: :earmark, optional: false]}]},
-  "exquisite": {:hex, :exquisite, "0.1.7", "4106503e976f409246731b168cd76eb54262bd04f4facc5cba82c2f53982aaf0", [:mix], []}}
+  "earmark": {:hex, :earmark, "1.0.3", "89bdbaf2aca8bbb5c97d8b3b55c5dd0cff517ecc78d417e87f1d0982e514557b", [:mix], []},
+  "ex_doc": {:hex, :ex_doc, "0.14.5", "c0433c8117e948404d93ca69411dd575ec6be39b47802e81ca8d91017a0cf83c", [:mix], [{:earmark, "~> 1.0", [hex: :earmark, optional: false]}]},
+  "exquisite": {:hex, :exquisite, "0.1.8", "ee8f56aae477287ce5e7dfcbc163a420cccbb73e680a6d80a09203e9ef514fa4", [:mix], []}}

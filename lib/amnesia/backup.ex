@@ -61,13 +61,11 @@ defmodule Amnesia.Backup do
   @spec checkpoint(Keyword.t) :: { :ok, any, [node] } | { :error, any }
   def checkpoint(options) do
     args = Keyword.new
-
-    args =
-      if options[:remote] do
-        Keyword.put_new(args, :allow_remote, options[:remote])
-      else
-        args
-      end
+      |> Options.update(:name, options[:name])
+      |> Options.update(:max, options[:max])
+      |> Options.update(:min, options[:min])
+      |> Options.update(:allow_remote, options[:remote])
+      |> Options.update(:ram_overrides_dump, options[:override])
 
     :mnesia.activate_checkpoint(args)
   end

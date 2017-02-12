@@ -61,8 +61,19 @@ defmodule Mix.Tasks.Amnesia.Create.Test do
     Amnesia.Schema.destroy
   end
 
-  test "creates schema and tables" do
+  test "creates schema and tables with --database" do
     Create.run(["--database", "Create.Database"])
+
+    Amnesia.start
+    tables = Amnesia.info(:tables)
+    assert :schema in tables
+    assert User in tables
+    assert Message in tables
+    assert DB in tables
+  end
+
+  test "creates schema and tables with -d" do
+    Create.run(["-d", "Create.Database"])
 
     Amnesia.start
     tables = Amnesia.info(:tables)

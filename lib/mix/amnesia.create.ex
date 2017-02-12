@@ -51,7 +51,7 @@ defmodule Mix.Tasks.Amnesia.Create do
   defp parse_args(args) when is_list(args) do
     {options, _, _} = OptionParser.parse(args, [
           aliases: [
-            db: :database
+            d: :database
           ],
           strict: [
             database: :string,

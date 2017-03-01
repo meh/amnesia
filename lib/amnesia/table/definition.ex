@@ -735,7 +735,7 @@ defmodule Amnesia.Table.Definition do
           * `limit` - sets the count of elements to select in every continuation
           * `lock` - sets the kind of lock to use
           * `select` - Exquisite selector spec
-          * `qualified' - whether to set a name for the record or not
+          * `qualified` - whether to set a name for the record or not
 
         """
         defmacro where(spec, options \\ []) do
@@ -774,7 +774,7 @@ defmodule Amnesia.Table.Definition do
         ## Options
 
           * `select` - Exquisite selector spec
-          * `qualified' - whether to set a name for the record or not
+          * `qualified` - whether to set a name for the record or not
 
         """
         defmacro where!(spec, options \\ []) do

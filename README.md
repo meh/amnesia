@@ -11,7 +11,7 @@ Everything is documented and specced, even the unspecced and undocumented parts
 of mnesia that have been wrapped.
 
 The documentation often refers to mnesia functions, I strongly suggest you read
-mnesia's documentation too, since it has a lot of valuable information.
+[mnesia's documentation](http://erlang.org/doc/man/mnesia.html) too, since it has a lot of valuable information.
 
 Defining a database
 -------------------

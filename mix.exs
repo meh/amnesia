@@ -3,7 +3,7 @@ defmodule Amnesia.Mixfile do
 
   def project do
     [ app: :amnesia,
-      version: "0.2.6",
+      version: "0.2.7",
       deps: deps(),
       package: package(),
       description: "mnesia wrapper for Elixir" ]
@@ -21,6 +21,6 @@ defmodule Amnesia.Mixfile do
 
   defp deps do
     [ { :exquisite, "~> 0.1.7" },
-      { :ex_doc, "~> 0.14", only: [:dev] } ]
+      { :ex_doc, "~> 0.15", only: [:dev] } ]
   end
 end

@@ -29,6 +29,10 @@ defmodule Amnesia.Schema do
   @spec create :: :ok | { :error, any }
   @spec create([node]) :: :ok | { :error, any }
   def create(nodes \\ [node()]) do
+    if path = Application.get_env(:mnesia, :dir) do
+      File.mkdir_p(path)
+    end
+    
     :mnesia.create_schema(nodes)
   end
 

@@ -20,6 +20,9 @@ To use amnesia you have to define a database and the tables of that database.
 You can have multiple databases in the same amnesia instance, a database is
 actually just a way to group *mnesia* tables.
 
+Let's create a module contains below code under `/lib` directory, 
+the filename does not matter like any Elixir module, e.g: `Database.ex`
+
 ```elixir
 # needed to get defdatabase and other macros
 use Amnesia

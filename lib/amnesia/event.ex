@@ -16,8 +16,8 @@ defmodule Amnesia.Event do
                   { :mnesia_checkpoint_activated, any } |
                   { :mnesia_overload, any } |
                   { :inconsistent_database, any } |
-                  { :mnesia_fatal, char_list, [any], binary } |
-                  { :mnesia_info, char_list, [any] } |
+                  { :mnesia_fatal, charlist, [any], binary } |
+                  { :mnesia_info, charlist, [any] } |
                   { :mnesia_user, any }
 
   @type activity :: { :complete, Amnesia.Access.id }

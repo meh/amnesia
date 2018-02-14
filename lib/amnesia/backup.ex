@@ -57,6 +57,16 @@ defmodule Amnesia.Backup do
 
   @doc """
   Create a checkpoint, see `mnesia:activate_checkpoint`.
+  It's important to backup the metadata table, to avoid bugs when restoring the database.
+
+  Example to backup on a file called "backup" the table Account as well the metadata table:
+
+  ```
+  Amnesia.Backup.checkpoint(%{
+    name: 'backup',
+    max: [Database.Account, Database]
+  })
+  ```
   """
   @spec checkpoint(Keyword.t) :: { :ok, any, [node] } | { :error, any }
   def checkpoint(options) do

@@ -935,7 +935,7 @@ defmodule Amnesia.Table.Definition do
 
         unquote(block)
 
-        unless Kernel.Typespec.defines_type?(__MODULE__, :t, 0) do
+        unless Kernel.Typespec.defines_type?(__MODULE__, {:t, 0}) do
           @opaque t :: %__MODULE__{}
         end
       end

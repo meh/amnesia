@@ -121,7 +121,7 @@ tables.
 # You want to be in a transaction most of the time, this ensures the data
 # doesn't get corrupted and you get meaningful values back.
 #
-# Most operation won't work outside a transaction and will raise an exception.
+# Most operations won't work outside a transaction and will raise an exception.
 Amnesia.transaction do
   # Every table is a record, so you can do everything you can do with records.
   #

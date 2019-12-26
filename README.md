@@ -166,14 +166,7 @@ Amnesia.transaction do
   which runs wget and mails the page back to me. It is very efficient use of my
   time, but it is slow in real time.
   """
-
-  richard |> User.add_message %S"""
-  I am skeptical of the claim that voluntarily pedophilia harms children. The
-  arguments that it causes harm seem to be based on cases which aren't
-  voluntary, which are then stretched by parents who are horrified by the idea
-  that their little baby is maturing.
-  """
-
+  
   linus |> User.add_message %S"""
   Portability is for people who cannot write new programs.
   """

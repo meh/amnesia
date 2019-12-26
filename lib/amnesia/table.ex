@@ -79,6 +79,14 @@ defmodule Amnesia.Table do
       - `:memory` => `:n_ram_copies`
       - `:disk`   => `:n_disc_copies`
       - `:disk!`  => `:n_disc_only_copies`
+
+    [@see storage options](http://erlang.org/doc/man/mnesia.html#create_table "storage_settings options")
+    [@see ets options](http://erlang.org/doc/man/ets.html#new-2 "ets options")
+    [@see dets options](http://erlang.org/doc/man/dets.html#init_table-3 "dets options")
+    + :ets_options =>  `:compressed`
+    + :dets_options => `{:auto_save, 5000}`
+
+    + :compressed => `true`
   """
   @spec create(atom) :: o
   @spec create(atom, c) :: o
@@ -95,6 +103,28 @@ defmodule Amnesia.Table do
       |> Options.update(:ram_copies,       definition[:copying][:memory])
       |> Options.update(:disc_copies,      definition[:copying][:disk])
       |> Options.update(:disc_only_copies, definition[:copying][:disk!])
+
+
+    ets_options = cond do
+      definition[:ets_options] ->
+        ets_options = is_list(definition[:ets_options]) && definition[:ets_options] || [definition[:ets_options]]
+        cond do
+          definition[:compressed] && !Enum.member?(ets_options, :compressed) -> ets_options ++ [:compressed]
+          true -> ets_options
+        end
+      definition[:compressed] -> [:compressed]
+      true -> nil
+    end
+
+    dets_options = cond do
+      definition[:dets_options] ->  is_list(definition[:dets_options]) && definition[:dets_options] || [definition[:dets_options]]
+      true -> nil
+    end
+
+    args = case (ets_options && [{:ets, ets_options}] || []) ++ (dets_options && [{:dets, dets_options}] || []) do
+      [] -> args
+      storage_properties -> Options.update(args, :storage_properties, storage_properties)
+    end
 
     args = if fragmentation = definition[:fragmentation] do
       properties = Keyword.new

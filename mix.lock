@@ -1,5 +1,7 @@
-%{"continuum": {:git, "git://github.com/meh/continuum.git", "4125f9d428971568f16da78cec24fddce18d6eca", []},
+%{
+  "continuum": {:git, "git://github.com/meh/continuum.git", "4125f9d428971568f16da78cec24fddce18d6eca", []},
   "datastructures": {:git, "git://github.com/meh/elixir-datastructures.git", "28a7aee9addfe521ad0aa62f5e54f1ad597356cc", []},
   "earmark": {:hex, :earmark, "1.2.0", "bf1ce17aea43ab62f6943b97bd6e3dc032ce45d4f787504e3adf738e54b42f3a", [:mix], []},
   "ex_doc": {:hex, :ex_doc, "0.15.0", "e73333785eef3488cf9144a6e847d3d647e67d02bd6fdac500687854dd5c599f", [:mix], [{:earmark, "~> 1.1", [hex: :earmark, optional: false]}]},
-  "exquisite": {:hex, :exquisite, "0.1.8", "ee8f56aae477287ce5e7dfcbc163a420cccbb73e680a6d80a09203e9ef514fa4", [:mix], []}}
+  "exquisite": {:git, "https://github.com/noizu/exquisite.git", "61d48f8c4eeb90ab0cafe9a4d98bdb2820db295d", [ref: "61d48f8"]},
+}

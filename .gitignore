@@ -4,3 +4,7 @@ erl_crash.dump
 _build
 Mnesia.*
 /doc
+
+.idea/
+amnesia.iml
+projectFilesBackup/
